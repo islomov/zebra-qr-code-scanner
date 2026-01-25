@@ -8,14 +8,32 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+    @State private var showSettings = false
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            GenerateView(showSettings: $showSettings)
+                .tabItem {
+                    Label("Generate", systemImage: "qrcode")
+                }
+                .tag(0)
+
+            ScanView(showSettings: $showSettings)
+                .tabItem {
+                    Label("Scan", systemImage: "camera.viewfinder")
+                }
+                .tag(1)
+
+            HistoryView(showSettings: $showSettings)
+                .tabItem {
+                    Label("History", systemImage: "clock.arrow.circlepath")
+                }
+                .tag(2)
         }
-        .padding()
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
     }
 }
 
