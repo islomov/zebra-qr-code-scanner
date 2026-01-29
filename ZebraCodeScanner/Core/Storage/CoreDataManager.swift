@@ -69,7 +69,57 @@ final class CoreDataManager {
             createdAtAttribute
         ]
 
-        model.entities = [generatedCodeEntity]
+        // ScannedCodeEntity
+        let scannedCodeEntity = NSEntityDescription()
+        scannedCodeEntity.name = "ScannedCodeEntity"
+        scannedCodeEntity.managedObjectClassName = NSStringFromClass(ScannedCodeEntity.self)
+
+        let scannedIdAttribute = NSAttributeDescription()
+        scannedIdAttribute.name = "id"
+        scannedIdAttribute.attributeType = .UUIDAttributeType
+        scannedIdAttribute.isOptional = false
+
+        let scannedTypeAttribute = NSAttributeDescription()
+        scannedTypeAttribute.name = "type"
+        scannedTypeAttribute.attributeType = .stringAttributeType
+        scannedTypeAttribute.isOptional = false
+
+        let scannedContentAttribute = NSAttributeDescription()
+        scannedContentAttribute.name = "content"
+        scannedContentAttribute.attributeType = .stringAttributeType
+        scannedContentAttribute.isOptional = false
+
+        let productNameAttribute = NSAttributeDescription()
+        productNameAttribute.name = "productName"
+        productNameAttribute.attributeType = .stringAttributeType
+        productNameAttribute.isOptional = true
+
+        let productBrandAttribute = NSAttributeDescription()
+        productBrandAttribute.name = "productBrand"
+        productBrandAttribute.attributeType = .stringAttributeType
+        productBrandAttribute.isOptional = true
+
+        let productImageAttribute = NSAttributeDescription()
+        productImageAttribute.name = "productImage"
+        productImageAttribute.attributeType = .stringAttributeType
+        productImageAttribute.isOptional = true
+
+        let scannedAtAttribute = NSAttributeDescription()
+        scannedAtAttribute.name = "scannedAt"
+        scannedAtAttribute.attributeType = .dateAttributeType
+        scannedAtAttribute.isOptional = false
+
+        scannedCodeEntity.properties = [
+            scannedIdAttribute,
+            scannedTypeAttribute,
+            scannedContentAttribute,
+            productNameAttribute,
+            productBrandAttribute,
+            productImageAttribute,
+            scannedAtAttribute
+        ]
+
+        model.entities = [generatedCodeEntity, scannedCodeEntity]
         return model
     }()
 
@@ -146,6 +196,57 @@ final class CoreDataManager {
             print("Failed to delete all generated codes: \(error)")
         }
     }
+
+    // MARK: - Scanned Codes
+
+    func saveScannedCode(
+        type: String,
+        content: String,
+        productName: String? = nil,
+        productBrand: String? = nil,
+        productImage: String? = nil
+    ) -> ScannedCodeEntity {
+        let entity = ScannedCodeEntity(context: viewContext)
+        entity.id = UUID()
+        entity.type = type
+        entity.content = content
+        entity.productName = productName
+        entity.productBrand = productBrand
+        entity.productImage = productImage
+        entity.scannedAt = Date()
+
+        saveContext()
+        return entity
+    }
+
+    func fetchScannedCodes() -> [ScannedCodeEntity] {
+        let request = ScannedCodeEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \ScannedCodeEntity.scannedAt, ascending: false)]
+
+        do {
+            return try viewContext.fetch(request)
+        } catch {
+            print("Failed to fetch scanned codes: \(error)")
+            return []
+        }
+    }
+
+    func deleteScannedCode(_ entity: ScannedCodeEntity) {
+        viewContext.delete(entity)
+        saveContext()
+    }
+
+    func deleteAllScannedCodes() {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ScannedCodeEntity")
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+
+        do {
+            try viewContext.execute(deleteRequest)
+            saveContext()
+        } catch {
+            print("Failed to delete all scanned codes: \(error)")
+        }
+    }
 }
 
 // MARK: - Core Data Entity
@@ -173,5 +274,24 @@ extension GeneratedCodeEntity {
     var image: UIImage? {
         guard let imageData = imageData else { return nil }
         return UIImage(data: imageData)
+    }
+}
+
+// MARK: - Scanned Code Entity
+
+@objc(ScannedCodeEntity)
+public class ScannedCodeEntity: NSManagedObject, Identifiable {
+    @NSManaged public var id: UUID?
+    @NSManaged public var type: String?
+    @NSManaged public var content: String?
+    @NSManaged public var productName: String?
+    @NSManaged public var productBrand: String?
+    @NSManaged public var productImage: String?
+    @NSManaged public var scannedAt: Date?
+}
+
+extension ScannedCodeEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<ScannedCodeEntity> {
+        return NSFetchRequest<ScannedCodeEntity>(entityName: "ScannedCodeEntity")
     }
 }
