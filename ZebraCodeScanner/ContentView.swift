@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showSettings = false
+    @StateObject private var scanViewModel = ScanViewModel()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -19,7 +20,7 @@ struct ContentView: View {
                 }
                 .tag(0)
 
-            ScanView(showSettings: $showSettings)
+            ScanView(showSettings: $showSettings, viewModel: scanViewModel, isActiveTab: selectedTab == 1)
                 .tabItem {
                     Label("Scan", systemImage: "camera.viewfinder")
                 }
@@ -30,6 +31,18 @@ struct ContentView: View {
                     Label("History", systemImage: "clock.arrow.circlepath")
                 }
                 .tag(2)
+        }
+        .onChange(of: selectedTab) { oldTab, newTab in
+            print("[ContentView] Tab switched: \(oldTab) → \(newTab)")
+            if newTab == 1 {
+                // Delay start so the old scanner instance is fully torn down
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    guard selectedTab == 1 else { return }
+                    scanViewModel.startScanning()
+                }
+            } else if oldTab == 1 {
+                scanViewModel.stopScanning()
+            }
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()

@@ -49,6 +49,7 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
     @Binding var isTorchOn: Bool
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
+        print("[Scanner] makeUIViewController called - creating new DataScannerViewController")
         let scanner = DataScannerViewController(
             recognizedDataTypes: recognizedDataTypes,
             qualityLevel: .balanced,
@@ -59,18 +60,35 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
             isHighlightingEnabled: true
         )
         scanner.delegate = context.coordinator
+        print("[Scanner] makeUIViewController done - scanner: \(ObjectIdentifier(scanner))")
         return scanner
     }
 
     func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
+        print("[Scanner] updateUIViewController - isScanning=\(isScanning), isActive=\(uiViewController.isScanning), scanner=\(ObjectIdentifier(uiViewController))")
         if isScanning {
-            try? uiViewController.startScanning()
+            if !uiViewController.isScanning {
+                do {
+                    try uiViewController.startScanning()
+                    print("[Scanner] startScanning succeeded")
+                } catch {
+                    print("[Scanner] startScanning FAILED: \(error)")
+                }
+            }
         } else {
-            uiViewController.stopScanning()
+            if uiViewController.isScanning {
+                uiViewController.stopScanning()
+                print("[Scanner] stopScanning called")
+            }
         }
 
         // Control torch via AVCaptureDevice
         setTorch(on: isTorchOn)
+    }
+
+    static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
+        print("[Scanner] dismantleUIViewController - stopping scanner: \(ObjectIdentifier(uiViewController))")
+        uiViewController.stopScanning()
     }
 
     private func setTorch(on: Bool) {
@@ -99,10 +117,12 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didTapOn item: RecognizedItem) {
+            print("[Scanner] didTapOn item")
             processItem(item)
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
+            print("[Scanner] didAdd \(addedItems.count) items, total: \(allItems.count)")
             guard let item = addedItems.first else { return }
             processItem(item)
         }
@@ -150,7 +170,12 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, becameUnavailableWithError error: DataScannerViewController.ScanningUnavailable) {
+            print("[Scanner] becameUnavailableWithError: \(error)")
             onError(error)
+        }
+
+        deinit {
+            print("[Scanner] Coordinator deinit")
         }
     }
 }

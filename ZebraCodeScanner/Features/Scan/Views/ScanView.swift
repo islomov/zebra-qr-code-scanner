@@ -11,15 +11,20 @@ import PhotosUI
 
 struct ScanView: View {
     @Binding var showSettings: Bool
-    @StateObject private var viewModel = ScanViewModel()
+    @ObservedObject var viewModel: ScanViewModel
+    var isActiveTab: Bool
 
     var body: some View {
         NavigationStack {
             ZStack {
-                if viewModel.isSupported {
-                    scannerView
+                if isActiveTab {
+                    if viewModel.isSupported {
+                        scannerView
+                    } else {
+                        unsupportedView
+                    }
                 } else {
-                    unsupportedView
+                    Color(.systemBackground)
                 }
             }
             .navigationTitle("Scan")
@@ -114,7 +119,6 @@ struct ScanView: View {
                     Spacer()
 
                     HStack(spacing: 40) {
-                        // Torch toggle
                         Button {
                             viewModel.toggleTorch()
                         } label: {
@@ -128,7 +132,7 @@ struct ScanView: View {
                     .padding(.bottom, 50)
                 }
             } else {
-                // Start scanning view
+                // Camera not active - show placeholder
                 VStack(spacing: 24) {
                     Image(systemName: "camera.viewfinder")
                         .font(.system(size: 80))
@@ -158,12 +162,6 @@ struct ScanView: View {
                 }
                 .padding()
             }
-        }
-        .onAppear {
-            viewModel.startScanning()
-        }
-        .onDisappear {
-            viewModel.stopScanning()
         }
     }
 
@@ -197,5 +195,5 @@ struct ScanView: View {
 }
 
 #Preview {
-    ScanView(showSettings: .constant(false))
+    ScanView(showSettings: .constant(false), viewModel: ScanViewModel(), isActiveTab: true)
 }

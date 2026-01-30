@@ -61,19 +61,25 @@ final class ScanViewModel: ObservableObject {
     }
 
     func checkAndRequestPermission() async {
+        print("[ScanVM] checkAndRequestPermission called")
         scannerService.checkPermission()
 
         switch scannerService.permissionStatus {
         case .authorized:
+            print("[ScanVM] permission authorized, setting isScanning=true")
             isScanning = true
         case .notDetermined:
+            print("[ScanVM] permission notDetermined, requesting...")
             let granted = await scannerService.requestPermission()
             if granted {
+                print("[ScanVM] permission granted, setting isScanning=true")
                 isScanning = true
             } else {
+                print("[ScanVM] permission denied by user")
                 showPermissionAlert = true
             }
         case .denied, .restricted:
+            print("[ScanVM] permission denied/restricted")
             showPermissionAlert = true
         @unknown default:
             showPermissionAlert = true
@@ -81,13 +87,16 @@ final class ScanViewModel: ObservableObject {
     }
 
     func startScanning() {
+        print("[ScanVM] startScanning() called, current isScanning=\(isScanning)")
         Task {
             await checkAndRequestPermission()
         }
     }
 
     func stopScanning() {
+        print("[ScanVM] stopScanning() called, setting isScanning=false")
         isScanning = false
+        isTorchOn = false
     }
 
     func toggleTorch() {
@@ -95,6 +104,7 @@ final class ScanViewModel: ObservableObject {
     }
 
     func handleScannedCode(content: String, type: String) {
+        print("[ScanVM] handleScannedCode: content=\(content), type=\(type)")
         guard !content.isEmpty else { return }
 
         stopScanning()
@@ -211,13 +221,19 @@ final class ScanViewModel: ObservableObject {
     }
 
     func resetScan() {
+        print("[ScanVM] resetScan() called")
         scannedContent = ""
         scannedType = ""
         showResult = false
         errorMessage = nil
         productInfo = nil
         isLoadingProduct = false
-        isScanning = true
+        startScanning()
+        print("[ScanVM] resetScan() done")
+    }
+
+    deinit {
+        print("[ScanVM] DEINIT - ScanViewModel destroyed")
     }
 
     func getTypeDisplayName(_ type: String) -> String {
