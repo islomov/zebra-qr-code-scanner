@@ -79,6 +79,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
     case tiktok = "tiktok"
     case snapchat = "snapchat"
     case threads = "threads"
+    case youtube = "youtube"
 
     var id: String { rawValue }
 
@@ -91,6 +92,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
         case .tiktok: return "TikTok"
         case .snapchat: return "Snapchat"
         case .threads: return "Threads"
+        case .youtube: return "YouTube"
         }
     }
 
@@ -103,6 +105,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
         case .tiktok: return "play.rectangle"
         case .snapchat: return "message.circle"
         case .threads: return "at.circle"
+        case .youtube: return "play.rectangle.fill"
         }
     }
 
@@ -115,6 +118,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
         case .tiktok: return "TikTok profile"
         case .snapchat: return "Snapchat profile"
         case .threads: return "Threads profile"
+        case .youtube: return "YouTube channel"
         }
     }
 
@@ -127,6 +131,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
         case .tiktok: return "https://tiktok.com/@"
         case .snapchat: return "https://snapchat.com/add/"
         case .threads: return "https://threads.net/@"
+        case .youtube: return "https://youtube.com/@"
         }
     }
 
@@ -139,6 +144,7 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
         case .tiktok: return "username"
         case .snapchat: return "username"
         case .threads: return "username"
+        case .youtube: return "channel name"
         }
     }
 }
@@ -148,6 +154,8 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     case ean13 = "ean13"
     case ean8 = "ean8"
     case upca = "upca"
+    case aztec = "aztec"
+    case pdf417 = "pdf417"
 
     var id: String { rawValue }
 
@@ -157,11 +165,17 @@ enum BarcodeType: String, CaseIterable, Identifiable {
         case .ean13: return "EAN-13"
         case .ean8: return "EAN-8"
         case .upca: return "UPC-A"
+        case .aztec: return "Aztec"
+        case .pdf417: return "PDF417"
         }
     }
 
     var icon: String {
-        return "barcode"
+        switch self {
+        case .aztec: return "square.dashed"
+        case .pdf417: return "rectangle.split.3x3"
+        default: return "barcode"
+        }
     }
 
     var description: String {
@@ -170,6 +184,8 @@ enum BarcodeType: String, CaseIterable, Identifiable {
         case .ean13: return "13-digit product code"
         case .ean8: return "8-digit product code"
         case .upca: return "12-digit US product code"
+        case .aztec: return "2D matrix barcode"
+        case .pdf417: return "2D stacked barcode"
         }
     }
 
@@ -179,12 +195,14 @@ enum BarcodeType: String, CaseIterable, Identifiable {
         case .ean13: return 13
         case .ean8: return 8
         case .upca: return 12
+        case .aztec: return nil // Variable length
+        case .pdf417: return nil // Variable length
         }
     }
 
     var allowsLetters: Bool {
         switch self {
-        case .code128: return true
+        case .code128, .aztec, .pdf417: return true
         case .ean13, .ean8, .upca: return false
         }
     }
@@ -195,6 +213,23 @@ enum BarcodeType: String, CaseIterable, Identifiable {
         case .ean13: return "Enter 13 digits"
         case .ean8: return "Enter 8 digits"
         case .upca: return "Enter 12 digits"
+        case .aztec: return "Enter text or numbers"
+        case .pdf417: return "Enter text or numbers"
         }
+    }
+
+    var is2D: Bool {
+        switch self {
+        case .aztec, .pdf417: return true
+        case .code128, .ean13, .ean8, .upca: return false
+        }
+    }
+
+    static var barcodes1D: [BarcodeType] {
+        allCases.filter { !$0.is2D }
+    }
+
+    static var barcodes2D: [BarcodeType] {
+        allCases.filter { $0.is2D }
     }
 }

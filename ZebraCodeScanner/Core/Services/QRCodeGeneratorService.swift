@@ -119,6 +119,10 @@ final class QRCodeGeneratorService {
             return generateEAN8(from: content, width: width, height: height)
         case .upca:
             return generateUPCA(from: content, width: width, height: height)
+        case .aztec:
+            return generateAztec(from: content, size: width)
+        case .pdf417:
+            return generatePDF417(from: content, width: width, height: height)
         }
     }
 
@@ -128,6 +132,42 @@ final class QRCodeGeneratorService {
         let filter = CIFilter.code128BarcodeGenerator()
         filter.message = data
         filter.quietSpace = 10
+
+        guard let outputImage = filter.outputImage else { return nil }
+
+        let scaleX = width / outputImage.extent.size.width
+        let scaleY = height / outputImage.extent.size.height
+        let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+
+        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
+
+        return UIImage(cgImage: cgImage)
+    }
+
+    private func generateAztec(from content: String, size: CGFloat) -> UIImage? {
+        guard let data = content.data(using: .utf8) else { return nil }
+
+        let filter = CIFilter.aztecCodeGenerator()
+        filter.message = data
+        filter.correctionLevel = 23 // ~23% error correction
+
+        guard let outputImage = filter.outputImage else { return nil }
+
+        let scaleX = size / outputImage.extent.size.width
+        let scaleY = size / outputImage.extent.size.height
+        let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+
+        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
+
+        return UIImage(cgImage: cgImage)
+    }
+
+    private func generatePDF417(from content: String, width: CGFloat, height: CGFloat) -> UIImage? {
+        guard let data = content.data(using: .utf8) else { return nil }
+
+        let filter = CIFilter.pdf417BarcodeGenerator()
+        filter.message = data
+        filter.correctionLevel = 2
 
         guard let outputImage = filter.outputImage else { return nil }
 
