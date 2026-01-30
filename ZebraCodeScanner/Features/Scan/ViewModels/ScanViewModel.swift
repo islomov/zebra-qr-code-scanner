@@ -23,8 +23,16 @@ final class ScanViewModel: ObservableObject {
 
     @Published var selectedPhoto: PhotosPickerItem?
 
+    @Published var productInfo: ProductInfo?
+    @Published var isLoadingProduct: Bool = false
+
     private let scannerService = ScannerService.shared
     private let dataManager = CoreDataManager.shared
+    private let productLookupService = ProductLookupService.shared
+
+    var isBarcode: Bool {
+        scannedType != "qr" && scannedType != "datamatrix" && scannedType != "aztec" && scannedType != "text" && !scannedType.isEmpty
+    }
 
     var recognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> {
         [
@@ -93,11 +101,26 @@ final class ScanViewModel: ObservableObject {
 
         scannedContent = content
         scannedType = type
+        productInfo = nil
         showResult = true
 
         // Haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
+
+        // Lookup product info for barcodes
+        if isBarcode {
+            lookupProduct(barcode: content)
+        }
+    }
+
+    private func lookupProduct(barcode: String) {
+        isLoadingProduct = true
+        Task {
+            let info = await productLookupService.lookupProduct(barcode: barcode)
+            self.productInfo = info
+            self.isLoadingProduct = false
+        }
     }
 
     func handleScanError(_ error: Error) {
@@ -180,7 +203,10 @@ final class ScanViewModel: ObservableObject {
     func saveToHistory() -> ScannedCodeEntity? {
         return dataManager.saveScannedCode(
             type: scannedType,
-            content: scannedContent
+            content: scannedContent,
+            productName: productInfo?.name,
+            productBrand: productInfo?.brand,
+            productImage: productInfo?.imageURL
         )
     }
 
@@ -189,6 +215,8 @@ final class ScanViewModel: ObservableObject {
         scannedType = ""
         showResult = false
         errorMessage = nil
+        productInfo = nil
+        isLoadingProduct = false
         isScanning = true
     }
 
