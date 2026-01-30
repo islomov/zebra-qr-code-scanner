@@ -43,18 +43,35 @@ struct ScanView: View {
                 viewModel.processSelectedPhoto()
             }
             .sheet(isPresented: $viewModel.showResult) {
-                ScanResultView(
-                    content: viewModel.scannedContent,
-                    type: viewModel.scannedType,
-                    onScanAgain: {
-                        viewModel.showResult = false
-                        viewModel.resetScan()
-                    },
-                    onDismiss: {
-                        viewModel.showResult = false
-                        viewModel.resetScan()
-                    }
-                )
+                if viewModel.isBarcode {
+                    ProductResultView(
+                        content: viewModel.scannedContent,
+                        type: viewModel.scannedType,
+                        productInfo: viewModel.productInfo,
+                        isLoading: viewModel.isLoadingProduct,
+                        onScanAgain: {
+                            viewModel.showResult = false
+                            viewModel.resetScan()
+                        },
+                        onDismiss: {
+                            viewModel.showResult = false
+                            viewModel.resetScan()
+                        }
+                    )
+                } else {
+                    ScanResultView(
+                        content: viewModel.scannedContent,
+                        type: viewModel.scannedType,
+                        onScanAgain: {
+                            viewModel.showResult = false
+                            viewModel.resetScan()
+                        },
+                        onDismiss: {
+                            viewModel.showResult = false
+                            viewModel.resetScan()
+                        }
+                    )
+                }
             }
             .alert("Camera Access Required", isPresented: $viewModel.showPermissionAlert) {
                 Button("Open Settings") {
