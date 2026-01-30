@@ -65,6 +65,28 @@ struct GenerateView: View {
                             }
                         }
                     }
+                    // Social Media Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "at")
+                                .foregroundStyle(.purple)
+                            Text("Social Media")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal)
+
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(SocialMediaType.allCases) { type in
+                                NavigationLink {
+                                    SocialMediaFormView(type: type, viewModel: viewModel)
+                                } label: {
+                                    SocialMediaTypeCard(type: type)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
                 }
                 .padding()
             }
@@ -118,6 +140,34 @@ struct BarcodeTypeCard: View {
             Image(systemName: type.icon)
                 .font(.system(size: 32))
                 .foregroundStyle(.orange)
+
+            Text(type.title)
+                .font(.headline)
+                .foregroundStyle(.primary)
+
+            Text(type.description)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 12)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
+    }
+}
+
+struct SocialMediaTypeCard: View {
+    let type: SocialMediaType
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: type.icon)
+                .font(.system(size: 32))
+                .foregroundStyle(.purple)
 
             Text(type.title)
                 .font(.headline)

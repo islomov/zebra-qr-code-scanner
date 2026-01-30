@@ -71,6 +71,78 @@ enum WiFiSecurityType: String, CaseIterable, Identifiable {
     }
 }
 
+enum SocialMediaType: String, CaseIterable, Identifiable {
+    case facebook = "facebook"
+    case instagram = "instagram"
+    case x = "x"
+    case reddit = "reddit"
+    case tiktok = "tiktok"
+    case snapchat = "snapchat"
+    case threads = "threads"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .facebook: return "Facebook"
+        case .instagram: return "Instagram"
+        case .x: return "X"
+        case .reddit: return "Reddit"
+        case .tiktok: return "TikTok"
+        case .snapchat: return "Snapchat"
+        case .threads: return "Threads"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .facebook: return "person.crop.square"
+        case .instagram: return "camera.circle"
+        case .x: return "bubble.left"
+        case .reddit: return "globe"
+        case .tiktok: return "play.rectangle"
+        case .snapchat: return "message.circle"
+        case .threads: return "at.circle"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .facebook: return "Facebook profile"
+        case .instagram: return "Instagram profile"
+        case .x: return "X (Twitter) profile"
+        case .reddit: return "Reddit profile"
+        case .tiktok: return "TikTok profile"
+        case .snapchat: return "Snapchat profile"
+        case .threads: return "Threads profile"
+        }
+    }
+
+    var baseURL: String {
+        switch self {
+        case .facebook: return "https://facebook.com/"
+        case .instagram: return "https://instagram.com/"
+        case .x: return "https://x.com/"
+        case .reddit: return "https://reddit.com/u/"
+        case .tiktok: return "https://tiktok.com/@"
+        case .snapchat: return "https://snapchat.com/add/"
+        case .threads: return "https://threads.net/@"
+        }
+    }
+
+    var placeholder: String {
+        switch self {
+        case .facebook: return "username or page name"
+        case .instagram: return "username"
+        case .x: return "username"
+        case .reddit: return "username"
+        case .tiktok: return "username"
+        case .snapchat: return "username"
+        case .threads: return "username"
+        }
+    }
+}
+
 enum BarcodeType: String, CaseIterable, Identifiable {
     case code128 = "code128"
     case ean13 = "ean13"
