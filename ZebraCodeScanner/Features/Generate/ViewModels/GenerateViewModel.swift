@@ -42,6 +42,9 @@ final class GenerateViewModel: ObservableObject {
     @Published var smsPhone: String = ""
     @Published var smsMessage: String = ""
 
+    // Social Media
+    @Published var socialMediaUsername: String = ""
+
     // Barcode
     @Published var barcodeContent: String = ""
 
@@ -80,6 +83,28 @@ final class GenerateViewModel: ObservableObject {
         case .sms:
             return qrService.encodeSMS(phone: smsPhone, message: smsMessage)
         }
+    }
+
+    // MARK: - Social Media Generation
+
+    func generateSocialMediaQRCode(for type: SocialMediaType) {
+        let profileURL = type.baseURL + socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        generatedContent = profileURL
+        generatedImage = qrService.generateQRCode(from: profileURL, size: 300)
+    }
+
+    func isSocialMediaValid() -> Bool {
+        !socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    @discardableResult
+    func saveSocialMediaToHistory(type: SocialMediaType) -> GeneratedCodeEntity {
+        return dataManager.saveGeneratedCode(
+            type: "qr",
+            content: generatedContent,
+            contentType: type.rawValue,
+            image: generatedImage
+        )
     }
 
     // MARK: - Barcode Generation
@@ -169,6 +194,7 @@ final class GenerateViewModel: ObservableObject {
         vcardCompany = ""
         smsPhone = ""
         smsMessage = ""
+        socialMediaUsername = ""
         barcodeContent = ""
         generatedImage = nil
         generatedContent = ""
