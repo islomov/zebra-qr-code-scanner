@@ -73,6 +73,10 @@ struct BarcodeFormView: View {
             return "Enter 7 or 8 digits. Check digit will be calculated automatically."
         case .upca:
             return "Enter 11 or 12 digits. Check digit will be calculated automatically."
+        case .aztec:
+            return "Aztec codes support text, numbers, and special characters."
+        case .pdf417:
+            return "PDF417 codes support text, numbers, and special characters."
         }
     }
 }

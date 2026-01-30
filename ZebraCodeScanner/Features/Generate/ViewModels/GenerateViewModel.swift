@@ -140,8 +140,8 @@ final class GenerateViewModel: ObservableObject {
         guard !content.isEmpty else { return false }
 
         switch type {
-        case .code128:
-            return true // Code 128 accepts any ASCII
+        case .code128, .aztec, .pdf417:
+            return true // These formats accept any content
         case .ean13:
             let digits = content.filter { $0.isNumber }
             return digits.count == 12 || digits.count == 13

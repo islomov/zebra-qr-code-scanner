@@ -43,19 +43,42 @@ struct GenerateView: View {
                         }
                     }
 
-                    // Barcodes Section
+                    // 1D Barcodes Section
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Image(systemName: "barcode")
-                                .foregroundStyle(.tint)
-                            Text("Barcodes")
+                                .foregroundStyle(.orange)
+                            Text("1D Barcodes")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
                         .padding(.horizontal)
 
                         LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(BarcodeType.allCases) { type in
+                            ForEach(BarcodeType.barcodes1D) { type in
+                                NavigationLink {
+                                    BarcodeFormView(type: type, viewModel: viewModel)
+                                } label: {
+                                    BarcodeTypeCard(type: type)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    // 2D Barcodes Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "square.dashed")
+                                .foregroundStyle(.green)
+                            Text("2D Barcodes")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal)
+
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(BarcodeType.barcodes2D) { type in
                                 NavigationLink {
                                     BarcodeFormView(type: type, viewModel: viewModel)
                                 } label: {
@@ -87,6 +110,34 @@ struct GenerateView: View {
                             }
                         }
                     }
+                    // Request Section
+                    VStack(spacing: 12) {
+                        Image(systemName: "lightbulb")
+                            .font(.system(size: 28))
+                            .foregroundStyle(.yellow)
+
+                        Text("Need a different code type?")
+                            .font(.headline)
+
+                        Text("If you need additional QR codes or barcodes, let us know!")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+
+                        Link(destination: URL(string: "mailto:sardor.islomov.96@gmail.com?subject=Code%20Scanner%20-%20Feature%20Request")!) {
+                            Label("Send a Request", systemImage: "envelope")
+                                .font(.headline)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.accentColor)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
                 }
                 .padding()
             }
