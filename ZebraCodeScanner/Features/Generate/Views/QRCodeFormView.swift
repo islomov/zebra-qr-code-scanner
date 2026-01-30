@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import ContactsUI
 
 struct QRCodeFormView: View {
     let type: QRCodeContentType
     @ObservedObject var viewModel: GenerateViewModel
     @State private var showPreview = false
+    @State private var showContactPicker = false
 
     var body: some View {
         Form {
@@ -143,6 +145,28 @@ struct QRCodeFormView: View {
 
     private var vcardForm: some View {
         Group {
+            Section {
+                Button {
+                    showContactPicker = true
+                } label: {
+                    Label("Import from Contacts", systemImage: "person.crop.circle.badge.plus")
+                }
+            }
+            .sheet(isPresented: $showContactPicker) {
+                ContactPickerView { contact in
+                    viewModel.vcardName = [contact.givenName, contact.familyName]
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " ")
+                    if let phone = contact.phoneNumbers.first?.value.stringValue {
+                        viewModel.vcardPhone = phone
+                    }
+                    if let email = contact.emailAddresses.first?.value as String? {
+                        viewModel.vcardEmail = email
+                    }
+                    viewModel.vcardCompany = contact.organizationName
+                }
+            }
+
             Section("Name") {
                 TextField("Full Name", text: $viewModel.vcardName)
                     .textContentType(.name)
