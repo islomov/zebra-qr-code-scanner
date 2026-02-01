@@ -34,6 +34,46 @@ final class QRCodeGeneratorService {
         return UIImage(cgImage: cgImage)
     }
 
+    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, centerLogo: UIImage? = nil) -> UIImage? {
+        guard let data = content.data(using: .utf8) else { return nil }
+
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = data
+        filter.correctionLevel = centerLogo != nil ? "H" : "M"
+
+        guard let outputImage = filter.outputImage else { return nil }
+
+        let scaleX = size / outputImage.extent.size.width
+        let scaleY = size / outputImage.extent.size.height
+        let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+
+        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            backgroundColor.setFill()
+            ctx.fill(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+
+            let qrImage = UIImage(cgImage: cgImage)
+            qrImage.draw(in: CGRect(origin: .zero, size: CGSize(width: size, height: size)), blendMode: .multiply, alpha: 1.0)
+
+            if let logo = centerLogo {
+                let logoSize = size * 0.22
+                let logoPadding: CGFloat = 6
+                let backgroundSize = logoSize + logoPadding * 2
+                let backgroundOrigin = CGPoint(x: (size - backgroundSize) / 2, y: (size - backgroundSize) / 2)
+                let backgroundRect = CGRect(origin: backgroundOrigin, size: CGSize(width: backgroundSize, height: backgroundSize))
+
+                UIColor.white.setFill()
+                UIBezierPath(roundedRect: backgroundRect, cornerRadius: 8).fill()
+
+                let logoOrigin = CGPoint(x: (size - logoSize) / 2, y: (size - logoSize) / 2)
+                let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
+                logo.draw(in: logoRect)
+            }
+        }
+    }
+
     // MARK: - Content Encoders
 
     func encodeText(_ text: String) -> String {

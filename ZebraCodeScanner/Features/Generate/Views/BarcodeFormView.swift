@@ -11,13 +11,16 @@ struct BarcodeFormView: View {
     let type: BarcodeType
     @ObservedObject var viewModel: GenerateViewModel
     @State private var showPreview = false
+    @FocusState private var isFieldFocused: Bool
 
     var body: some View {
         Form {
             Section {
                 TextField(type.placeholder, text: $viewModel.barcodeContent)
+                    .focused($isFieldFocused)
                     .keyboardType(type.allowsLetters ? .default : .numberPad)
                     .autocorrectionDisabled()
+                    .padding(.vertical, 4)
 
                 if let requiredLength = type.requiredLength {
                     HStack {
@@ -50,10 +53,19 @@ struct BarcodeFormView: View {
                 .disabled(!viewModel.isValidBarcode(for: type))
             }
         }
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(type.title)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showPreview) {
             BarcodePreviewView(type: type, viewModel: viewModel)
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isFieldFocused = true
+            }
+        }
+        .onDisappear {
+            isFieldFocused = false
         }
     }
 

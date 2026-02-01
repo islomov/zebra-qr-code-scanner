@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct SocialMediaFormView: View {
     let type: SocialMediaType
     @ObservedObject var viewModel: GenerateViewModel
     @State private var showPreview = false
+    @FocusState private var isFieldFocused: Bool
 
     var body: some View {
         Form {
@@ -32,8 +34,10 @@ struct SocialMediaFormView: View {
 
             Section("Username") {
                 TextField(type.placeholder, text: $viewModel.socialMediaUsername)
+                    .focused($isFieldFocused)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
+                    .padding(.vertical, 4)
             }
 
             if !viewModel.socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -59,10 +63,19 @@ struct SocialMediaFormView: View {
                 .disabled(!viewModel.isSocialMediaValid())
             }
         }
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(type.title)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showPreview) {
             SocialMediaPreviewView(type: type, viewModel: viewModel)
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isFieldFocused = true
+            }
+        }
+        .onDisappear {
+            isFieldFocused = false
         }
     }
 }
@@ -75,75 +88,159 @@ struct SocialMediaPreviewView: View {
     @State private var showSaveSuccess = false
     @State private var showSaveError = false
     @State private var hasSavedToHistory = false
+    @State private var showDeleteConfirmation = false
+    @State private var selectedPhotoItem: PhotosPickerItem?
+
+    private let presetColors: [Color] = [
+        .white, .black, Color(.systemGray5),
+        .red, .orange, .yellow, .green, .blue, .purple, .pink
+    ]
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            if let image = viewModel.generatedImage {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 250, height: 250)
-                    .padding(20)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
-            }
-
-            HStack {
-                Image(systemName: type.icon)
-                Text(type.title)
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color(.systemGray6))
-            .clipShape(Capsule())
-
-            Spacer()
-
-            VStack(spacing: 12) {
+        ScrollView {
+            VStack(spacing: 24) {
                 if let image = viewModel.generatedImage {
-                    ShareLink(
-                        item: Image(uiImage: image),
-                        preview: SharePreview("\(type.title) QR Code", image: Image(uiImage: image))
-                    ) {
-                        Label("Share", systemImage: "square.and.arrow.up")
+                    Image(uiImage: image)
+                        .interpolation(.none)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 250, height: 250)
+                        .padding(20)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                }
+
+                HStack {
+                    Image(systemName: type.icon)
+                    Text(type.title)
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .clipShape(Capsule())
+
+                // Background Color Picker
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Background Color")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(presetColors, id: \.self) { color in
+                                Circle()
+                                    .fill(color)
+                                    .frame(width: 36, height: 36)
+                                    .overlay(
+                                        Circle()
+                                            .strokeBorder(color == .white ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
+                                    )
+                                    .overlay(
+                                        Circle()
+                                            .strokeBorder(Color.accentColor, lineWidth: viewModel.qrBackgroundColor == color ? 3 : 0)
+                                            .frame(width: 42, height: 42)
+                                    )
+                                    .onTapGesture {
+                                        viewModel.qrBackgroundColor = color
+                                        viewModel.regenerateStyledQRCode()
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                    }
+                }
+                .padding(.horizontal)
+
+                // Center Logo
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Center Logo")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 12) {
+                        if let logo = viewModel.qrCenterLogo {
+                            Image(uiImage: logo)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 44, height: 44)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                            Button("Remove") {
+                                viewModel.qrCenterLogo = nil
+                                viewModel.regenerateStyledQRCode()
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                        }
+
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            Label(viewModel.qrCenterLogo == nil ? "Add Logo" : "Change", systemImage: "photo")
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(.systemGray5))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+                }
+                .padding(.horizontal)
+
+                // Action Buttons
+                VStack(spacing: 12) {
+                    if let image = viewModel.generatedImage {
+                        ShareLink(
+                            item: Image(uiImage: image),
+                            preview: SharePreview("\(type.title) QR Code", image: Image(uiImage: image))
+                        ) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.accentColor)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+
+                    Button {
+                        saveToPhotos()
+                    } label: {
+                        Label("Save to Photos", systemImage: "photo.badge.arrow.down")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.accentColor)
-                            .foregroundStyle(.white)
+                            .background(Color(.systemGray5))
+                            .foregroundStyle(.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    Button {
+                        copyToClipboard()
+                    } label: {
+                        Label("Copy Image", systemImage: "doc.on.doc")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGray5))
+                            .foregroundStyle(.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .foregroundStyle(.red)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                 }
-
-                Button {
-                    saveToPhotos()
-                } label: {
-                    Label("Save to Photos", systemImage: "photo.badge.arrow.down")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-
-                Button {
-                    copyToClipboard()
-                } label: {
-                    Label("Copy Image", systemImage: "doc.on.doc")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+                .padding(.horizontal)
+                .padding(.bottom)
             }
-            .padding(.horizontal)
-            .padding(.bottom)
+            .padding(.top)
         }
         .navigationTitle("QR Code")
         .navigationBarTitleDisplayMode(.inline)
@@ -158,6 +255,15 @@ struct SocialMediaPreviewView: View {
         .onAppear {
             saveToHistory()
         }
+        .onChange(of: selectedPhotoItem) { newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    viewModel.qrCenterLogo = image
+                    viewModel.regenerateStyledQRCode()
+                }
+            }
+        }
         .alert("Saved!", isPresented: $showSaveSuccess) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -167,6 +273,16 @@ struct SocialMediaPreviewView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Failed to save QR code. Please check photo library permissions.")
+        }
+        .alert("Delete QR Code?", isPresented: $showDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                viewModel.deleteCurrentCode()
+                viewModel.reset()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will remove the QR code from your history.")
         }
     }
 
