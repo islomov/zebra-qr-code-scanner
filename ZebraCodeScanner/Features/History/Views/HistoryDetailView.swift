@@ -186,6 +186,89 @@ struct DetailRow: View {
     }
 }
 
+struct ScannedDetailView: View {
+    let entity: ScannedCodeEntity
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Icon
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemGray6))
+                    .frame(width: 120, height: 120)
+                    .overlay {
+                        Image(systemName: typeIcon)
+                            .font(.system(size: 50))
+                            .foregroundStyle(.secondary)
+                    }
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+
+                // Type Badge
+                HStack {
+                    Image(systemName: typeIcon)
+                    Text(entity.type?.capitalized ?? "Unknown")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .clipShape(Capsule())
+
+                // Details Section
+                VStack(alignment: .leading, spacing: 16) {
+                    DetailRow(title: "Type", value: entity.type?.capitalized ?? "Unknown")
+                    DetailRow(title: "Content", value: entity.content ?? "")
+                    if let productName = entity.productName, !productName.isEmpty {
+                        DetailRow(title: "Product", value: productName)
+                    }
+                    if let productBrand = entity.productBrand, !productBrand.isEmpty {
+                        DetailRow(title: "Brand", value: productBrand)
+                    }
+                    DetailRow(title: "Scanned", value: formatDate(entity.scannedAt))
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal)
+
+                // Copy Content Button
+                Button {
+                    UIPasteboard.general.string = entity.content
+                } label: {
+                    Label("Copy Content", systemImage: "doc.on.doc")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+            }
+            .padding(.top)
+        }
+        .navigationTitle(entity.type?.capitalized ?? "Scanned Code")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var typeIcon: String {
+        let type = entity.type?.lowercased() ?? ""
+        if type.contains("qr") {
+            return "qrcode"
+        }
+        return "barcode"
+    }
+
+    private func formatDate(_ date: Date?) -> String {
+        guard let date = date else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
 #Preview {
     NavigationStack {
         HistoryDetailView(entity: GeneratedCodeEntity(context: CoreDataManager.shared.viewContext))
