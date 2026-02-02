@@ -49,45 +49,34 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
     @Binding var isTorchOn: Bool
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
-        print("[Scanner] makeUIViewController called - creating new DataScannerViewController")
         let scanner = DataScannerViewController(
             recognizedDataTypes: recognizedDataTypes,
             qualityLevel: .balanced,
             recognizesMultipleItems: false,
-            isHighFrameRateTrackingEnabled: false,
+            isHighFrameRateTrackingEnabled: true,
             isPinchToZoomEnabled: true,
-            isGuidanceEnabled: true,
-            isHighlightingEnabled: true
+            isGuidanceEnabled: false,
+            isHighlightingEnabled: false
         )
         scanner.delegate = context.coordinator
-        print("[Scanner] makeUIViewController done - scanner: \(ObjectIdentifier(scanner))")
         return scanner
     }
 
     func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
-        print("[Scanner] updateUIViewController - isScanning=\(isScanning), isActive=\(uiViewController.isScanning), scanner=\(ObjectIdentifier(uiViewController))")
         if isScanning {
             if !uiViewController.isScanning {
-                do {
-                    try uiViewController.startScanning()
-                    print("[Scanner] startScanning succeeded")
-                } catch {
-                    print("[Scanner] startScanning FAILED: \(error)")
-                }
+                try? uiViewController.startScanning()
             }
         } else {
             if uiViewController.isScanning {
                 uiViewController.stopScanning()
-                print("[Scanner] stopScanning called")
             }
         }
 
-        // Control torch via AVCaptureDevice
         setTorch(on: isTorchOn)
     }
 
     static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
-        print("[Scanner] dismantleUIViewController - stopping scanner: \(ObjectIdentifier(uiViewController))")
         uiViewController.stopScanning()
     }
 
