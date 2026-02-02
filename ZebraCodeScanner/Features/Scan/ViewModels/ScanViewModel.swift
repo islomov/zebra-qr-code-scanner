@@ -10,6 +10,7 @@ import Combine
 import VisionKit
 import PhotosUI
 import Vision
+import AudioToolbox
 
 enum ScanMode: String, CaseIterable {
     case qrCode = "QR Code"
@@ -134,8 +135,15 @@ final class ScanViewModel: ObservableObject {
         _ = dataManager.saveScannedCode(type: type, content: content)
 
         // Haptic feedback
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
+        if UserDefaults.standard.object(forKey: "vibrateOnScan") == nil || UserDefaults.standard.bool(forKey: "vibrateOnScan") {
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        }
+
+        // Sound feedback
+        if UserDefaults.standard.object(forKey: "soundOnScan") == nil || UserDefaults.standard.bool(forKey: "soundOnScan") {
+            AudioServicesPlaySystemSound(1057)
+        }
 
         // Lookup product info for barcodes
         if isBarcode {
