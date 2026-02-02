@@ -78,6 +78,9 @@ struct ScanView: View {
                     )
                 }
             }
+            .sheet(isPresented: $viewModel.showManualEntry) {
+                ManualBarcodeEntryView(viewModel: viewModel)
+            }
             .alert("Camera Access Required", isPresented: $viewModel.showPermissionAlert) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -112,7 +115,13 @@ struct ScanView: View {
                     isScanning: $viewModel.isScanning,
                     isTorchOn: $viewModel.isTorchOn
                 )
+                .id(viewModel.scanMode)
                 .ignoresSafeArea()
+
+                // QR frame overlay
+                if viewModel.scanMode == .qrCode {
+                    QRFrameOverlay()
+                }
 
                 // Overlay controls
                 VStack {
@@ -128,8 +137,25 @@ struct ScanView: View {
                                 .padding()
                                 .background(Circle().fill(.ultraThinMaterial))
                         }
+
+                        if viewModel.scanMode == .barcode {
+                            Button {
+                                viewModel.showManualEntry = true
+                            } label: {
+                                Image(systemName: "keyboard")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                    .padding()
+                                    .background(Circle().fill(.ultraThinMaterial))
+                            }
+                        }
                     }
-                    .padding(.bottom, 50)
+                    .padding(.bottom, 16)
+
+                    // Mode picker at bottom
+                    ScanModePicker(selectedMode: $viewModel.scanMode)
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 30)
                 }
             } else {
                 // Camera not active - show placeholder
@@ -189,6 +215,190 @@ struct ScanView: View {
                     .background(Color.accentColor)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+}
+
+// MARK: - QR Frame Overlay
+
+struct QRFrameOverlay: View {
+    @State private var isAnimating = false
+    private let frameSize: CGFloat = 250
+    private let cornerLength: CGFloat = 30
+    private let lineWidth: CGFloat = 4
+
+    var body: some View {
+        ZStack {
+            // Dimmed background with cutout
+            Color.black.opacity(0.4)
+                .reverseMask {
+                    RoundedRectangle(cornerRadius: 16)
+                        .frame(width: frameSize, height: frameSize)
+                }
+
+            // Corner brackets
+            ZStack {
+                // Top-left
+                CornerShape(corner: .topLeft, length: cornerLength)
+                // Top-right
+                CornerShape(corner: .topRight, length: cornerLength)
+                // Bottom-left
+                CornerShape(corner: .bottomLeft, length: cornerLength)
+                // Bottom-right
+                CornerShape(corner: .bottomRight, length: cornerLength)
+            }
+            .frame(width: frameSize, height: frameSize)
+            .foregroundStyle(.white)
+            .opacity(isAnimating ? 1.0 : 0.6)
+            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
+            .onAppear { isAnimating = true }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+struct CornerShape: View {
+    enum Corner {
+        case topLeft, topRight, bottomLeft, bottomRight
+    }
+
+    let corner: Corner
+    let length: CGFloat
+    let lineWidth: CGFloat = 4
+
+    var body: some View {
+        GeometryReader { geo in
+            Path { path in
+                let w = geo.size.width
+                let h = geo.size.height
+
+                switch corner {
+                case .topLeft:
+                    path.move(to: CGPoint(x: 0, y: length))
+                    path.addLine(to: CGPoint(x: 0, y: 0))
+                    path.addLine(to: CGPoint(x: length, y: 0))
+                case .topRight:
+                    path.move(to: CGPoint(x: w - length, y: 0))
+                    path.addLine(to: CGPoint(x: w, y: 0))
+                    path.addLine(to: CGPoint(x: w, y: length))
+                case .bottomLeft:
+                    path.move(to: CGPoint(x: 0, y: h - length))
+                    path.addLine(to: CGPoint(x: 0, y: h))
+                    path.addLine(to: CGPoint(x: length, y: h))
+                case .bottomRight:
+                    path.move(to: CGPoint(x: w - length, y: h))
+                    path.addLine(to: CGPoint(x: w, y: h))
+                    path.addLine(to: CGPoint(x: w, y: h - length))
+                }
+            }
+            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func reverseMask<Mask: View>(@ViewBuilder _ mask: () -> Mask) -> some View {
+        self.mask(
+            ZStack {
+                Rectangle()
+                mask()
+                    .blendMode(.destinationOut)
+            }
+            .compositingGroup()
+        )
+    }
+}
+
+// MARK: - Scan Mode Picker
+
+struct ScanModePicker: View {
+    @Binding var selectedMode: ScanMode
+    @Namespace private var animation
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(ScanMode.allCases, id: \.self) { mode in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        selectedMode = mode
+                    }
+                } label: {
+                    Text(mode.rawValue)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(selectedMode == mode ? .white : .white.opacity(0.7))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background {
+                            if selectedMode == mode {
+                                Capsule()
+                                    .fill(.white.opacity(0.25))
+                                    .matchedGeometryEffect(id: "tab", in: animation)
+                            }
+                        }
+                }
+            }
+        }
+        .padding(4)
+        .background(Capsule().fill(.black.opacity(0.5)))
+    }
+}
+
+// MARK: - Manual Barcode Entry
+
+struct ManualBarcodeEntryView: View {
+    @ObservedObject var viewModel: ScanViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    private let barcodeTypes = [
+        ("ean13", "EAN-13"),
+        ("ean8", "EAN-8"),
+        ("upce", "UPC-E"),
+        ("code128", "Code 128"),
+    ]
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Barcode Type") {
+                    Picker("Type", selection: $viewModel.manualBarcodeType) {
+                        ForEach(barcodeTypes, id: \.0) { value, label in
+                            Text(label).tag(value)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section("Barcode Number") {
+                    TextField("Enter barcode number", text: $viewModel.manualBarcodeText)
+                        .keyboardType(.numberPad)
+                        .textContentType(.none)
+                        .autocorrectionDisabled()
+                }
+
+                Section {
+                    Button {
+                        viewModel.submitManualBarcode()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Label("Search", systemImage: "magnifyingglass")
+                                .font(.headline)
+                            Spacer()
+                        }
+                    }
+                    .disabled(viewModel.manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .navigationTitle("Enter Barcode")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
             }
         }
     }

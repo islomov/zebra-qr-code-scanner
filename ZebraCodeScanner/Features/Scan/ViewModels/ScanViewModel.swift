@@ -11,6 +11,11 @@ import VisionKit
 import PhotosUI
 import Vision
 
+enum ScanMode: String, CaseIterable {
+    case qrCode = "QR Code"
+    case barcode = "Barcode"
+}
+
 @MainActor
 final class ScanViewModel: ObservableObject {
     @Published var isScanning: Bool = false
@@ -26,6 +31,11 @@ final class ScanViewModel: ObservableObject {
     @Published var productInfo: ProductInfo?
     @Published var isLoadingProduct: Bool = false
 
+    @Published var scanMode: ScanMode = .qrCode
+    @Published var showManualEntry: Bool = false
+    @Published var manualBarcodeText: String = ""
+    @Published var manualBarcodeType: String = "ean13"
+
     private let scannerService = ScannerService.shared
     private let dataManager = CoreDataManager.shared
     private let productLookupService = ProductLookupService.shared
@@ -35,21 +45,29 @@ final class ScanViewModel: ObservableObject {
     }
 
     var recognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> {
-        [
-            .barcode(symbologies: [
-                .qr,
-                .code128,
-                .ean13,
-                .ean8,
-                .upce,
-                .code39,
-                .code93,
-                .itf14,
-                .dataMatrix,
-                .pdf417,
-                .aztec
-            ])
-        ]
+        switch scanMode {
+        case .qrCode:
+            return [
+                .barcode(symbologies: [
+                    .qr,
+                    .dataMatrix,
+                    .aztec
+                ])
+            ]
+        case .barcode:
+            return [
+                .barcode(symbologies: [
+                    .code128,
+                    .ean13,
+                    .ean8,
+                    .upce,
+                    .code39,
+                    .code93,
+                    .itf14,
+                    .pdf417
+                ])
+            ]
+        }
     }
 
     var isSupported: Bool {
@@ -107,8 +125,6 @@ final class ScanViewModel: ObservableObject {
         print("[ScanVM] handleScannedCode: content=\(content), type=\(type)")
         guard !content.isEmpty else { return }
 
-        stopScanning()
-
         scannedContent = content
         scannedType = type
         productInfo = nil
@@ -134,6 +150,14 @@ final class ScanViewModel: ObservableObject {
             self.productInfo = info
             self.isLoadingProduct = false
         }
+    }
+
+    func submitManualBarcode() {
+        let trimmed = manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        showManualEntry = false
+        handleScannedCode(content: trimmed, type: manualBarcodeType)
+        manualBarcodeText = ""
     }
 
     func handleScanError(_ error: Error) {
@@ -231,7 +255,9 @@ final class ScanViewModel: ObservableObject {
         errorMessage = nil
         productInfo = nil
         isLoadingProduct = false
-        startScanning()
+        if !isScanning {
+            startScanning()
+        }
         print("[ScanVM] resetScan() done")
     }
 
