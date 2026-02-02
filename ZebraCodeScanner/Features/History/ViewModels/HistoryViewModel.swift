@@ -8,44 +8,81 @@
 import SwiftUI
 import Combine
 
+enum HistoryFilterTab: String, CaseIterable {
+    case all = "All"
+    case generated = "Generated"
+    case scanned = "Scanned"
+}
+
 @MainActor
 final class HistoryViewModel: ObservableObject {
     @Published var generatedCodes: [GeneratedCodeEntity] = []
+    @Published var scannedCodes: [ScannedCodeEntity] = []
     @Published var searchText: String = ""
+    @Published var selectedTab: HistoryFilterTab = .all
 
     private let dataManager = CoreDataManager.shared
 
-    var filteredCodes: [GeneratedCodeEntity] {
-        if searchText.isEmpty {
-            return generatedCodes
-        }
-        return generatedCodes.filter { entity in
+    var filteredGeneratedCodes: [GeneratedCodeEntity] {
+        let codes = generatedCodes
+        if searchText.isEmpty { return codes }
+        let search = searchText.lowercased()
+        return codes.filter { entity in
             let content = entity.content?.lowercased() ?? ""
             let contentType = entity.contentType?.lowercased() ?? ""
-            let search = searchText.lowercased()
             return content.contains(search) || contentType.contains(search)
         }
     }
 
+    var filteredScannedCodes: [ScannedCodeEntity] {
+        let codes = scannedCodes
+        if searchText.isEmpty { return codes }
+        let search = searchText.lowercased()
+        return codes.filter { entity in
+            let content = entity.content?.lowercased() ?? ""
+            let type = entity.type?.lowercased() ?? ""
+            let productName = entity.productName?.lowercased() ?? ""
+            return content.contains(search) || type.contains(search) || productName.contains(search)
+        }
+    }
+
     var qrCodes: [GeneratedCodeEntity] {
-        filteredCodes.filter { $0.type == "qr" }
+        filteredGeneratedCodes.filter { $0.type == "qr" }
     }
 
     var barcodes: [GeneratedCodeEntity] {
-        filteredCodes.filter { $0.type == "barcode" }
+        filteredGeneratedCodes.filter { $0.type == "barcode" }
+    }
+
+    var isEmpty: Bool {
+        switch selectedTab {
+        case .all:
+            return generatedCodes.isEmpty && scannedCodes.isEmpty
+        case .generated:
+            return generatedCodes.isEmpty
+        case .scanned:
+            return scannedCodes.isEmpty
+        }
     }
 
     func fetchHistory() {
         generatedCodes = dataManager.fetchGeneratedCodes()
+        scannedCodes = dataManager.fetchScannedCodes()
     }
 
-    func delete(_ entity: GeneratedCodeEntity) {
+    func deleteGenerated(_ entity: GeneratedCodeEntity) {
         dataManager.deleteGeneratedCode(entity)
+        fetchHistory()
+    }
+
+    func deleteScanned(_ entity: ScannedCodeEntity) {
+        dataManager.deleteScannedCode(entity)
         fetchHistory()
     }
 
     func deleteAll() {
         dataManager.deleteAllGeneratedCodes()
+        dataManager.deleteAllScannedCodes()
         fetchHistory()
     }
 
@@ -82,5 +119,17 @@ final class HistoryViewModel: ObservableObject {
         } else {
             return "barcode"
         }
+    }
+
+    func getScannedTypeTitle(for entity: ScannedCodeEntity) -> String {
+        entity.type?.capitalized ?? "Unknown"
+    }
+
+    func getScannedTypeIcon(for entity: ScannedCodeEntity) -> String {
+        let type = entity.type?.lowercased() ?? ""
+        if type.contains("qr") {
+            return "qrcode"
+        }
+        return "barcode"
     }
 }
