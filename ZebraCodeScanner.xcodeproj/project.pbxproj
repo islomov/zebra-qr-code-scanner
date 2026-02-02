@@ -6,7 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1581A58E2F30E52200B61DB5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1581A58D2F30E52200B61DB5 /* GoogleService-Info.plist */; };
+		1581A5DA2F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */; };
+		1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DB2F30E76400B61DB5 /* FirebaseCore */; };
+		1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */; };
+		1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		1581A58D2F30E52200B61DB5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		15AE59BC2F263F2C002C8A8F /* ZebraCodeScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZebraCodeScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -23,6 +32,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */,
+				1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */,
+				1581A5DA2F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */,
+				1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,6 +45,7 @@
 		15AE59B32F263F2C002C8A8F = {
 			isa = PBXGroup;
 			children = (
+				1581A58D2F30E52200B61DB5 /* GoogleService-Info.plist */,
 				15AE59BE2F263F2C002C8A8F /* ZebraCodeScanner */,
 				15AE59BD2F263F2C002C8A8F /* Products */,
 			);
@@ -65,6 +79,10 @@
 			);
 			name = ZebraCodeScanner;
 			packageProductDependencies = (
+				1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */,
+				1581A5DB2F30E76400B61DB5 /* FirebaseCore */,
+				1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */,
+				1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */,
 			);
 			productName = ZebraCodeScanner;
 			productReference = 15AE59BC2F263F2C002C8A8F /* ZebraCodeScanner.app */;
@@ -94,6 +112,9 @@
 			);
 			mainGroup = 15AE59B32F263F2C002C8A8F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 15AE59BD2F263F2C002C8A8F /* Products */;
 			projectDirPath = "";
@@ -109,6 +130,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1581A58E2F30E52200B61DB5 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,8 +282,9 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -270,12 +293,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = studio.viralapps.ZebraCodeScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -295,8 +322,9 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -305,12 +333,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = studio.viralapps.ZebraCodeScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -336,6 +368,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		1581A5DB2F30E76400B61DB5 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 15AE59B42F263F2C002C8A8F /* Project object */;
 }
