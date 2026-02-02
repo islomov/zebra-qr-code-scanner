@@ -15,10 +15,7 @@ struct ProductResultView: View {
     let onScanAgain: () -> Void
     let onDismiss: () -> Void
 
-    @State private var showSavedAlert = false
     @State private var showCopiedAlert = false
-
-    private let dataManager = CoreDataManager.shared
 
     var body: some View {
         NavigationStack {
@@ -76,17 +73,6 @@ struct ProductResultView: View {
                         }
 
                         Button {
-                            saveToHistory()
-                        } label: {
-                            Label("Save to History", systemImage: "clock.arrow.circlepath")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-
-                        Button {
                             onScanAgain()
                         } label: {
                             Label("Scan Again", systemImage: "camera.viewfinder")
@@ -110,11 +96,6 @@ struct ProductResultView: View {
                         onDismiss()
                     }
                 }
-            }
-            .alert("Saved!", isPresented: $showSavedAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Scan result saved to history.")
             }
             .alert("Copied!", isPresented: $showCopiedAlert) {
                 Button("OK", role: .cancel) {}
@@ -265,16 +246,6 @@ struct ProductResultView: View {
         }
     }
 
-    private func saveToHistory() {
-        _ = dataManager.saveScannedCode(
-            type: type,
-            content: content,
-            productName: productInfo?.name,
-            productBrand: productInfo?.brand,
-            productImage: productInfo?.imageURL
-        )
-        showSavedAlert = true
-    }
 }
 
 #Preview {

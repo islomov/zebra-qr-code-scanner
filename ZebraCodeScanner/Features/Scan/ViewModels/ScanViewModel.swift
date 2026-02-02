@@ -114,6 +114,9 @@ final class ScanViewModel: ObservableObject {
         productInfo = nil
         showResult = true
 
+        // Auto-save to history
+        _ = dataManager.saveScannedCode(type: type, content: content)
+
         // Haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
