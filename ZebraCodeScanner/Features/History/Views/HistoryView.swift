@@ -13,8 +13,18 @@ struct HistoryView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.generatedCodes.isEmpty {
+            VStack(spacing: 0) {
+                // Filter tabs
+                Picker("Filter", selection: $viewModel.selectedTab) {
+                    ForEach(HistoryFilterTab.allCases, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+
+                if viewModel.isEmpty {
                     emptyStateView
                 } else {
                     historyListView
@@ -39,6 +49,7 @@ struct HistoryView: View {
 
     private var emptyStateView: some View {
         VStack(spacing: 20) {
+            Spacer()
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 80))
                 .foregroundStyle(.tertiary)
@@ -47,51 +58,93 @@ struct HistoryView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("Generated QR codes and barcodes will appear here.")
+            Text(emptyStateMessage)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            Spacer()
+        }
+    }
+
+    private var emptyStateMessage: String {
+        switch viewModel.selectedTab {
+        case .all:
+            return "Generated and scanned codes will appear here."
+        case .generated:
+            return "Generated QR codes and barcodes will appear here."
+        case .scanned:
+            return "Scanned QR codes and barcodes will appear here."
         }
     }
 
     private var historyListView: some View {
         List {
-            if !viewModel.qrCodes.isEmpty {
-                Section("QR Codes") {
-                    ForEach(viewModel.qrCodes) { entity in
-                        NavigationLink {
-                            HistoryDetailView(entity: entity)
-                        } label: {
-                            HistoryRowView(entity: entity, viewModel: viewModel)
-                        }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            viewModel.delete(viewModel.qrCodes[index])
-                        }
+            if viewModel.selectedTab != .scanned {
+                generatedSections
+            }
+            if viewModel.selectedTab != .generated {
+                scannedSection
+            }
+        }
+        .listStyle(.insetGrouped)
+    }
+
+    @ViewBuilder
+    private var generatedSections: some View {
+        if !viewModel.qrCodes.isEmpty {
+            Section("QR Codes") {
+                ForEach(viewModel.qrCodes) { entity in
+                    NavigationLink {
+                        HistoryDetailView(entity: entity)
+                    } label: {
+                        HistoryRowView(entity: entity, viewModel: viewModel)
                     }
                 }
-            }
-
-            if !viewModel.barcodes.isEmpty {
-                Section("Barcodes") {
-                    ForEach(viewModel.barcodes) { entity in
-                        NavigationLink {
-                            HistoryDetailView(entity: entity)
-                        } label: {
-                            HistoryRowView(entity: entity, viewModel: viewModel)
-                        }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            viewModel.delete(viewModel.barcodes[index])
-                        }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        viewModel.deleteGenerated(viewModel.qrCodes[index])
                     }
                 }
             }
         }
-        .listStyle(.insetGrouped)
+
+        if !viewModel.barcodes.isEmpty {
+            Section("Barcodes") {
+                ForEach(viewModel.barcodes) { entity in
+                    NavigationLink {
+                        HistoryDetailView(entity: entity)
+                    } label: {
+                        HistoryRowView(entity: entity, viewModel: viewModel)
+                    }
+                }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        viewModel.deleteGenerated(viewModel.barcodes[index])
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var scannedSection: some View {
+        if !viewModel.filteredScannedCodes.isEmpty {
+            Section("Scanned") {
+                ForEach(viewModel.filteredScannedCodes) { entity in
+                    NavigationLink {
+                        ScannedDetailView(entity: entity)
+                    } label: {
+                        ScannedRowView(entity: entity, viewModel: viewModel)
+                    }
+                }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        viewModel.deleteScanned(viewModel.filteredScannedCodes[index])
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -137,6 +190,53 @@ struct HistoryRowView: View {
                     .lineLimit(1)
 
                 Text(viewModel.formatDate(entity.createdAt))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct ScannedRowView: View {
+    let entity: ScannedCodeEntity
+    let viewModel: HistoryViewModel
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(.systemGray5))
+                .frame(width: 50, height: 50)
+                .overlay {
+                    Image(systemName: viewModel.getScannedTypeIcon(for: entity))
+                        .foregroundStyle(.secondary)
+                }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Image(systemName: viewModel.getScannedTypeIcon(for: entity))
+                        .font(.caption)
+                        .foregroundStyle(.tint)
+                    Text(viewModel.getScannedTypeTitle(for: entity))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+
+                if let productName = entity.productName, !productName.isEmpty {
+                    Text(productName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(entity.content ?? "")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+
+                Text(viewModel.formatDate(entity.scannedAt))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
