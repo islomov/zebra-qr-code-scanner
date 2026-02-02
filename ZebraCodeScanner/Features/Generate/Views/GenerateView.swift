@@ -239,6 +239,8 @@ struct SocialMediaTypeCard: View {
     }
 }
 
-#Preview {
-    GenerateView(showSettings: .constant(false))
+struct GenerateView_Previews: PreviewProvider {
+    static var previews: some View {
+        GenerateView(showSettings: .constant(false))
+    }
 }

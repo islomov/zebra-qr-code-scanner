@@ -93,8 +93,10 @@ struct BarcodeFormView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        BarcodeFormView(type: .code128, viewModel: GenerateViewModel())
+struct BarcodeFormView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            BarcodeFormView(type: .code128, viewModel: GenerateViewModel())
+        }
     }
 }

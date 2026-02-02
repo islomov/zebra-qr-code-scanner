@@ -247,6 +247,8 @@ struct ScannedRowView: View {
     }
 }
 
-#Preview {
-    HistoryView(showSettings: .constant(false))
+struct HistoryView_Previews: PreviewProvider {
+    static var previews: some View {
+        HistoryView(showSettings: .constant(false))
+    }
 }

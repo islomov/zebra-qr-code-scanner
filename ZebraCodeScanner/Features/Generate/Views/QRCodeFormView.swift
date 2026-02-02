@@ -239,8 +239,10 @@ struct QRCodeFormView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        QRCodeFormView(type: .wifi, viewModel: GenerateViewModel())
+struct QRCodeFormView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            QRCodeFormView(type: .wifi, viewModel: GenerateViewModel())
+        }
     }
 }

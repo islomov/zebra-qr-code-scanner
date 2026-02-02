@@ -251,13 +251,15 @@ struct QRCodePreviewView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        QRCodePreviewView(type: .text, viewModel: {
-            let vm = GenerateViewModel()
-            vm.text = "Hello World"
-            vm.generateQRCode(for: .text)
-            return vm
-        }())
+struct QRCodePreviewView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            QRCodePreviewView(type: .text, viewModel: {
+                let vm = GenerateViewModel()
+                vm.text = "Hello World"
+                vm.generateQRCode(for: .text)
+                return vm
+            }())
+        }
     }
 }

@@ -175,11 +175,13 @@ struct ScanResultView: View {
 
 }
 
-#Preview {
-    ScanResultView(
-        content: "https://example.com",
-        type: "qr",
-        onScanAgain: {},
-        onDismiss: {}
-    )
+struct ScanResultView_Previews: PreviewProvider {
+    static var previews: some View {
+        ScanResultView(
+            content: "https://example.com",
+            type: "qr",
+            onScanAgain: {},
+            onDismiss: {}
+        )
+    }
 }

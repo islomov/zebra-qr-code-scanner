@@ -140,13 +140,15 @@ struct BarcodePreviewView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        BarcodePreviewView(type: .code128, viewModel: {
-            let vm = GenerateViewModel()
-            vm.barcodeContent = "ABC123"
-            vm.generateBarcode(for: .code128)
-            return vm
-        }())
+struct BarcodePreviewView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            BarcodePreviewView(type: .code128, viewModel: {
+                let vm = GenerateViewModel()
+                vm.barcodeContent = "ABC123"
+                vm.generateBarcode(for: .code128)
+                return vm
+            }())
+        }
     }
 }

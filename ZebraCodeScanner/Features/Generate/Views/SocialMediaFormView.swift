@@ -278,8 +278,10 @@ struct SocialMediaPreviewView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        SocialMediaFormView(type: .instagram, viewModel: GenerateViewModel())
+struct SocialMediaFormView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            SocialMediaFormView(type: .instagram, viewModel: GenerateViewModel())
+        }
     }
 }

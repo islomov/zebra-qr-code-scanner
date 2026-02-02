@@ -44,7 +44,7 @@ struct ScanView: View {
                     }
                 }
             }
-            .onChange(of: viewModel.selectedPhoto) { _, _ in
+            .onChange(of: viewModel.selectedPhoto) { _ in
                 viewModel.processSelectedPhoto()
             }
             .sheet(isPresented: $viewModel.showResult) {
@@ -404,6 +404,8 @@ struct ManualBarcodeEntryView: View {
     }
 }
 
-#Preview {
-    ScanView(showSettings: .constant(false), viewModel: ScanViewModel(), isActiveTab: true)
+struct ScanView_Previews: PreviewProvider {
+    static var previews: some View {
+        ScanView(showSettings: .constant(false), viewModel: ScanViewModel(), isActiveTab: true)
+    }
 }
