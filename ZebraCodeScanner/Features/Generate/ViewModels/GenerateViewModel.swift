@@ -53,6 +53,13 @@ final class GenerateViewModel: ObservableObject {
     @Published var generatedImage: UIImage?
     @Published var generatedContent: String = ""
 
+    // MARK: - QR Styling
+
+    @Published var qrBackgroundColor: Color = .white
+    @Published var qrForegroundColor: Color = .black
+    @Published var qrCenterLogo: UIImage? = nil
+    var savedEntity: GeneratedCodeEntity? = nil
+
     // MARK: - Services
 
     private let qrService = QRCodeGeneratorService.shared
@@ -63,7 +70,16 @@ final class GenerateViewModel: ObservableObject {
     func generateQRCode(for type: QRCodeContentType) {
         let content = encodeContent(for: type)
         generatedContent = content
-        generatedImage = qrService.generateQRCode(from: content, size: 300)
+        qrBackgroundColor = .white
+        qrForegroundColor = .black
+        qrCenterLogo = nil
+        generatedImage = qrService.generateStyledQRCode(
+            from: content,
+            size: 300,
+            backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
+            centerLogo: qrCenterLogo
+        )
     }
 
     private func encodeContent(for type: QRCodeContentType) -> String {
@@ -90,7 +106,21 @@ final class GenerateViewModel: ObservableObject {
     func generateSocialMediaQRCode(for type: SocialMediaType) {
         let profileURL = type.baseURL + socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         generatedContent = profileURL
-        generatedImage = qrService.generateQRCode(from: profileURL, size: 300)
+        qrBackgroundColor = .white
+        qrForegroundColor = .black
+        qrCenterLogo = sfSymbolImage(for: type.icon)
+        generatedImage = qrService.generateStyledQRCode(
+            from: profileURL,
+            size: 300,
+            backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
+            centerLogo: qrCenterLogo
+        )
+    }
+
+    private func sfSymbolImage(for name: String) -> UIImage? {
+        let config = UIImage.SymbolConfiguration(pointSize: 60, weight: .medium)
+        return UIImage(systemName: name, withConfiguration: config)?.withTintColor(.black, renderingMode: .alwaysOriginal)
     }
 
     func isSocialMediaValid() -> Bool {
@@ -99,12 +129,14 @@ final class GenerateViewModel: ObservableObject {
 
     @discardableResult
     func saveSocialMediaToHistory(type: SocialMediaType) -> GeneratedCodeEntity {
-        return dataManager.saveGeneratedCode(
+        let entity = dataManager.saveGeneratedCode(
             type: "qr",
             content: generatedContent,
             contentType: type.rawValue,
             image: generatedImage
         )
+        savedEntity = entity
+        return entity
     }
 
     // MARK: - Barcode Generation
@@ -154,26 +186,52 @@ final class GenerateViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Styled Regeneration
+
+    func regenerateStyledQRCode() {
+        guard !generatedContent.isEmpty else { return }
+        generatedImage = qrService.generateStyledQRCode(
+            from: generatedContent,
+            size: 300,
+            backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
+            centerLogo: qrCenterLogo
+        )
+    }
+
+    // MARK: - Delete
+
+    func deleteCurrentCode() {
+        if let entity = savedEntity {
+            dataManager.deleteGeneratedCode(entity)
+            savedEntity = nil
+        }
+    }
+
     // MARK: - Save to History
 
     @discardableResult
     func saveToHistory(type: QRCodeContentType) -> GeneratedCodeEntity {
-        return dataManager.saveGeneratedCode(
+        let entity = dataManager.saveGeneratedCode(
             type: "qr",
             content: generatedContent,
             contentType: type.rawValue,
             image: generatedImage
         )
+        savedEntity = entity
+        return entity
     }
 
     @discardableResult
     func saveBarcodeToHistory(type: BarcodeType) -> GeneratedCodeEntity {
-        return dataManager.saveGeneratedCode(
+        let entity = dataManager.saveGeneratedCode(
             type: "barcode",
             content: generatedContent,
             contentType: type.rawValue,
             image: generatedImage
         )
+        savedEntity = entity
+        return entity
     }
 
     // MARK: - Reset
@@ -198,5 +256,9 @@ final class GenerateViewModel: ObservableObject {
         barcodeContent = ""
         generatedImage = nil
         generatedContent = ""
+        qrBackgroundColor = .white
+        qrForegroundColor = .black
+        qrCenterLogo = nil
+        savedEntity = nil
     }
 }

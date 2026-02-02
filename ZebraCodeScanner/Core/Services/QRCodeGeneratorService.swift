@@ -34,6 +34,55 @@ final class QRCodeGeneratorService {
         return UIImage(cgImage: cgImage)
     }
 
+    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, foregroundColor: UIColor = .black, centerLogo: UIImage? = nil) -> UIImage? {
+        guard let data = content.data(using: .utf8) else { return nil }
+
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = data
+        filter.correctionLevel = centerLogo != nil ? "H" : "M"
+
+        guard let outputImage = filter.outputImage else { return nil }
+
+        // Apply foreground/background colors via CIFalseColor
+        let coloredImage: CIImage
+        if let colorFilter = CIFilter(name: "CIFalseColor",
+                                       parameters: ["inputImage": outputImage,
+                                                     "inputColor0": CIColor(color: foregroundColor),
+                                                     "inputColor1": CIColor(color: backgroundColor)]),
+           let colored = colorFilter.outputImage {
+            coloredImage = colored
+        } else {
+            coloredImage = outputImage
+        }
+
+        let scaleX = size / coloredImage.extent.size.width
+        let scaleY = size / coloredImage.extent.size.height
+        let scaledImage = coloredImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+
+        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let qrImage = UIImage(cgImage: cgImage)
+            qrImage.draw(in: CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+
+            if let logo = centerLogo {
+                let logoSize = size * 0.22
+                let logoPadding: CGFloat = 6
+                let backgroundSize = logoSize + logoPadding * 2
+                let backgroundOrigin = CGPoint(x: (size - backgroundSize) / 2, y: (size - backgroundSize) / 2)
+                let backgroundRect = CGRect(origin: backgroundOrigin, size: CGSize(width: backgroundSize, height: backgroundSize))
+
+                UIColor.white.setFill()
+                UIBezierPath(roundedRect: backgroundRect, cornerRadius: 8).fill()
+
+                let logoOrigin = CGPoint(x: (size - logoSize) / 2, y: (size - logoSize) / 2)
+                let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
+                logo.draw(in: logoRect)
+            }
+        }
+    }
+
     // MARK: - Content Encoders
 
     func encodeText(_ text: String) -> String {
