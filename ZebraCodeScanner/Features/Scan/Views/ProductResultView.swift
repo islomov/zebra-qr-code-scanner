@@ -248,19 +248,21 @@ struct ProductResultView: View {
 
 }
 
-#Preview {
-    ProductResultView(
-        content: "737628064502",
-        type: "ean13",
-        productInfo: ProductInfo(
-            name: "Chocolate Bar",
-            brand: "Example Brand",
-            imageURL: nil,
-            category: "Snacks",
-            ingredients: "Sugar, cocoa butter, milk"
-        ),
-        isLoading: false,
-        onScanAgain: {},
-        onDismiss: {}
-    )
+struct ProductResultView_Previews: PreviewProvider {
+    static var previews: some View {
+        ProductResultView(
+            content: "737628064502",
+            type: "ean13",
+            productInfo: ProductInfo(
+                name: "Chocolate Bar",
+                brand: "Example Brand",
+                imageURL: nil,
+                category: "Snacks",
+                ingredients: "Sugar, cocoa butter, milk"
+            ),
+            isLoading: false,
+            onScanAgain: {},
+            onDismiss: {}
+        )
+    }
 }

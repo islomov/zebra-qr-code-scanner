@@ -32,11 +32,15 @@ struct ContentView: View {
                 }
                 .tag(2)
         }
-        .onChange(of: selectedTab) { oldTab, newTab in
-            print("[ContentView] Tab switched: \(oldTab) → \(newTab)")
+        .onChange(of: selectedTab) { [selectedTab] newTab in
+            print("[ContentView] Tab switched: \(selectedTab) → \(newTab)")
             if newTab == 1 {
-                scanViewModel.startScanning()
-            } else if oldTab == 1 {
+                // Delay start so the old scanner instance is fully torn down
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    guard self.selectedTab == 1 else { return }
+                    scanViewModel.startScanning()
+                }
+            } else if selectedTab == 1 {
                 scanViewModel.stopScanning()
             }
         }
@@ -46,6 +50,8 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

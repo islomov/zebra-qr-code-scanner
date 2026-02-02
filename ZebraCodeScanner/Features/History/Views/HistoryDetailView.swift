@@ -269,8 +269,10 @@ struct ScannedDetailView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        HistoryDetailView(entity: GeneratedCodeEntity(context: CoreDataManager.shared.viewContext))
+struct HistoryDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            HistoryDetailView(entity: GeneratedCodeEntity(context: CoreDataManager.shared.viewContext))
+        }
     }
 }
