@@ -56,6 +56,7 @@ final class GenerateViewModel: ObservableObject {
     // MARK: - QR Styling
 
     @Published var qrBackgroundColor: Color = .white
+    @Published var qrForegroundColor: Color = .black
     @Published var qrCenterLogo: UIImage? = nil
     var savedEntity: GeneratedCodeEntity? = nil
 
@@ -70,11 +71,13 @@ final class GenerateViewModel: ObservableObject {
         let content = encodeContent(for: type)
         generatedContent = content
         qrBackgroundColor = .white
+        qrForegroundColor = .black
         qrCenterLogo = nil
         generatedImage = qrService.generateStyledQRCode(
             from: content,
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
             centerLogo: qrCenterLogo
         )
     }
@@ -104,11 +107,13 @@ final class GenerateViewModel: ObservableObject {
         let profileURL = type.baseURL + socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         generatedContent = profileURL
         qrBackgroundColor = .white
+        qrForegroundColor = .black
         qrCenterLogo = sfSymbolImage(for: type.icon)
         generatedImage = qrService.generateStyledQRCode(
             from: profileURL,
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
             centerLogo: qrCenterLogo
         )
     }
@@ -189,6 +194,7 @@ final class GenerateViewModel: ObservableObject {
             from: generatedContent,
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
+            foregroundColor: UIColor(qrForegroundColor),
             centerLogo: qrCenterLogo
         )
     }
@@ -251,6 +257,7 @@ final class GenerateViewModel: ObservableObject {
         generatedImage = nil
         generatedContent = ""
         qrBackgroundColor = .white
+        qrForegroundColor = .black
         qrCenterLogo = nil
         savedEntity = nil
     }
