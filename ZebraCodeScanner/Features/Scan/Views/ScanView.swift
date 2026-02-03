@@ -103,21 +103,21 @@ struct ScanView: View {
 
     private var scannerView: some View {
         ZStack {
-            if viewModel.isScanning {
-                DataScannerRepresentable(
-                    recognizedDataTypes: viewModel.recognizedDataTypes,
-                    onScanned: { content, type in
-                        viewModel.handleScannedCode(content: content, type: type)
-                    },
-                    onError: { error in
-                        viewModel.handleScanError(error)
-                    },
-                    isScanning: $viewModel.isScanning,
-                    isTorchOn: $viewModel.isTorchOn
-                )
-                .id(viewModel.scanMode)
-                .ignoresSafeArea()
+            // Keep DataScannerRepresentable always mounted to avoid recreation
+            DataScannerRepresentable(
+                scanMode: viewModel.scanMode,
+                onScanned: { content, type in
+                    viewModel.handleScannedCode(content: content, type: type)
+                },
+                onError: { error in
+                    viewModel.handleScanError(error)
+                },
+                isScanning: $viewModel.isScanning,
+                isTorchOn: $viewModel.isTorchOn
+            )
+            .ignoresSafeArea()
 
+            if viewModel.isScanning {
                 // QR frame overlay
                 if viewModel.scanMode == .qrCode {
                     QRFrameOverlay()
@@ -158,7 +158,9 @@ struct ScanView: View {
                         .padding(.bottom, 30)
                 }
             } else {
-                // Camera not active - show placeholder
+                // Camera not active - show placeholder over scanner
+                Color(.systemBackground)
+
                 VStack(spacing: 24) {
                     Image(systemName: "camera.viewfinder")
                         .font(.system(size: 80))

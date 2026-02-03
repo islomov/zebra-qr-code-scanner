@@ -12,11 +12,6 @@ import PhotosUI
 import Vision
 import AudioToolbox
 
-enum ScanMode: String, CaseIterable {
-    case qrCode = "QR Code"
-    case barcode = "Barcode"
-}
-
 @MainActor
 final class ScanViewModel: ObservableObject {
     @Published var isScanning: Bool = false
@@ -43,32 +38,6 @@ final class ScanViewModel: ObservableObject {
 
     var isBarcode: Bool {
         scannedType != "qr" && scannedType != "datamatrix" && scannedType != "aztec" && scannedType != "text" && !scannedType.isEmpty
-    }
-
-    var recognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> {
-        switch scanMode {
-        case .qrCode:
-            return [
-                .barcode(symbologies: [
-                    .qr,
-                    .dataMatrix,
-                    .aztec
-                ])
-            ]
-        case .barcode:
-            return [
-                .barcode(symbologies: [
-                    .code128,
-                    .ean13,
-                    .ean8,
-                    .upce,
-                    .code39,
-                    .code93,
-                    .itf14,
-                    .pdf417
-                ])
-            ]
-        }
     }
 
     var isSupported: Bool {
