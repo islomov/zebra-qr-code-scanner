@@ -200,8 +200,9 @@ struct SocialMediaPreviewView: View {
                     .foregroundStyle(.red)
                 }
 
+                let hasLogo = viewModel.qrCenterLogo != nil
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    Label(viewModel.qrCenterLogo == nil ? "Add Logo" : "Change", systemImage: "photo")
+                    Label(hasLogo ? "Change" : "Add Logo", systemImage: "photo")
                         .font(.subheadline)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
