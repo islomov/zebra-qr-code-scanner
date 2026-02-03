@@ -35,11 +35,8 @@ struct ContentView: View {
         .onChange(of: selectedTab) { [selectedTab] newTab in
             print("[ContentView] Tab switched: \(selectedTab) → \(newTab)")
             if newTab == 1 {
-                // Delay start so the old scanner instance is fully torn down
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    guard self.selectedTab == 1 else { return }
-                    scanViewModel.startScanning()
-                }
+                // Start scanning immediately - camera is kept alive
+                scanViewModel.startScanning()
             } else if selectedTab == 1 {
                 scanViewModel.stopScanning()
             }
