@@ -18,8 +18,9 @@ final class ForceUpdateService: ObservableObject {
                 let status = try await remoteConfig.fetchAndActivate()
                 print("[ForceUpdate] Remote Config status: \(status)")
 
-                let minimumVersion = (remoteConfig.configValue(forKey: "minimum_app_version").stringValue ?? "1.0.0")
+                let rawValue = remoteConfig.configValue(forKey: "minimum_app_version").stringValue
                     .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "\"")))
+                let minimumVersion = rawValue.isEmpty ? "1.0.0" : rawValue
 
                 let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
 
