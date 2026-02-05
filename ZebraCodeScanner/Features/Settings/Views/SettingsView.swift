@@ -227,6 +227,63 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
 
+                Divider()
+                    .background(DesignColors.stroke)
+
+                // Privacy Policy row
+                Button {
+                    if let url = URL(string: "https://viralapps.studio/privacy-policy") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Text("Privacy Policy")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                            .foregroundStyle(DesignColors.primaryText)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(DesignColors.secondaryText)
+                    }
+                    .padding(20)
+                    .frame(height: 58)
+                    .background(DesignColors.cardBackground)
+                }
+                .buttonStyle(.plain)
+
+                Divider()
+                    .background(DesignColors.stroke)
+
+                // Terms of Use row
+                Button {
+                    if let url = URL(string: "https://viralapps.studio/terms-of-use") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Text("Terms of Use")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                            .foregroundStyle(DesignColors.primaryText)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(DesignColors.secondaryText)
+                    }
+                    .padding(20)
+                    .frame(height: 58)
+                    .background(DesignColors.cardBackground)
+                }
+                .buttonStyle(.plain)
+
+                Divider()
+                    .background(DesignColors.stroke)
+
                 // Version row (bottom rounded)
                 HStack {
                     Text("Version")
