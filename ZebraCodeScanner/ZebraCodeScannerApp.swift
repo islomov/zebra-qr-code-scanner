@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreText
 import FirebaseCore
 import FirebaseCrashlytics
 
@@ -15,6 +16,17 @@ struct ZebraCodeScannerApp: App {
 
     init() {
         FirebaseApp.configure()
+        Self.registerCustomFonts()
+    }
+
+    private static func registerCustomFonts() {
+        let fontFileNames = ["Inter-Regular", "Inter-Medium", "Inter-SemiBold"]
+        for fontFileName in fontFileNames {
+            guard let fontURL = Bundle.main.url(forResource: fontFileName, withExtension: "ttf") else {
+                continue
+            }
+            CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, nil)
+        }
     }
 
     var body: some Scene {

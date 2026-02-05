@@ -13,168 +13,311 @@ struct QRCodeFormView: View {
     @ObservedObject var viewModel: GenerateViewModel
     @State private var showPreview = false
     @State private var showContactPicker = false
-    @FocusState private var isFieldFocused: Bool
+    @State private var showValidationError = false
+    @FocusState private var focusedField: String?
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        Form {
-            formContent
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Custom Navigation Header
+                navigationHeader
 
-            Section {
-                Button {
-                    viewModel.generateQRCode(for: type)
-                    showPreview = true
-                } label: {
-                    HStack {
-                        Spacer()
-                        Label("Generate QR Code", systemImage: "qrcode")
-                            .font(.headline)
-                        Spacer()
-                    }
+                // Section header + fields
+                VStack(alignment: .leading, spacing: 8) {
+                    sectionHeader
+                    formFields
                 }
-                .disabled(!viewModel.isValid(for: type))
+
+                // Generate button
+                generateButton
+                    .padding(.top, 24)
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle(type.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .background(DesignColors.background)
+        .navigationBarHidden(true)
         .navigationDestination(isPresented: $showPreview) {
             QRCodePreviewView(type: type, viewModel: viewModel)
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isFieldFocused = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                focusedField = firstFieldKey
             }
         }
         .onDisappear {
-            isFieldFocused = false
+            focusedField = nil
         }
     }
 
+    // MARK: - Navigation Header
+
+    private var navigationHeader: some View {
+        ZStack {
+            Text("QR Codes")
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Section Header
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Image(iconName)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(DesignColors.primaryText)
+
+            Text(type.title)
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Icon Name
+
+    private var iconName: String {
+        switch type {
+        case .text: return "icon-text"
+        case .url: return "icon-link"
+        case .phone: return "icon-phone"
+        case .email: return "icon-email"
+        case .wifi: return "icon-wifi"
+        case .vcard: return "icon-contact"
+        case .sms: return "icon-sms"
+        }
+    }
+
+    // MARK: - First Field Key
+
+    private var firstFieldKey: String {
+        switch type {
+        case .text: return "text"
+        case .url: return "url"
+        case .phone: return "phone"
+        case .email: return "emailTo"
+        case .wifi: return "wifiSSID"
+        case .vcard: return "vcardName"
+        case .sms: return "smsPhone"
+        }
+    }
+
+    // MARK: - Form Fields
+
     @ViewBuilder
-    private var formContent: some View {
+    private var formFields: some View {
         switch type {
         case .text:
-            textForm
+            textFields
         case .url:
-            urlForm
+            urlFields
         case .phone:
-            phoneForm
+            phoneFields
         case .email:
-            emailForm
+            emailFields
         case .wifi:
-            wifiForm
+            wifiFields
         case .vcard:
-            vcardForm
+            vcardFields
         case .sms:
-            smsForm
+            smsFields
         }
     }
 
     // MARK: - Text Form
 
-    private var textForm: some View {
-        Section("Content") {
-            TextField("Enter text", text: $viewModel.text, axis: .vertical)
-                .focused($isFieldFocused)
-                .lineLimit(5...10)
-                .padding(.vertical, 4)
-        }
+    private var textFields: some View {
+        customTextEditor(
+            text: $viewModel.text,
+            placeholder: "Enter text",
+            fieldKey: "text",
+            isRequired: true
+        )
+        .padding(.horizontal, 16)
     }
 
     // MARK: - URL Form
 
-    private var urlForm: some View {
-        Section("Website URL") {
-            TextField("example.com", text: $viewModel.url)
-                .focused($isFieldFocused)
-                .keyboardType(.URL)
-                .textContentType(.URL)
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .padding(.vertical, 4)
-        }
+    private var urlFields: some View {
+        customTextField(
+            text: $viewModel.url,
+            placeholder: "Example.com",
+            fieldKey: "url",
+            isRequired: true,
+            keyboardType: .URL,
+            contentType: .URL,
+            autocapitalization: false
+        )
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Phone Form
 
-    private var phoneForm: some View {
-        Section("Phone Number") {
-            TextField("+1 234 567 8900", text: $viewModel.phone)
-                .focused($isFieldFocused)
-                .keyboardType(.phonePad)
-                .textContentType(.telephoneNumber)
-                .padding(.vertical, 4)
-        }
+    private var phoneFields: some View {
+        customTextField(
+            text: $viewModel.phone,
+            placeholder: "+123 456 789",
+            fieldKey: "phone",
+            isRequired: true,
+            keyboardType: .phonePad,
+            contentType: .telephoneNumber
+        )
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Email Form
 
-    private var emailForm: some View {
-        Group {
-            Section("Recipient") {
-                TextField("email@example.com", text: $viewModel.emailTo)
-                    .focused($isFieldFocused)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                    .padding(.vertical, 4)
-            }
+    private var emailFields: some View {
+        VStack(spacing: 8) {
+            customTextField(
+                text: $viewModel.emailTo,
+                placeholder: "Forexample@gmail.com",
+                fieldKey: "emailTo",
+                isRequired: true,
+                keyboardType: .emailAddress,
+                contentType: .emailAddress,
+                autocapitalization: false
+            )
 
-            Section("Subject (Optional)") {
-                TextField("Subject", text: $viewModel.emailSubject)
-                    .padding(.vertical, 4)
-            }
+            customTextField(
+                text: $viewModel.emailSubject,
+                placeholder: "Subject (Optional)",
+                fieldKey: "emailSubject",
+                isRequired: false
+            )
 
-            Section("Message (Optional)") {
-                TextField("Message", text: $viewModel.emailBody, axis: .vertical)
-                    .lineLimit(3...6)
-                    .padding(.vertical, 4)
-            }
+            customTextEditor(
+                text: $viewModel.emailBody,
+                placeholder: "Message",
+                fieldKey: "emailBody",
+                isRequired: false
+            )
         }
+        .padding(.horizontal, 16)
     }
 
     // MARK: - WiFi Form
 
-    private var wifiForm: some View {
-        Group {
-            Section("Network Name") {
-                TextField("WiFi Name (SSID)", text: $viewModel.wifiSSID)
-                    .focused($isFieldFocused)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                    .padding(.vertical, 4)
-            }
+    private var wifiFields: some View {
+        VStack(spacing: 12) {
+            customTextField(
+                text: $viewModel.wifiSSID,
+                placeholder: "Wi-Fi Name (SSD)",
+                fieldKey: "wifiSSID",
+                isRequired: true,
+                autocapitalization: false
+            )
 
-            Section("Security") {
-                Picker("Security Type", selection: $viewModel.wifiSecurity) {
-                    ForEach(WiFiSecurityType.allCases) { security in
-                        Text(security.title).tag(security)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
+            wifiSecurityToggle
 
             if viewModel.wifiSecurity != .none {
-                Section("Password") {
-                    SecureField("WiFi Password", text: $viewModel.wifiPassword)
-                        .padding(.vertical, 4)
-                }
+                customTextField(
+                    text: $viewModel.wifiPassword,
+                    placeholder: "Wi-Fi Password",
+                    fieldKey: "wifiPassword",
+                    isRequired: false,
+                    isSecure: true
+                )
             }
         }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - WiFi Security Toggle
+
+    private var wifiSecurityToggle: some View {
+        HStack(spacing: 0) {
+            ForEach(WiFiSecurityType.allCases) { security in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.wifiSecurity = security
+                    }
+                } label: {
+                    Text(security.title)
+                        .font(.custom("Inter-Regular", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 36)
+                        .background(
+                            viewModel.wifiSecurity == security
+                            ? Color.white
+                            : Color.clear
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(
+                            color: viewModel.wifiSecurity == security
+                            ? Color.black.opacity(0.08) : Color.clear,
+                            radius: 4, y: 2
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(DesignColors.lightText)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - vCard Form
 
-    private var vcardForm: some View {
-        Group {
-            Section {
-                Button {
-                    showContactPicker = true
-                } label: {
-                    Label("Import from Contacts", systemImage: "person.crop.circle.badge.plus")
+    private var vcardFields: some View {
+        VStack(spacing: 8) {
+            // Import from Contacts button
+            Button {
+                showContactPicker = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image("icon-contact")
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color(red: 0x27/255, green: 0x61/255, blue: 0xF4/255))
+
+                    Text("Import from Contacts")
+                        .font(.custom("Inter-Regular", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(Color(red: 0x27/255, green: 0x61/255, blue: 0xF4/255))
+
+                    Spacer()
                 }
+                .padding(20)
+                .frame(height: 58)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(DesignColors.stroke, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
+            .buttonStyle(.plain)
             .sheet(isPresented: $showContactPicker) {
                 ContactPickerView { contact in
                     viewModel.vcardName = [contact.givenName, contact.familyName]
@@ -190,52 +333,190 @@ struct QRCodeFormView: View {
                 }
             }
 
-            Section("Name") {
-                TextField("Full Name", text: $viewModel.vcardName)
-                    .focused($isFieldFocused)
-                    .textContentType(.name)
-                    .padding(.vertical, 4)
-            }
+            customTextField(
+                text: $viewModel.vcardName,
+                placeholder: "Full name",
+                fieldKey: "vcardName",
+                isRequired: true,
+                contentType: .name
+            )
 
-            Section("Contact Info (Optional)") {
-                TextField("Phone", text: $viewModel.vcardPhone)
-                    .keyboardType(.phonePad)
-                    .textContentType(.telephoneNumber)
-                    .padding(.vertical, 4)
+            customTextField(
+                text: $viewModel.vcardPhone,
+                placeholder: "Phone (Optional)",
+                fieldKey: "vcardPhone",
+                isRequired: false,
+                keyboardType: .phonePad,
+                contentType: .telephoneNumber
+            )
 
-                TextField("Email", text: $viewModel.vcardEmail)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-                    .autocapitalization(.none)
-                    .padding(.vertical, 4)
-            }
+            customTextField(
+                text: $viewModel.vcardEmail,
+                placeholder: "Email (Optional)",
+                fieldKey: "vcardEmail",
+                isRequired: false,
+                keyboardType: .emailAddress,
+                contentType: .emailAddress,
+                autocapitalization: false
+            )
 
-            Section("Company (Optional)") {
-                TextField("Company Name", text: $viewModel.vcardCompany)
-                    .textContentType(.organizationName)
-                    .padding(.vertical, 4)
-            }
+            customTextField(
+                text: $viewModel.vcardCompany,
+                placeholder: "Company name (Optional)",
+                fieldKey: "vcardCompany",
+                isRequired: false,
+                contentType: .organizationName
+            )
         }
+        .padding(.horizontal, 16)
     }
 
     // MARK: - SMS Form
 
-    private var smsForm: some View {
-        Group {
-            Section("Phone Number") {
-                TextField("+1 234 567 8900", text: $viewModel.smsPhone)
-                    .focused($isFieldFocused)
-                    .keyboardType(.phonePad)
-                    .textContentType(.telephoneNumber)
-                    .padding(.vertical, 4)
-            }
+    private var smsFields: some View {
+        VStack(spacing: 8) {
+            customTextField(
+                text: $viewModel.smsPhone,
+                placeholder: "+123 456 789",
+                fieldKey: "smsPhone",
+                isRequired: true,
+                keyboardType: .phonePad,
+                contentType: .telephoneNumber
+            )
 
-            Section("Message (Optional)") {
-                TextField("Message", text: $viewModel.smsMessage, axis: .vertical)
-                    .lineLimit(3...6)
-                    .padding(.vertical, 4)
+            customTextEditor(
+                text: $viewModel.smsMessage,
+                placeholder: "Message (Optional)",
+                fieldKey: "smsMessage",
+                isRequired: false
+            )
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Generate Button
+
+    private var generateButton: some View {
+        Button {
+            if viewModel.isValid(for: type) {
+                showValidationError = false
+                viewModel.generateQRCode(for: type)
+                showPreview = true
+            } else {
+                showValidationError = true
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image("icon-qr")
+                    .renderingMode(.template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(DesignColors.lightText)
+
+                Text("Generate QR Code")
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.lightText)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 51)
+            .background(DesignColors.primaryText)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Custom Input Components
+
+    private func customTextField(
+        text: Binding<String>,
+        placeholder: String,
+        fieldKey: String,
+        isRequired: Bool,
+        keyboardType: UIKeyboardType = .default,
+        contentType: UITextContentType? = nil,
+        autocapitalization: Bool = true,
+        isSecure: Bool = false
+    ) -> some View {
+        let hasError = showValidationError && isRequired && text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let isFocused = focusedField == fieldKey
+
+        let borderColor: Color = hasError
+            ? Color(red: 0xFF/255, green: 0x3B/255, blue: 0x30/255)
+            : (isFocused ? DesignColors.primaryText : DesignColors.stroke)
+
+        return ZStack {
+            if isSecure {
+                SecureField("", text: text, prompt: Text(placeholder)
+                    .foregroundColor(DesignColors.secondaryText))
+                    .font(.custom("Inter-Regular", size: 14))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .focused($focusedField, equals: fieldKey)
+            } else {
+                TextField("", text: text, prompt: Text(placeholder)
+                    .foregroundColor(DesignColors.secondaryText))
+                    .font(.custom("Inter-Regular", size: 14))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .focused($focusedField, equals: fieldKey)
+                    .keyboardType(keyboardType)
+                    .textContentType(contentType)
+                    .autocapitalization(autocapitalization ? .sentences : .none)
+                    .autocorrectionDisabled(!autocapitalization)
             }
         }
+        .padding(20)
+        .frame(height: 58)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(borderColor, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func customTextEditor(
+        text: Binding<String>,
+        placeholder: String,
+        fieldKey: String,
+        isRequired: Bool
+    ) -> some View {
+        let hasError = showValidationError && isRequired && text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let isFocused = focusedField == fieldKey
+
+        let borderColor: Color = hasError
+            ? Color(red: 0xFF/255, green: 0x3B/255, blue: 0x30/255)
+            : (isFocused ? DesignColors.primaryText : DesignColors.stroke)
+
+        return ZStack(alignment: .topLeading) {
+            if text.wrappedValue.isEmpty {
+                Text(placeholder)
+                    .font(.custom("Inter-Regular", size: 14))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.secondaryText)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+            }
+
+            TextEditor(text: text)
+                .font(.custom("Inter-Regular", size: 14))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+                .focused($focusedField, equals: fieldKey)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+        }
+        .frame(height: 120)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(borderColor, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 

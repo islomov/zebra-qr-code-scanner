@@ -12,65 +12,35 @@ struct SocialMediaFormView: View {
     let type: SocialMediaType
     @ObservedObject var viewModel: GenerateViewModel
     @State private var showPreview = false
+    @State private var showValidationError = false
     @FocusState private var isFieldFocused: Bool
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        Form {
-            Section {
-                HStack(spacing: 12) {
-                    Image(systemName: type.icon)
-                        .font(.system(size: 28))
-                        .foregroundStyle(.purple)
-                    VStack(alignment: .leading) {
-                        Text(type.title)
-                            .font(.headline)
-                        Text(type.description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Custom Navigation Header
+                navigationHeader
 
-            Section("Username") {
-                TextField(type.placeholder, text: $viewModel.socialMediaUsername)
-                    .focused($isFieldFocused)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                    .padding(.vertical, 4)
-            }
-
-            if !viewModel.socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Section("Profile URL") {
-                    Text(type.baseURL + viewModel.socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                // Section header + input
+                VStack(alignment: .leading, spacing: 8) {
+                    sectionHeader
+                    usernameField
                 }
-            }
 
-            Section {
-                Button {
-                    viewModel.generateSocialMediaQRCode(for: type)
-                    showPreview = true
-                } label: {
-                    HStack {
-                        Spacer()
-                        Label("Generate QR Code", systemImage: "qrcode")
-                            .font(.headline)
-                        Spacer()
-                    }
-                }
-                .disabled(!viewModel.isSocialMediaValid())
+                // Generate button
+                generateButton
+                    .padding(.top, 24)
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle(type.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .background(DesignColors.background)
+        .navigationBarHidden(true)
         .navigationDestination(isPresented: $showPreview) {
             SocialMediaPreviewView(type: type, viewModel: viewModel)
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isFieldFocused = true
             }
         }
@@ -78,7 +48,140 @@ struct SocialMediaFormView: View {
             isFieldFocused = false
         }
     }
+
+    // MARK: - Navigation Header
+
+    private var navigationHeader: some View {
+        ZStack {
+            Text("Social media")
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Section Header
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Image(iconName)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(DesignColors.primaryText)
+
+            Text(type.title)
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var iconName: String {
+        switch type {
+        case .facebook: return "icon-facebook"
+        case .instagram: return "icon-instagram"
+        case .x: return "icon-twitter-x"
+        case .reddit: return "icon-reddit"
+        case .tiktok: return "icon-tiktok"
+        case .snapchat: return "icon-snapchat"
+        case .threads: return "icon-threads"
+        case .youtube: return "icon-youtube"
+        }
+    }
+
+    // MARK: - Username Field
+
+    private var usernameField: some View {
+        let hasError = showValidationError && viewModel.socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let borderColor: Color = hasError
+            ? Color(red: 0xFF/255, green: 0x3B/255, blue: 0x30/255)
+            : (isFieldFocused ? DesignColors.primaryText : DesignColors.stroke)
+
+        return TextField("", text: $viewModel.socialMediaUsername, prompt: Text(placeholderText)
+            .foregroundColor(DesignColors.secondaryText))
+            .font(.custom("Inter-Regular", size: 14))
+            .tracking(-0.408)
+            .foregroundStyle(DesignColors.primaryText)
+            .focused($isFieldFocused)
+            .autocapitalization(.none)
+            .autocorrectionDisabled()
+            .padding(20)
+            .frame(height: 58)
+            .background(Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(borderColor, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 16)
+    }
+
+    private var placeholderText: String {
+        switch type {
+        case .facebook: return "Username or page name"
+        default: return "Username"
+        }
+    }
+
+    // MARK: - Generate Button
+
+    private var generateButton: some View {
+        Button {
+            if viewModel.isSocialMediaValid() {
+                showValidationError = false
+                viewModel.generateSocialMediaQRCode(for: type)
+                showPreview = true
+            } else {
+                showValidationError = true
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image("icon-qr")
+                    .renderingMode(.template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(DesignColors.lightText)
+
+                Text("Generate QR Code")
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.lightText)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 51)
+            .background(DesignColors.primaryText)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
 }
+
+// MARK: - Social Media Preview View
 
 struct SocialMediaPreviewView: View {
     let type: SocialMediaType
