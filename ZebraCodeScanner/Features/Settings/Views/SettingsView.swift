@@ -15,6 +15,8 @@ struct SettingsView: View {
     @AppStorage("soundOnScan") private var soundOnScan = true
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @State private var showClearHistoryAlert = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
 
     private let dataManager = CoreDataManager.shared
 
@@ -52,6 +54,12 @@ struct SettingsView: View {
             }
         } message: {
             Text("This will permanently delete all generated and scanned code history.")
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            LegalDocumentView(title: "Privacy Policy", fileName: "privacy-policy")
+        }
+        .sheet(isPresented: $showTermsOfUse) {
+            LegalDocumentView(title: "Terms of Use", fileName: "terms-of-use")
         }
     }
 
@@ -232,9 +240,7 @@ struct SettingsView: View {
 
                 // Privacy Policy row
                 Button {
-                    if let url = URL(string: "https://viralapps.studio/privacy-policy") {
-                        UIApplication.shared.open(url)
-                    }
+                    showPrivacyPolicy = true
                 } label: {
                     HStack {
                         Text("Privacy Policy")
@@ -259,9 +265,7 @@ struct SettingsView: View {
 
                 // Terms of Use row
                 Button {
-                    if let url = URL(string: "https://viralapps.studio/terms-of-use") {
-                        UIApplication.shared.open(url)
-                    }
+                    showTermsOfUse = true
                 } label: {
                     HStack {
                         Text("Terms of Use")
