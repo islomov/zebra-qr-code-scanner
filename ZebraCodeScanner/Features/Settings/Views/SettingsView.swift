@@ -74,7 +74,7 @@ struct SettingsView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
             }
@@ -119,7 +119,7 @@ struct SettingsView: View {
             }
             .padding(20)
             .frame(height: 58)
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(DesignColors.stroke, lineWidth: 1)
@@ -186,7 +186,7 @@ struct SettingsView: View {
                 }
                 .padding(20)
                 .frame(height: 58)
-                .background(Color.white)
+                .background(DesignColors.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(DesignColors.stroke, lineWidth: 1)
@@ -223,7 +223,7 @@ struct SettingsView: View {
                     }
                     .padding(20)
                     .frame(height: 58)
-                    .background(Color.white)
+                    .background(DesignColors.cardBackground)
                 }
                 .buttonStyle(.plain)
 
@@ -243,7 +243,7 @@ struct SettingsView: View {
                 }
                 .padding(20)
                 .frame(height: 58)
-                .background(Color.white)
+                .background(DesignColors.cardBackground)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
@@ -286,7 +286,7 @@ struct SettingsView: View {
                         .frame(width: 40, height: 24)
 
                     Circle()
-                        .fill(Color.white)
+                        .fill(DesignColors.primaryButtonText)
                         .frame(width: 20, height: 20)
                         .padding(2)
                 }
@@ -295,7 +295,7 @@ struct SettingsView: View {
         }
         .padding(20)
         .frame(height: 58)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(DesignColors.stroke, lineWidth: 1)
@@ -317,7 +317,7 @@ struct SettingsView: View {
 
                     Image(systemName: icon)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(iconBgColor == .white ? DesignColors.primaryText : .white)
+                        .foregroundStyle(iconBgColor == .white ? Color(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255) : .white)
                 }
 
                 Text(title)
@@ -327,7 +327,7 @@ struct SettingsView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(12)
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)

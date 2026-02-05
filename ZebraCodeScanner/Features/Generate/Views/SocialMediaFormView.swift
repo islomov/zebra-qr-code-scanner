@@ -66,7 +66,7 @@ struct SocialMediaFormView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
 
@@ -130,7 +130,7 @@ struct SocialMediaFormView: View {
             .autocorrectionDisabled()
             .padding(20)
             .frame(height: 58)
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(borderColor, lineWidth: 1)
@@ -164,12 +164,12 @@ struct SocialMediaFormView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24, height: 24)
-                    .foregroundStyle(DesignColors.lightText)
+                    .foregroundStyle(DesignColors.primaryButtonText)
 
                 Text("Generate QR Code")
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
-                    .foregroundStyle(DesignColors.lightText)
+                    .foregroundStyle(DesignColors.primaryButtonText)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 51)

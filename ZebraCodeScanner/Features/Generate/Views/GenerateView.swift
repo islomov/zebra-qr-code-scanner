@@ -39,7 +39,7 @@ struct GenerateView: View {
                                 .frame(width: 24, height: 24)
                                 .foregroundStyle(DesignColors.primaryText)
                                 .frame(width: 44, height: 44)
-                                .background(Color.white)
+                                .background(DesignColors.cardBackground)
                                 .clipShape(Circle())
                         }
                     }
@@ -122,10 +122,11 @@ struct GenerateView: View {
                     // Feature Request Section
                     VStack(spacing: 16) {
                         Image("icon-lightbulb")
-                            .renderingMode(.original)
+                            .renderingMode(.template)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 40, height: 40)
+                            .foregroundStyle(DesignColors.primaryText)
 
                         VStack(spacing: 8) {
                             Text("Need a different code type?")
@@ -152,7 +153,7 @@ struct GenerateView: View {
                         }
                     }
                     .padding(16)
-                    .background(Color.white)
+                    .background(DesignColors.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(DesignColors.stroke, lineWidth: 1)
@@ -246,7 +247,7 @@ struct GenerateCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(16)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(DesignColors.stroke, lineWidth: 1)

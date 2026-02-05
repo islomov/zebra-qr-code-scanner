@@ -80,7 +80,7 @@ struct ColorPickerRow: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .padding(16)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -192,7 +192,7 @@ struct QRCodePreviewView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
 
@@ -207,7 +207,7 @@ struct QRCodePreviewView: View {
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 66, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Capsule())
                 }
             }
@@ -331,7 +331,7 @@ struct QRCodePreviewView: View {
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
                         }
-                        .foregroundStyle(Color.white)
+                        .foregroundStyle(DesignColors.primaryButtonText)
                         .padding(16)
                         .frame(height: 51)
                         .background(DesignColors.primaryText)
