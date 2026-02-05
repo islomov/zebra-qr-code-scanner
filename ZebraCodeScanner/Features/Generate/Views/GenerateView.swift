@@ -11,11 +11,6 @@ struct GenerateView: View {
     @Binding var showSettings: Bool
     @StateObject private var viewModel = GenerateViewModel()
 
-    private let columns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8)
-    ]
-
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -50,72 +45,64 @@ struct GenerateView: View {
                     // QR Codes Section
                     sectionHeader(icon: "icon-qr", title: "QR Codes", iconColor: Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
 
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(QRCodeContentType.allCases) { type in
-                            NavigationLink {
-                                QRCodeFormView(type: type, viewModel: viewModel)
-                            } label: {
-                                GenerateCard(
-                                    iconName: qrIconName(for: type),
-                                    title: type.title
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    gridLayout(items: Array(QRCodeContentType.allCases)) { type in
+                        NavigationLink {
+                            QRCodeFormView(type: type, viewModel: viewModel)
+                        } label: {
+                            GenerateCard(
+                                iconName: qrIconName(for: type),
+                                title: type.title
+                            )
                         }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 16)
 
                     // 1D Barcodes Section
                     sectionHeader(icon: "icon-1d-section", title: "1D Barcodes", iconColor: Color(red: 0xF2/255, green: 0x99/255, blue: 0x0A/255))
 
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(BarcodeType.barcodes1D) { type in
-                            NavigationLink {
-                                BarcodeFormView(type: type, viewModel: viewModel)
-                            } label: {
-                                GenerateCard(
-                                    iconName: "icon-barcode1d",
-                                    title: type.title
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    gridLayout(items: BarcodeType.barcodes1D) { type in
+                        NavigationLink {
+                            BarcodeFormView(type: type, viewModel: viewModel)
+                        } label: {
+                            GenerateCard(
+                                iconName: "icon-barcode1d",
+                                title: type.title
+                            )
                         }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 16)
 
                     // 2D Barcodes Section
                     sectionHeader(icon: "icon-2d-section", title: "2D Barcodes", iconColor: Color(red: 0x2D/255, green: 0xD9/255, blue: 0x16/255))
 
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(BarcodeType.barcodes2D) { type in
-                            NavigationLink {
-                                BarcodeFormView(type: type, viewModel: viewModel)
-                            } label: {
-                                GenerateCard(
-                                    iconName: barcodeIconName(for: type),
-                                    title: type.title
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    gridLayout(items: BarcodeType.barcodes2D) { type in
+                        NavigationLink {
+                            BarcodeFormView(type: type, viewModel: viewModel)
+                        } label: {
+                            GenerateCard(
+                                iconName: barcodeIconName(for: type),
+                                title: type.title
+                            )
                         }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 16)
 
                     // Social Media Section
                     sectionHeader(icon: "icon-social-section", title: "Social Media", iconColor: Color(red: 0xC2/255, green: 0x0E/255, blue: 0xEF/255))
 
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(SocialMediaType.allCases) { type in
-                            NavigationLink {
-                                SocialMediaFormView(type: type, viewModel: viewModel)
-                            } label: {
-                                GenerateCard(
-                                    iconName: socialIconName(for: type),
-                                    title: type.title
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    gridLayout(items: Array(SocialMediaType.allCases)) { type in
+                        NavigationLink {
+                            SocialMediaFormView(type: type, viewModel: viewModel)
+                        } label: {
+                            GenerateCard(
+                                iconName: socialIconName(for: type),
+                                title: type.title
+                            )
                         }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 16)
 
@@ -165,6 +152,28 @@ struct GenerateView: View {
             }
             .background(DesignColors.background)
             .navigationBarHidden(true)
+        }
+    }
+
+    // MARK: - Non-Lazy Grid Layout
+
+    @ViewBuilder
+    private func gridLayout<Item: Identifiable, Content: View>(
+        items: [Item],
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        let indices = Array(stride(from: 0, to: items.count, by: 2))
+        VStack(spacing: 8) {
+            ForEach(indices, id: \.self) { index in
+                HStack(spacing: 8) {
+                    content(items[index])
+                    if index + 1 < items.count {
+                        content(items[index + 1])
+                    } else {
+                        Color.clear
+                    }
+                }
+            }
         }
     }
 
