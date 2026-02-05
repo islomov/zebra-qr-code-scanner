@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Zebra Code Scanner</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --muted: #555555;
+            --border: #e0e0e0;
+            --accent: #0066cc;
+            --section-bg: #f8f9fa;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1c1c1e;
+                --text: #e8e8e8;
+                --muted: #a0a0a0;
+                --border: #3a3a3c;
+                --accent: #4da3ff;
+                --section-bg: #2c2c2e;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 36px;
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        p, li {
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .effective-date {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .section {
+            margin-bottom: 8px;
+        }
+
+        .highlight-box {
+            background-color: var(--section-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            background-color: var(--section-bg);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+
+<h1>Privacy Policy</h1>
+<p class="effective-date">Effective Date: February 5, 2026</p>
+
+<p>Zebra Code Scanner ("the App") is developed and operated by Viral Apps Studio ("we", "us", or "our"). We are committed to protecting your privacy. This Privacy Policy explains what information the App collects, how it is used, and the choices you have.</p>
+
+<div class="highlight-box">
+    <strong>Summary:</strong> Zebra Code Scanner is designed with privacy in mind. The App does not require account creation, does not collect personal information, and stores all your data locally on your device. Network requests are only made when you scan a barcode to look up product information.
+</div>
+
+<div class="section">
+    <h2>1. Information We Collect</h2>
+
+    <h3>Information Stored Locally on Your Device</h3>
+    <p>All data the App creates is stored exclusively on your device using Apple's Core Data framework. This includes:</p>
+    <ul>
+        <li><strong>Generated Codes:</strong> QR codes and barcodes you create, including the code type, content, and generated image.</li>
+        <li><strong>Scanned Codes:</strong> Codes you scan, including the decoded content and any product information retrieved.</li>
+        <li><strong>App Preferences:</strong> Your settings such as vibration feedback, sound feedback, and appearance mode (light/dark/system).</li>
+    </ul>
+    <p>This data never leaves your device unless you explicitly choose to share it using the iOS share sheet.</p>
+
+    <h3>Information We Do Not Collect</h3>
+    <p>The App does <strong>not</strong> collect:</p>
+    <ul>
+        <li>Personal identification information (name, email, phone number, address)</li>
+        <li>Account credentials (no sign-up or login required)</li>
+        <li>Location data</li>
+        <li>Device advertising identifiers (IDFA)</li>
+        <li>Browsing or usage analytics</li>
+        <li>Contact information (contacts are accessed only locally for vCard QR code generation and are never transmitted)</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>2. Device Permissions</h2>
+    <p>The App requests the following permissions, each only when the relevant feature is used:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Permission</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Camera</td>
+                <td>Required to scan QR codes and barcodes using the device camera.</td>
+            </tr>
+            <tr>
+                <td>Photo Library (Read)</td>
+                <td>Allows importing images from your photo library for scanning.</td>
+            </tr>
+            <tr>
+                <td>Photo Library (Write)</td>
+                <td>Allows saving generated QR codes and barcodes to your photo library.</td>
+            </tr>
+            <tr>
+                <td>Contacts</td>
+                <td>Allows selecting a contact to generate a vCard QR code. Contact data is processed locally and never transmitted.</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>You can revoke any of these permissions at any time through your device's Settings app.</p>
+</div>
+
+<div class="section">
+    <h2>3. Third-Party Services</h2>
+    <p>The App communicates with third-party services only in the following limited circumstances:</p>
+
+    <h3>Product Information Lookup</h3>
+    <p>When you scan a barcode, the App may send the barcode number (and only the barcode number) to the following services to retrieve product information:</p>
+    <ul>
+        <li><strong>Open Food Facts</strong> &mdash; A free, open-source food product database. Used to look up food product details.</li>
+        <li><strong>UPCitemdb</strong> &mdash; A product information database. Used as a fallback for non-food products.</li>
+    </ul>
+    <p>No personal information, device identifiers, or location data is sent with these requests. Only the scanned barcode number is transmitted.</p>
+
+    <h3>Crash Reporting</h3>
+    <p>The App uses <strong>Firebase Crashlytics</strong> by Google to collect crash reports. When the App crashes, a report is automatically sent that may include:</p>
+    <ul>
+        <li>Device type and operating system version</li>
+        <li>App version and build number</li>
+        <li>Crash logs and stack traces</li>
+    </ul>
+    <p>Crash reports do not contain personal information, scan history, or generated code content. They are used solely to identify and fix bugs to improve app stability.</p>
+
+    <h3>Remote Configuration</h3>
+    <p>The App uses <strong>Firebase Remote Config</strong> to check the minimum required app version. This is used only to notify you if a critical update is available. No personal data is transmitted in this process.</p>
+
+    <h3>Analytics and Advertising</h3>
+    <p>The App does <strong>not</strong> use analytics tracking. The App does <strong>not</strong> display advertisements and does not use advertising SDKs.</p>
+</div>
+
+<div class="section">
+    <h2>4. Data Sharing</h2>
+    <p>We do not sell, trade, or rent your personal information to third parties.</p>
+    <p>Data is shared with third parties only as described in Section 3 above (barcode numbers for product lookup, and crash reports for stability improvement).</p>
+    <p>You may choose to share generated QR codes or barcodes using the iOS share sheet. This sharing is entirely user-initiated and controlled by you.</p>
+</div>
+
+<div class="section">
+    <h2>5. Data Retention</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Data Type</th>
+                <th>Storage</th>
+                <th>Retention</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Generated codes</td>
+                <td>On your device</td>
+                <td>Until you delete them or uninstall the App</td>
+            </tr>
+            <tr>
+                <td>Scanned codes</td>
+                <td>On your device</td>
+                <td>Until you delete them or uninstall the App</td>
+            </tr>
+            <tr>
+                <td>App preferences</td>
+                <td>On your device</td>
+                <td>Until you uninstall the App</td>
+            </tr>
+            <tr>
+                <td>Crash reports</td>
+                <td>Firebase servers</td>
+                <td>90 days (Google's default retention)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2>6. Your Choices and Controls</h2>
+    <p>You have full control over your data:</p>
+    <ul>
+        <li><strong>Delete History:</strong> Use Settings &rarr; Clear History to permanently delete all generated and scanned code records from your device.</li>
+        <li><strong>Revoke Permissions:</strong> You can revoke camera, photo library, or contacts permissions at any time in your device's Settings.</li>
+        <li><strong>Delete the App:</strong> Uninstalling the App removes all locally stored data from your device.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>7. Data Security</h2>
+    <p>We take reasonable measures to protect your data:</p>
+    <ul>
+        <li>All data stored on your device is protected by iOS's built-in file encryption.</li>
+        <li>All network communications use HTTPS/TLS encryption.</li>
+        <li>The App does not store sensitive credentials or authentication tokens.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>8. Children's Privacy</h2>
+    <p>The App is not directed at children under the age of 13. We do not knowingly collect personal information from children. Since the App does not collect personal information from any user, no special provisions for children's data are necessary.</p>
+</div>
+
+<div class="section">
+    <h2>9. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated "Effective Date." Continued use of the App after changes constitutes acceptance of the updated policy.</p>
+</div>
+
+<div class="section">
+    <h2>10. Contact Us</h2>
+    <p>If you have any questions or concerns about this Privacy Policy, please contact us at:</p>
+    <p><a href="mailto:viralapps.studio@gmail.com">viralapps.studio@gmail.com</a></p>
+</div>
+
+<div class="footer">
+    <p>&copy; 2026 Viral Apps Studio. All rights reserved.</p>
+</div>
+
+</body>
+</html>
