@@ -67,7 +67,7 @@ struct QRCodeFormView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
 
@@ -267,7 +267,7 @@ struct QRCodeFormView: View {
                         .frame(height: 36)
                         .background(
                             viewModel.wifiSecurity == security
-                            ? Color.white
+                            ? DesignColors.cardBackground
                             : Color.clear
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -310,7 +310,7 @@ struct QRCodeFormView: View {
                 }
                 .padding(20)
                 .frame(height: 58)
-                .background(Color.white)
+                .background(DesignColors.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(DesignColors.stroke, lineWidth: 1)
@@ -412,12 +412,12 @@ struct QRCodeFormView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24, height: 24)
-                    .foregroundStyle(DesignColors.lightText)
+                    .foregroundStyle(DesignColors.primaryButtonText)
 
                 Text("Generate QR Code")
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
-                    .foregroundStyle(DesignColors.lightText)
+                    .foregroundStyle(DesignColors.primaryButtonText)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 51)
@@ -470,7 +470,7 @@ struct QRCodeFormView: View {
         }
         .padding(20)
         .frame(height: 58)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(borderColor, lineWidth: 1)
@@ -511,7 +511,7 @@ struct QRCodeFormView: View {
                 .padding(.vertical, 12)
         }
         .frame(height: 120)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(borderColor, lineWidth: 1)

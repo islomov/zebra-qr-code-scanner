@@ -11,6 +11,15 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showSettings = false
     @StateObject private var scanViewModel = ScanViewModel()
+    @AppStorage("appearanceMode") private var appearanceMode = "system"
+
+    private var colorScheme: ColorScheme? {
+        switch appearanceMode {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -43,7 +52,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+                .preferredColorScheme(colorScheme)
         }
+        .preferredColorScheme(colorScheme)
     }
 }
 

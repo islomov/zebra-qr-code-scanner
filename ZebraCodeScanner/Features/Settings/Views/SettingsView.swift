@@ -74,7 +74,7 @@ struct SettingsView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
             }
@@ -119,7 +119,7 @@ struct SettingsView: View {
             }
             .padding(20)
             .frame(height: 58)
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(DesignColors.stroke, lineWidth: 1)
@@ -186,7 +186,7 @@ struct SettingsView: View {
                 }
                 .padding(20)
                 .frame(height: 58)
-                .background(Color.white)
+                .background(DesignColors.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(DesignColors.stroke, lineWidth: 1)
@@ -223,7 +223,7 @@ struct SettingsView: View {
                     }
                     .padding(20)
                     .frame(height: 58)
-                    .background(Color.white)
+                    .background(DesignColors.cardBackground)
                 }
                 .buttonStyle(.plain)
 
@@ -243,7 +243,7 @@ struct SettingsView: View {
                 }
                 .padding(20)
                 .frame(height: 58)
-                .background(Color.white)
+                .background(DesignColors.cardBackground)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
@@ -295,7 +295,7 @@ struct SettingsView: View {
         }
         .padding(20)
         .frame(height: 58)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(DesignColors.stroke, lineWidth: 1)
@@ -327,7 +327,7 @@ struct SettingsView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(12)
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)

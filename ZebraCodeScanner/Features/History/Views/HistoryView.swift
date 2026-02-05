@@ -63,7 +63,7 @@ struct HistoryView: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(DesignColors.primaryText)
                     .frame(width: 44, height: 44)
-                    .background(Color.white)
+                    .background(DesignColors.cardBackground)
                     .clipShape(Circle())
             }
         }
@@ -96,7 +96,7 @@ struct HistoryView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -216,7 +216,7 @@ struct HistoryView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
@@ -241,7 +241,7 @@ struct HistoryView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
@@ -269,7 +269,7 @@ struct HistoryView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(DesignColors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
@@ -332,7 +332,7 @@ struct HistoryRowView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 58, height: 58)
-                    .background(Color.white)
+                    .background(DesignColors.cardBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 RoundedRectangle(cornerRadius: 8)

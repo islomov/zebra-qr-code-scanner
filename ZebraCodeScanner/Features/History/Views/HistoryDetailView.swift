@@ -82,7 +82,7 @@ struct HistoryDetailView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
 
@@ -97,7 +97,7 @@ struct HistoryDetailView: View {
                         .foregroundStyle(DesignColors.primaryText)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Capsule())
                 }
             }
@@ -157,7 +157,7 @@ struct HistoryDetailView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(Capsule())
     }
 
@@ -171,7 +171,7 @@ struct HistoryDetailView: View {
             detailRow(label: "Created", value: formatDate(entity.createdAt))
         }
         .padding(8)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal, 16)
     }
@@ -250,7 +250,7 @@ struct HistoryDetailView: View {
                 .font(.custom("Inter-Medium", size: 16))
                 .tracking(-0.408)
         }
-        .foregroundStyle(isPrimary || isDestructive ? Color.white : DesignColors.primaryText)
+        .foregroundStyle(isDestructive ? Color.white : isPrimary ? DesignColors.primaryButtonText : DesignColors.primaryText)
         .padding(.horizontal, 16)
         .frame(height: 51)
         .background(isPrimary ? DesignColors.primaryText : isDestructive ? Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255) : DesignColors.lightText)
@@ -362,7 +362,7 @@ struct ScannedDetailView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(DesignColors.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Circle())
                 }
 
@@ -377,7 +377,7 @@ struct ScannedDetailView: View {
                         .foregroundStyle(DesignColors.primaryText)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
-                        .background(Color.white)
+                        .background(DesignColors.cardBackground)
                         .clipShape(Capsule())
                 }
             }
@@ -416,7 +416,7 @@ struct ScannedDetailView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(Capsule())
     }
 
@@ -435,7 +435,7 @@ struct ScannedDetailView: View {
             detailRow(label: "Scanned", value: formatDate(entity.scannedAt))
         }
         .padding(8)
-        .background(Color.white)
+        .background(DesignColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal, 16)
     }
@@ -492,7 +492,7 @@ struct ScannedDetailView: View {
                 .font(.custom("Inter-Medium", size: 16))
                 .tracking(-0.408)
         }
-        .foregroundStyle(isPrimary ? Color.white : DesignColors.primaryText)
+        .foregroundStyle(isPrimary ? DesignColors.primaryButtonText : DesignColors.primaryText)
         .padding(.horizontal, 16)
         .frame(height: 51)
         .background(isPrimary ? DesignColors.primaryText : DesignColors.lightText)
