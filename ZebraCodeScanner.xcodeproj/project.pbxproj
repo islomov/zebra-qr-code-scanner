@@ -284,6 +284,7 @@
 				DEVELOPMENT_TEAM = 265AV6332H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Zebra: Code Scanner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan QR codes and barcodes.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save generated QR codes to your photo library.";
@@ -325,6 +326,7 @@
 				DEVELOPMENT_TEAM = 265AV6332H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Zebra: Code Scanner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan QR codes and barcodes.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save generated QR codes to your photo library.";
