@@ -10,46 +10,78 @@ import PhotosUI
 
 struct ColorPickerRow: View {
     let title: String
+    var subtitle: String = "Choose a preferred color"
     @Binding var selectedColor: Color
     let borderColor: Color
+    var disabledColor: Color? = nil
     let onSelect: () -> Void
 
     private let presetColors: [Color] = [
-        .white, .black, Color(.systemGray5),
+        .white, .black, Color(.systemGray3),
         .red, .orange, .yellow, .green, .blue, .purple, .pink
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+
+                Text(subtitle)
+                    .font(.custom("Inter-Regular", size: 12))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.secondaryText)
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: 0) {
                     ForEach(presetColors, id: \.self) { color in
-                        Circle()
-                            .fill(color)
-                            .frame(width: 36, height: 36)
-                            .overlay(
+                        let isDisabled = disabledColor == color
+                        Button {
+                            selectedColor = color
+                            onSelect()
+                        } label: {
+                            ZStack {
                                 Circle()
-                                    .strokeBorder(color == borderColor ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
-                            )
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(Color.accentColor, lineWidth: selectedColor == color ? 3 : 0)
-                                    .frame(width: 42, height: 42)
-                            )
-                            .onTapGesture {
-                                selectedColor = color
-                                onSelect()
+                                    .fill(color)
+                                    .frame(width: 24, height: 24)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(
+                                                color == borderColor ? DesignColors.stroke : Color.clear,
+                                                lineWidth: 1
+                                            )
+                                    )
+                                    .opacity(isDisabled ? 0.3 : 1.0)
+
+                                if selectedColor == color {
+                                    Circle()
+                                        .stroke(DesignColors.primaryText, lineWidth: 2)
+                                        .frame(width: 28, height: 28)
+                                }
+
+                                if isDisabled {
+                                    Image(systemName: "line.diagonal")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundStyle(DesignColors.secondaryText)
+                                }
                             }
+                            .frame(width: 48, height: 32)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isDisabled)
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(3)
             }
+            .background(DesignColors.lightText)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         }
-        .padding(.horizontal)
+        .padding(16)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -66,30 +98,51 @@ struct QRCodePreviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Custom Navigation Header
+                navigationHeader
+
+                // Section header
+                sectionHeader
+
+                // QR image + Add Logo
                 qrImageSection
-                typeBadge
-                ColorPickerRow(title: "Background Color", selectedColor: $viewModel.qrBackgroundColor, borderColor: .white) {
-                    viewModel.regenerateStyledQRCode()
+                    .padding(.top, 16)
+
+                // Color pickers
+                VStack(spacing: 12) {
+                    ColorPickerRow(
+                        title: "Background color",
+                        subtitle: "Choose a preferred background color",
+                        selectedColor: $viewModel.qrBackgroundColor,
+                        borderColor: .white,
+                        disabledColor: viewModel.qrForegroundColor
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
+
+                    ColorPickerRow(
+                        title: "QR Code Color",
+                        subtitle: "Choose a preferred QR code color",
+                        selectedColor: $viewModel.qrForegroundColor,
+                        borderColor: .black,
+                        disabledColor: viewModel.qrBackgroundColor
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
                 }
-                ColorPickerRow(title: "QR Code Color", selectedColor: $viewModel.qrForegroundColor, borderColor: .black) {
-                    viewModel.regenerateStyledQRCode()
-                }
-                logoSection
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+
+                // Action buttons
                 actionButtons
-            }
-            .padding(.top)
-        }
-        .navigationTitle("QR Code")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") {
-                    viewModel.reset()
-                    dismiss()
-                }
+                    .padding(.top, 24)
+                    .padding(.bottom, 24)
             }
         }
+        .background(DesignColors.background)
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear { saveToHistory() }
         .onChange(of: selectedPhotoItem) { newItem in
             Task {
@@ -122,117 +175,226 @@ struct QRCodePreviewView: View {
         }
     }
 
+    // MARK: - Navigation Header
+
+    private var navigationHeader: some View {
+        ZStack {
+            Text("QR Code")
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+
+                Button {
+                    viewModel.reset()
+                    dismiss()
+                } label: {
+                    Text("Done")
+                        .font(.custom("Inter-Medium", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 66, height: 44)
+                        .background(Color.white)
+                        .clipShape(Capsule())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Section Header
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Image(iconName)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(DesignColors.primaryText)
+
+            Text(type.title)
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var iconName: String {
+        switch type {
+        case .text: return "icon-text"
+        case .url: return "icon-link"
+        case .phone: return "icon-phone"
+        case .email: return "icon-email"
+        case .wifi: return "icon-wifi"
+        case .vcard: return "icon-contact"
+        case .sms: return "icon-sms"
+        }
+    }
+
+    // MARK: - QR Image + Add Logo
+
     private var qrImageSection: some View {
-        Group {
+        HStack(alignment: .center, spacing: 16) {
             if let image = viewModel.generatedImage {
                 Image(uiImage: image)
                     .interpolation(.none)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 250, height: 250)
+                    .frame(width: 160, height: 160)
                     .padding(20)
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
             }
-        }
-    }
 
-    private var typeBadge: some View {
-        HStack {
-            Image(systemName: type.icon)
-            Text(type.title)
+            addLogoSection
         }
-        .font(.subheadline)
-        .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color(.systemGray6))
-        .clipShape(Capsule())
     }
 
-    private var logoSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Center Logo")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+    private var addLogoSection: some View {
+        VStack(spacing: 8) {
+            if let logo = viewModel.qrCenterLogo {
+                Image(uiImage: logo)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
 
-            HStack(spacing: 12) {
-                if let logo = viewModel.qrCenterLogo {
-                    Image(uiImage: logo)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 44, height: 44)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                    Button("Remove") {
-                        viewModel.qrCenterLogo = nil
-                        viewModel.regenerateStyledQRCode()
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.red)
+                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                    Text("Change")
+                        .font(.custom("Inter-Medium", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
                 }
 
-                let hasLogo = viewModel.qrCenterLogo != nil
+                Button {
+                    viewModel.qrCenterLogo = nil
+                    viewModel.regenerateStyledQRCode()
+                } label: {
+                    Text("Remove")
+                        .font(.custom("Inter-Medium", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
+                }
+            } else {
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    Label(hasLogo ? "Change" : "Add Logo", systemImage: "photo")
-                        .font(.subheadline)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(.systemGray5))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    VStack(spacing: 8) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 24))
+                            .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
+
+                        Text("Add Logo")
+                            .font(.custom("Inter-Medium", size: 14))
+                            .tracking(-0.408)
+                            .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
+                    }
                 }
             }
         }
-        .padding(.horizontal)
     }
+
+    // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        VStack(spacing: 12) {
-            if let image = viewModel.generatedImage {
-                ShareLink(
-                    item: Image(uiImage: image),
-                    preview: SharePreview("QR Code", image: Image(uiImage: image))
-                ) {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                // Share
+                if let image = viewModel.generatedImage {
+                    ShareLink(
+                        item: Image(uiImage: image),
+                        preview: SharePreview("QR Code", image: Image(uiImage: image))
+                    ) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("Share")
+                                .font(.custom("Inter-Medium", size: 16))
+                                .tracking(-0.408)
+                        }
+                        .foregroundStyle(Color.white)
+                        .padding(16)
+                        .frame(height: 51)
+                        .background(DesignColors.primaryText)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
                 }
-            }
 
-            Button { saveToPhotos() } label: {
-                Label("Save to Photos", systemImage: "photo.badge.arrow.down")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .foregroundStyle(.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
+                // Save to Photos
+                Button { saveToPhotos() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.to.line")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Save to Photos")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(DesignColors.primaryText)
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(DesignColors.lightText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
 
-            Button { copyToClipboard() } label: {
-                Label("Copy Image", systemImage: "doc.on.doc")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .foregroundStyle(.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
+                // Copy Image
+                Button { copyToClipboard() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Copy Image")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(DesignColors.primaryText)
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(DesignColors.lightText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
 
-            Button(role: .destructive) { showDeleteConfirmation = true } label: {
-                Label("Delete", systemImage: "trash")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.red.opacity(0.1))
-                    .foregroundStyle(.red)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                // Delete
+                Button { showDeleteConfirmation = true } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Delete")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255).opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
             }
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal)
-        .padding(.bottom)
     }
+
+    // MARK: - Actions
 
     private func saveToHistory() {
         guard !hasSavedToHistory else { return }

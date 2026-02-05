@@ -15,98 +15,39 @@ struct BarcodePreviewView: View {
     @State private var showSaveSuccess = false
     @State private var showSaveError = false
     @State private var hasSavedToHistory = false
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Custom Navigation Header
+                navigationHeader
 
-            // Barcode Image
-            if let image = viewModel.generatedImage {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 120)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 30)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
-            }
+                // Section header
+                sectionHeader
 
-            // Content Preview
-            Text(viewModel.generatedContent)
-                .font(.title3.monospaced())
-                .foregroundStyle(.primary)
+                // Barcode image
+                barcodeImageSection
+                    .padding(.top, 16)
 
-            // Type Badge
-            HStack {
-                Image(systemName: type.icon)
-                Text(type.title)
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color(.systemGray6))
-            .clipShape(Capsule())
+                // Content preview
+                Text(viewModel.generatedContent)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 16)
+                    .padding(.horizontal, 16)
 
-            Spacer()
-
-            // Action Buttons
-            VStack(spacing: 12) {
-                // Share Button
-                if let image = viewModel.generatedImage {
-                    ShareLink(
-                        item: Image(uiImage: image),
-                        preview: SharePreview("Barcode", image: Image(uiImage: image))
-                    ) {
-                        Label("Share", systemImage: "square.and.arrow.up")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.accentColor)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                }
-
-                // Save to Photos Button
-                Button {
-                    saveToPhotos()
-                } label: {
-                    Label("Save to Photos", systemImage: "photo.badge.arrow.down")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-
-                // Copy to Clipboard Button
-                Button {
-                    copyToClipboard()
-                } label: {
-                    Label("Copy Image", systemImage: "doc.on.doc")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
-        }
-        .navigationTitle("Barcode")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") {
-                    viewModel.reset()
-                    dismiss()
-                }
+                // Action buttons
+                actionButtons
+                    .padding(.top, 24)
+                    .padding(.bottom, 24)
             }
         }
+        .background(DesignColors.background)
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             saveToHistory()
         }
@@ -120,7 +61,192 @@ struct BarcodePreviewView: View {
         } message: {
             Text("Failed to save barcode. Please check photo library permissions.")
         }
+        .alert("Delete Barcode?", isPresented: $showDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                viewModel.deleteCurrentCode()
+                viewModel.reset()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will remove the barcode from your history.")
+        }
     }
+
+    // MARK: - Navigation Header
+
+    private var navigationHeader: some View {
+        ZStack {
+            Text("Barcode")
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+
+                Button {
+                    viewModel.reset()
+                    dismiss()
+                } label: {
+                    Text("Done")
+                        .font(.custom("Inter-Medium", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 66, height: 44)
+                        .background(Color.white)
+                        .clipShape(Capsule())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Section Header
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Image(sectionIconName)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(DesignColors.primaryText)
+
+            Text(type.title)
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.primaryText)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var sectionIconName: String {
+        switch type {
+        case .aztec: return "icon-aztec"
+        case .pdf417: return "icon-pdf417"
+        default: return "icon-barcode1d"
+        }
+    }
+
+    // MARK: - Barcode Image
+
+    private var barcodeImageSection: some View {
+        Group {
+            if let image = viewModel.generatedImage {
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 120)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 30)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Action Buttons
+
+    private var actionButtons: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                // Share
+                if let image = viewModel.generatedImage {
+                    ShareLink(
+                        item: Image(uiImage: image),
+                        preview: SharePreview("Barcode", image: Image(uiImage: image))
+                    ) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("Share")
+                                .font(.custom("Inter-Medium", size: 16))
+                                .tracking(-0.408)
+                        }
+                        .foregroundStyle(Color.white)
+                        .padding(16)
+                        .frame(height: 51)
+                        .background(DesignColors.primaryText)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+
+                // Save to Photos
+                Button { saveToPhotos() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.to.line")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Save to Photos")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(DesignColors.primaryText)
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(DesignColors.lightText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
+
+                // Copy Image
+                Button { copyToClipboard() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Copy Image")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(DesignColors.primaryText)
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(DesignColors.lightText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
+
+                // Delete
+                Button { showDeleteConfirmation = true } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Delete")
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255).opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+
+    // MARK: - Actions
 
     private func saveToHistory() {
         guard !hasSavedToHistory else { return }
