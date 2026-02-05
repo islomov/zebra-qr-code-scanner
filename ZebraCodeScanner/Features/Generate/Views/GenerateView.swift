@@ -122,10 +122,11 @@ struct GenerateView: View {
                     // Feature Request Section
                     VStack(spacing: 16) {
                         Image("icon-lightbulb")
-                            .renderingMode(.original)
+                            .renderingMode(.template)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 40, height: 40)
+                            .foregroundStyle(DesignColors.primaryText)
 
                         VStack(spacing: 8) {
                             Text("Need a different code type?")

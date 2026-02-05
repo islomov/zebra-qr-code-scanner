@@ -286,7 +286,7 @@ struct SettingsView: View {
                         .frame(width: 40, height: 24)
 
                     Circle()
-                        .fill(Color.white)
+                        .fill(DesignColors.primaryButtonText)
                         .frame(width: 20, height: 20)
                         .padding(2)
                 }
@@ -317,7 +317,7 @@ struct SettingsView: View {
 
                     Image(systemName: icon)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(iconBgColor == .white ? DesignColors.primaryText : .white)
+                        .foregroundStyle(iconBgColor == .white ? Color(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255) : .white)
                 }
 
                 Text(title)

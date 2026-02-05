@@ -414,14 +414,14 @@ struct ScanModePicker: View {
                     Text(mode.rawValue)
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
-                        .foregroundStyle(Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255))
+                        .foregroundStyle(DesignColors.primaryText)
                         .frame(maxWidth: .infinity)
                         .frame(height: 36)
                         .background {
                             if selectedMode == mode {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
-                                    .shadow(color: Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255).opacity(0.08), radius: 4, x: 0, y: 0)
+                                    .fill(DesignColors.primaryButtonText)
+                                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 0)
                                     .matchedGeometryEffect(id: "tab", in: animation)
                             }
                         }
@@ -494,14 +494,14 @@ struct ManualBarcodeEntryView: View {
                         Text(label)
                             .font(.custom("Inter-Regular", size: 14))
                             .tracking(-0.408)
-                            .foregroundStyle(Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255))
+                            .foregroundStyle(DesignColors.primaryText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)
                             .background(
                                 viewModel.manualBarcodeType == value
                                     ? RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.white)
-                                        .shadow(color: Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255).opacity(0.08), radius: 4, x: 0, y: 0)
+                                        .fill(DesignColors.primaryButtonText)
+                                        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 0)
                                     : nil
                             )
                     }
