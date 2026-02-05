@@ -15,95 +15,77 @@ struct ScanView: View {
     var isActiveTab: Bool
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                if isActiveTab {
-                    if viewModel.isSupported {
-                        scannerView
-                    } else {
-                        unsupportedView
-                    }
+        ZStack {
+            if isActiveTab {
+                if viewModel.isSupported {
+                    scannerView
                 } else {
-                    Color(.systemBackground)
+                    unsupportedView
                 }
+            } else {
+                Color(.systemBackground)
             }
-            .navigationTitle("Scan")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
-                        Image(systemName: "photo.on.rectangle")
+        }
+        .onChange(of: viewModel.selectedPhoto) { _ in
+            viewModel.processSelectedPhoto()
+        }
+        .sheet(isPresented: $viewModel.showResult) {
+            if viewModel.isBarcode {
+                ProductResultView(
+                    content: viewModel.scannedContent,
+                    type: viewModel.scannedType,
+                    productInfo: viewModel.productInfo,
+                    isLoading: viewModel.isLoadingProduct,
+                    onScanAgain: {
+                        viewModel.showResult = false
+                        viewModel.resetScan()
+                    },
+                    onDismiss: {
+                        viewModel.showResult = false
+                        viewModel.resetScan()
                     }
-                }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
+                )
+            } else {
+                ScanResultView(
+                    content: viewModel.scannedContent,
+                    type: viewModel.scannedType,
+                    onScanAgain: {
+                        viewModel.showResult = false
+                        viewModel.resetScan()
+                    },
+                    onDismiss: {
+                        viewModel.showResult = false
+                        viewModel.resetScan()
                     }
+                )
+            }
+        }
+        .sheet(isPresented: $viewModel.showManualEntry) {
+            ManualBarcodeEntryView(viewModel: viewModel)
+        }
+        .alert("Camera Access Required", isPresented: $viewModel.showPermissionAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
                 }
             }
-            .onChange(of: viewModel.selectedPhoto) { _ in
-                viewModel.processSelectedPhoto()
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Please allow camera access in Settings to scan QR codes and barcodes.")
+        }
+        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button("OK") {
+                viewModel.errorMessage = nil
             }
-            .sheet(isPresented: $viewModel.showResult) {
-                if viewModel.isBarcode {
-                    ProductResultView(
-                        content: viewModel.scannedContent,
-                        type: viewModel.scannedType,
-                        productInfo: viewModel.productInfo,
-                        isLoading: viewModel.isLoadingProduct,
-                        onScanAgain: {
-                            viewModel.showResult = false
-                            viewModel.resetScan()
-                        },
-                        onDismiss: {
-                            viewModel.showResult = false
-                            viewModel.resetScan()
-                        }
-                    )
-                } else {
-                    ScanResultView(
-                        content: viewModel.scannedContent,
-                        type: viewModel.scannedType,
-                        onScanAgain: {
-                            viewModel.showResult = false
-                            viewModel.resetScan()
-                        },
-                        onDismiss: {
-                            viewModel.showResult = false
-                            viewModel.resetScan()
-                        }
-                    )
-                }
-            }
-            .sheet(isPresented: $viewModel.showManualEntry) {
-                ManualBarcodeEntryView(viewModel: viewModel)
-            }
-            .alert("Camera Access Required", isPresented: $viewModel.showPermissionAlert) {
-                Button("Open Settings") {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Please allow camera access in Settings to scan QR codes and barcodes.")
-            }
-            .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
-                Button("OK") {
-                    viewModel.errorMessage = nil
-                }
-            } message: {
-                Text(viewModel.errorMessage ?? "An error occurred")
-            }
+        } message: {
+            Text(viewModel.errorMessage ?? "An error occurred")
         }
     }
 
+    // MARK: - Scanner View
+
     private var scannerView: some View {
         ZStack {
-            // Keep DataScannerRepresentable always mounted to avoid recreation
             DataScannerRepresentable(
                 scanMode: viewModel.scanMode,
                 onScanned: { content, type in
@@ -118,47 +100,33 @@ struct ScanView: View {
             .ignoresSafeArea()
 
             if viewModel.isScanning {
-                // QR frame overlay
+                // Frame overlay
                 if viewModel.scanMode == .qrCode {
                     QRFrameOverlay()
+                } else {
+                    BarcodeFrameOverlay()
                 }
 
-                // Overlay controls
+                // Header
+                VStack {
+                    scanHeader
+                    Spacer()
+                }
+
+                // Bottom controls
                 VStack {
                     Spacer()
 
-                    HStack(spacing: 40) {
-                        Button {
-                            viewModel.toggleTorch()
-                        } label: {
-                            Image(systemName: viewModel.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background(Circle().fill(.ultraThinMaterial))
-                        }
-
-                        if viewModel.scanMode == .barcode {
-                            Button {
-                                viewModel.showManualEntry = true
-                            } label: {
-                                Image(systemName: "keyboard")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                                    .padding()
-                                    .background(Circle().fill(.ultraThinMaterial))
-                            }
-                        }
+                    if viewModel.scanMode == .barcode {
+                        actionButtons
+                            .padding(.bottom, 16)
                     }
-                    .padding(.bottom, 16)
 
-                    // Mode picker at bottom
                     ScanModePicker(selectedMode: $viewModel.scanMode)
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 30)
+                        .padding(.horizontal, 44)
+                        .padding(.bottom, 20)
                 }
             } else {
-                // Camera not active - show placeholder over scanner
                 Color(.systemBackground)
 
                 VStack(spacing: 24) {
@@ -167,11 +135,12 @@ struct ScanView: View {
                         .foregroundStyle(.tint)
 
                     Text("Scan QR & Barcodes")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.custom("Inter-SemiBold", size: 20))
+                        .tracking(-0.408)
 
                     Text("Use your camera to scan QR codes and barcodes.")
-                        .font(.subheadline)
+                        .font(.custom("Inter-Regular", size: 14))
+                        .tracking(-0.408)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
@@ -180,18 +149,90 @@ struct ScanView: View {
                         viewModel.startScanning()
                     } label: {
                         Label("Start Scanning", systemImage: "camera")
-                            .font(.headline)
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
                             .padding()
                             .frame(maxWidth: 200)
-                            .background(Color.accentColor)
+                            .background(DesignColors.primaryText)
                             .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                 }
                 .padding()
             }
         }
     }
+
+    // MARK: - Scan Header
+
+    private var scanHeader: some View {
+        ZStack {
+            Text("Scan")
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
+                .foregroundStyle(.white)
+
+            HStack {
+                PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+
+                Button {
+                    showSettings = true
+                } label: {
+                    Image("icon-setting")
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(DesignColors.primaryText)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Action Buttons (Flashlight & Keyboard)
+
+    private var actionButtons: some View {
+        HStack(spacing: 16) {
+            Button {
+                viewModel.toggleTorch()
+            } label: {
+                Image(systemName: viewModel.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(DesignColors.primaryText)
+                    .frame(width: 44, height: 44)
+                    .background(DesignColors.lightText)
+                    .clipShape(Circle())
+            }
+
+            Button {
+                viewModel.showManualEntry = true
+            } label: {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(DesignColors.primaryText)
+                    .frame(width: 44, height: 44)
+                    .background(DesignColors.lightText)
+                    .clipShape(Circle())
+            }
+        }
+    }
+
+    // MARK: - Unsupported View
 
     private var unsupportedView: some View {
         VStack(spacing: 20) {
@@ -200,23 +241,25 @@ struct ScanView: View {
                 .foregroundStyle(.secondary)
 
             Text("Scanner Not Available")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.custom("Inter-SemiBold", size: 20))
+                .tracking(-0.408)
 
             Text("This device doesn't support barcode scanning. You can still import images from your photo library.")
-                .font(.subheadline)
+                .font(.custom("Inter-Regular", size: 14))
+                .tracking(-0.408)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
             PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
                 Label("Import from Photos", systemImage: "photo.on.rectangle")
-                    .font(.headline)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
                     .padding()
                     .frame(maxWidth: 200)
-                    .background(Color.accentColor)
+                    .background(DesignColors.primaryText)
                     .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
     }
@@ -226,39 +269,80 @@ struct ScanView: View {
 
 struct QRFrameOverlay: View {
     @State private var isAnimating = false
-    private let frameSize: CGFloat = 250
-    private let cornerLength: CGFloat = 30
-    private let lineWidth: CGFloat = 4
+    private let frameSize: CGFloat = 230
+    private let cornerLength: CGFloat = 32
+    private let lineWidth: CGFloat = 3
 
     var body: some View {
         ZStack {
-            // Dimmed background with cutout
-            Color.black.opacity(0.4)
+            Color(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255)
+                .opacity(0.72)
                 .reverseMask {
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 4)
                         .frame(width: frameSize, height: frameSize)
                 }
 
+            // Semi-transparent fill inside the frame
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.white.opacity(0.2))
+                .frame(width: frameSize, height: frameSize)
+
             // Corner brackets
             ZStack {
-                // Top-left
-                CornerShape(corner: .topLeft, length: cornerLength)
-                // Top-right
-                CornerShape(corner: .topRight, length: cornerLength)
-                // Bottom-left
-                CornerShape(corner: .bottomLeft, length: cornerLength)
-                // Bottom-right
-                CornerShape(corner: .bottomRight, length: cornerLength)
+                CornerShape(corner: .topLeft, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .topRight, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .bottomLeft, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .bottomRight, length: cornerLength, lineWidth: lineWidth)
             }
-            .frame(width: frameSize, height: frameSize)
+            .frame(width: frameSize + 8, height: frameSize + 8)
             .foregroundStyle(.white)
-            .opacity(isAnimating ? 1.0 : 0.6)
+            .opacity(isAnimating ? 1.0 : 0.7)
             .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
             .onAppear { isAnimating = true }
         }
         .ignoresSafeArea()
     }
 }
+
+// MARK: - Barcode Frame Overlay
+
+struct BarcodeFrameOverlay: View {
+    @State private var isAnimating = false
+    private let frameWidth: CGFloat = 342
+    private let frameHeight: CGFloat = 150
+    private let cornerLength: CGFloat = 32
+    private let lineWidth: CGFloat = 3
+
+    var body: some View {
+        ZStack {
+            Color(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255)
+                .opacity(0.72)
+                .reverseMask {
+                    RoundedRectangle(cornerRadius: 4)
+                        .frame(width: frameWidth, height: frameHeight)
+                }
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.white.opacity(0.2))
+                .frame(width: frameWidth, height: frameHeight)
+
+            ZStack {
+                CornerShape(corner: .topLeft, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .topRight, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .bottomLeft, length: cornerLength, lineWidth: lineWidth)
+                CornerShape(corner: .bottomRight, length: cornerLength, lineWidth: lineWidth)
+            }
+            .frame(width: frameWidth + 8, height: frameHeight + 8)
+            .foregroundStyle(.white)
+            .opacity(isAnimating ? 1.0 : 0.7)
+            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
+            .onAppear { isAnimating = true }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Corner Shape
 
 struct CornerShape: View {
     enum Corner {
@@ -267,7 +351,7 @@ struct CornerShape: View {
 
     let corner: Corner
     let length: CGFloat
-    let lineWidth: CGFloat = 4
+    var lineWidth: CGFloat = 3
 
     var body: some View {
         GeometryReader { geo in
@@ -328,14 +412,16 @@ struct ScanModePicker: View {
                     }
                 } label: {
                     Text(mode.rawValue)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(selectedMode == mode ? .white : .white.opacity(0.7))
+                        .font(.custom("Inter-Regular", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .frame(height: 36)
                         .background {
                             if selectedMode == mode {
-                                Capsule()
-                                    .fill(.white.opacity(0.25))
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white)
+                                    .shadow(color: Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255).opacity(0.08), radius: 4, x: 0, y: 0)
                                     .matchedGeometryEffect(id: "tab", in: animation)
                             }
                         }
@@ -343,7 +429,15 @@ struct ScanModePicker: View {
             }
         }
         .padding(4)
-        .background(Capsule().fill(.black.opacity(0.5)))
+        .frame(width: 302)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignColors.lightText)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DesignColors.stroke, lineWidth: 1)
+                )
+        )
     }
 }
 
@@ -352,6 +446,7 @@ struct ScanModePicker: View {
 struct ManualBarcodeEntryView: View {
     @ObservedObject var viewModel: ScanViewModel
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var isInputFocused: Bool
 
     private let barcodeTypes = [
         ("ean13", "EAN-13"),
@@ -361,48 +456,113 @@ struct ManualBarcodeEntryView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Barcode Type") {
-                    Picker("Type", selection: $viewModel.manualBarcodeType) {
-                        ForEach(barcodeTypes, id: \.0) { value, label in
-                            Text(label).tag(value)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            ZStack {
+                Text("Enter Barcode")
+                    .font(.custom("Inter-SemiBold", size: 20))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
 
-                Section("Barcode Number") {
-                    TextField("Enter barcode number", text: $viewModel.manualBarcodeText)
-                        .keyboardType(.numberPad)
-                        .textContentType(.none)
-                        .autocorrectionDisabled()
-                }
+                HStack {
+                    Spacer()
 
-                Section {
                     Button {
-                        viewModel.submitManualBarcode()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Search", systemImage: "magnifyingglass")
-                                .font(.headline)
-                            Spacer()
-                        }
-                    }
-                    .disabled(viewModel.manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .navigationTitle("Enter Barcode")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(DesignColors.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white)
+                            .clipShape(Circle())
                     }
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+
+            // Barcode type segmented control
+            HStack(spacing: 0) {
+                ForEach(barcodeTypes, id: \.0) { value, label in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            viewModel.manualBarcodeType = value
+                        }
+                    } label: {
+                        Text(label)
+                            .font(.custom("Inter-Regular", size: 14))
+                            .tracking(-0.408)
+                            .foregroundStyle(Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 36)
+                            .background(
+                                viewModel.manualBarcodeType == value
+                                    ? RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.white)
+                                        .shadow(color: Color(red: 0x2F/255, green: 0x2E/255, blue: 0x41/255).opacity(0.08), radius: 4, x: 0, y: 0)
+                                    : nil
+                            )
+                    }
+                }
+            }
+            .padding(4)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignColors.lightText)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(DesignColors.stroke, lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+
+            // Input field
+            TextField("Enter barcode number", text: $viewModel.manualBarcodeText)
+                .font(.custom("Inter-Regular", size: 16))
+                .tracking(-0.408)
+                .keyboardType(.numberPad)
+                .textContentType(.none)
+                .autocorrectionDisabled()
+                .focused($isInputFocused)
+                .padding(20)
+                .frame(height: 58)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(isInputFocused ? DesignColors.primaryText : DesignColors.stroke, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal, 16)
+                .padding(.top, 24)
+
+            // Search button
+            Button {
+                viewModel.submitManualBarcode()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Search")
+                        .font(.custom("Inter-Medium", size: 16))
+                        .tracking(-0.408)
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 51)
+                .background(DesignColors.primaryText)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .disabled(viewModel.manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .opacity(viewModel.manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1.0)
+            .padding(.horizontal, 16)
+            .padding(.top, 24)
+
+            Spacer()
         }
+        .background(DesignColors.background)
     }
 }
 
