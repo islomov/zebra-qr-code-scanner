@@ -108,7 +108,7 @@ final class GenerateViewModel: ObservableObject {
         generatedContent = profileURL
         qrBackgroundColor = .white
         qrForegroundColor = .black
-        qrCenterLogo = sfSymbolImage(for: type.icon)
+        qrCenterLogo = nil
         generatedImage = qrService.generateStyledQRCode(
             from: profileURL,
             size: 300,
@@ -116,11 +116,6 @@ final class GenerateViewModel: ObservableObject {
             foregroundColor: UIColor(qrForegroundColor),
             centerLogo: qrCenterLogo
         )
-    }
-
-    private func sfSymbolImage(for name: String) -> UIImage? {
-        let config = UIImage.SymbolConfiguration(pointSize: 60, weight: .medium)
-        return UIImage(systemName: name, withConfiguration: config)?.withTintColor(.black, renderingMode: .alwaysOriginal)
     }
 
     func isSocialMediaValid() -> Bool {
