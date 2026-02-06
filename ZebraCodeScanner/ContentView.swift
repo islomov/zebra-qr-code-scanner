@@ -25,19 +25,19 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             GenerateView(showSettings: $showSettings)
                 .tabItem {
-                    Label("Generate", systemImage: "qrcode")
+                    Label("Generate", image: "icon-qr")
                 }
                 .tag(0)
 
             ScanView(showSettings: $showSettings, viewModel: scanViewModel, isActiveTab: selectedTab == 1)
                 .tabItem {
-                    Label("Scan", systemImage: "camera.viewfinder")
+                    Label("Scan", image: "icon-scan")
                 }
                 .tag(1)
 
             HistoryView(showSettings: $showSettings)
                 .tabItem {
-                    Label("History", systemImage: "clock.arrow.circlepath")
+                    Label("History", image: "icon-history")
                 }
                 .tag(2)
         }
