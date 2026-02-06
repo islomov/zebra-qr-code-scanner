@@ -16,14 +16,17 @@ struct ScanView: View {
 
     var body: some View {
         ZStack {
-            if isActiveTab {
-                if viewModel.isSupported {
-                    scannerView
-                } else {
-                    unsupportedView
-                }
-            } else {
+            // Scanner always in the view hierarchy — never destroyed on tab switch
+            if viewModel.isSupported {
+                scannerView
+            }
+
+            if !isActiveTab {
+                // Opaque cover hides camera preview when tab is inactive
                 Color(.systemBackground)
+                    .ignoresSafeArea()
+            } else if !viewModel.isSupported {
+                unsupportedView
             }
         }
         .onChange(of: viewModel.selectedPhoto) { _ in
@@ -87,7 +90,6 @@ struct ScanView: View {
     private var scannerView: some View {
         ZStack {
             DataScannerRepresentable(
-                scanMode: viewModel.scanMode,
                 onScanned: { content, type in
                     viewModel.handleScannedCode(content: content, type: type)
                 },

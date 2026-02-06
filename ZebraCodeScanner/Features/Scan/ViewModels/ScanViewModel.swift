@@ -11,6 +11,7 @@ import VisionKit
 import PhotosUI
 import Vision
 import AudioToolbox
+import AVFoundation
 
 @MainActor
 final class ScanViewModel: ObservableObject {
@@ -35,6 +36,18 @@ final class ScanViewModel: ObservableObject {
     private let scannerService = ScannerService.shared
     private let dataManager = CoreDataManager.shared
     private let productLookupService = ProductLookupService.shared
+    private var hasAuthorizedCamera = false
+
+    init() {
+        // Warm up the camera on app launch if permission was already granted.
+        // The DataScannerRepresentable is always in the view hierarchy, so setting
+        // isScanning = true triggers startScanning() on the DataScannerViewController
+        // in the background while the user sees another tab.
+        if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
+            hasAuthorizedCamera = true
+            isScanning = true
+        }
+    }
 
     var isBarcode: Bool {
         scannedType != "qr" && scannedType != "datamatrix" && scannedType != "aztec" && scannedType != "text" && !scannedType.isEmpty
@@ -55,12 +68,14 @@ final class ScanViewModel: ObservableObject {
         switch scannerService.permissionStatus {
         case .authorized:
             print("[ScanVM] permission authorized, setting isScanning=true")
+            hasAuthorizedCamera = true
             isScanning = true
         case .notDetermined:
             print("[ScanVM] permission notDetermined, requesting...")
             let granted = await scannerService.requestPermission()
             if granted {
                 print("[ScanVM] permission granted, setting isScanning=true")
+                hasAuthorizedCamera = true
                 isScanning = true
             } else {
                 print("[ScanVM] permission denied by user")
@@ -76,6 +91,10 @@ final class ScanViewModel: ObservableObject {
 
     func startScanning() {
         print("[ScanVM] startScanning() called, current isScanning=\(isScanning)")
+        if hasAuthorizedCamera {
+            isScanning = true
+            return
+        }
         Task {
             await checkAndRequestPermission()
         }
