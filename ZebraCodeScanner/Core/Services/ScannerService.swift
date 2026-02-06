@@ -73,66 +73,54 @@ enum ScanMode: String, CaseIterable {
 
 // MARK: - DataScanner UIViewControllerRepresentable
 struct DataScannerRepresentable: UIViewControllerRepresentable {
-    let scanMode: ScanMode
     let onScanned: (String, String) -> Void
     let onError: (Error) -> Void
 
     @Binding var isScanning: Bool
     @Binding var isTorchOn: Bool
 
+    /// All symbologies recognized at once — no need to recreate the scanner when switching modes.
+    private static let allRecognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> = [
+        .barcode(symbologies: [
+            .qr, .dataMatrix, .aztec,
+            .code128, .ean13, .ean8, .upce,
+            .code39, .code93, .itf14, .pdf417
+        ])
+    ]
+
     func makeUIViewController(context: Context) -> DataScannerViewController {
         print("[Scanner] makeUIViewController - creating scanner")
         let scanner = DataScannerViewController(
-            recognizedDataTypes: scanMode.recognizedDataTypes,
+            recognizedDataTypes: Self.allRecognizedDataTypes,
             qualityLevel: .balanced,
             recognizesMultipleItems: false,
-            isHighFrameRateTrackingEnabled: false,
+            isHighFrameRateTrackingEnabled: true,
             isPinchToZoomEnabled: true,
             isGuidanceEnabled: false,
             isHighlightingEnabled: false
         )
         scanner.delegate = context.coordinator
-        context.coordinator.currentScanner = scanner
         return scanner
     }
 
     func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
-        // Handle scan mode changes by recreating scanner if needed
-        let coordinator = context.coordinator
-        if coordinator.currentScanMode != scanMode {
-            print("[Scanner] Scan mode changed: \(coordinator.currentScanMode?.rawValue ?? "nil") → \(scanMode.rawValue)")
-            coordinator.currentScanMode = scanMode
-
-            // Stop current scanning, update recognized types
-            if uiViewController.isScanning {
-                uiViewController.stopScanning()
-            }
-
-            // We need to restart with new data types - unfortunately DataScannerViewController
-            // doesn't support changing recognizedDataTypes after creation, so we trigger a refresh
-            // by stopping and starting scanning again
-            if isScanning {
-                // Small delay to allow the scanner to fully stop before restarting
-                DispatchQueue.main.async {
-                    try? uiViewController.startScanning()
-                }
+        if isScanning {
+            if !uiViewController.isScanning {
+                print("[Scanner] Starting scanning")
+                try? uiViewController.startScanning()
             }
         } else {
-            // Normal scanning state update
-            if isScanning {
-                if !uiViewController.isScanning {
-                    print("[Scanner] Starting scanning")
-                    try? uiViewController.startScanning()
-                }
-            } else {
-                if uiViewController.isScanning {
-                    print("[Scanner] Stopping scanning")
-                    uiViewController.stopScanning()
-                }
+            if uiViewController.isScanning {
+                print("[Scanner] Stopping scanning")
+                uiViewController.stopScanning()
             }
         }
 
-        setTorch(on: isTorchOn)
+        let coordinator = context.coordinator
+        if coordinator.previousTorchState != isTorchOn {
+            coordinator.previousTorchState = isTorchOn
+            setTorch(on: isTorchOn)
+        }
     }
 
     static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
@@ -153,19 +141,17 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onScanned: onScanned, onError: onError, initialScanMode: scanMode)
+        Coordinator(onScanned: onScanned, onError: onError)
     }
 
     class Coordinator: NSObject, DataScannerViewControllerDelegate {
         let onScanned: (String, String) -> Void
         let onError: (Error) -> Void
-        var currentScanMode: ScanMode?
-        weak var currentScanner: DataScannerViewController?
+        var previousTorchState: Bool = false
 
-        init(onScanned: @escaping (String, String) -> Void, onError: @escaping (Error) -> Void, initialScanMode: ScanMode) {
+        init(onScanned: @escaping (String, String) -> Void, onError: @escaping (Error) -> Void) {
             self.onScanned = onScanned
             self.onError = onError
-            self.currentScanMode = initialScanMode
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didTapOn item: RecognizedItem) {
