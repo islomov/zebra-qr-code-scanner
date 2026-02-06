@@ -56,4 +56,39 @@ enum DesignColors {
             ? UIColor(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255, alpha: 1)
             : .white
     })
+
+    // Primary action button background: Light: #1E1E1E, Dark: #353535
+    static let primaryActionBackground = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0x35/255, green: 0x35/255, blue: 0x35/255, alpha: 1)
+            : UIColor(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255, alpha: 1)
+    })
+
+    // Secondary action button background: Light: #EAEAEA, Dark: #353535
+    static let actionButtonBackground = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0x35/255, green: 0x35/255, blue: 0x35/255, alpha: 1)
+            : UIColor(red: 0xEA/255, green: 0xEA/255, blue: 0xEA/255, alpha: 1)
+    })
+
+    // Detail card background: Light: white, Dark: #353535
+    static let detailCardBackground = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0x35/255, green: 0x35/255, blue: 0x35/255, alpha: 1)
+            : .white
+    })
+
+    // Detail card stroke: Light: #F0F0F0, Dark: #454545
+    static let detailCardStroke = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0x45/255, green: 0x45/255, blue: 0x45/255, alpha: 1)
+            : UIColor(red: 0xF0/255, green: 0xF0/255, blue: 0xF0/255, alpha: 1)
+    })
+
+    // Label text: Light: #808080, Dark: #C8C8C8
+    static let labelText = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0xC8/255, green: 0xC8/255, blue: 0xC8/255, alpha: 1)
+            : UIColor(red: 0x80/255, green: 0x80/255, blue: 0x80/255, alpha: 1)
+    })
 }

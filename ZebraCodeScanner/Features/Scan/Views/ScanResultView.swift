@@ -18,102 +18,69 @@ struct ScanResultView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
-                    // Icon
-                    Image(systemName: typeIcon)
-                        .font(.system(size: 80))
-                        .foregroundStyle(.tint)
-                        .padding(.top, 20)
+                VStack(spacing: 0) {
+                    // Type Icon + Name
+                    VStack(spacing: 20) {
+                        Image(typeIconAsset)
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 72, height: 72)
+                            .foregroundStyle(DesignColors.primaryText)
 
-                    // Type Badge
-                    HStack {
-                        Image(systemName: typeIcon)
                         Text(typeDisplayName)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(DesignColors.primaryText)
+                            .multilineTextAlignment(.center)
                     }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color(.systemGray6))
-                    .clipShape(Capsule())
+                    .padding(.top, 16)
 
-                    // Content Card
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Scanned Content")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        Text(content)
-                            .font(.body)
-                            .textSelection(.enabled)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding(.horizontal)
-
-                    // Action Buttons
-                    VStack(spacing: 12) {
-                        // Copy Button
-                        Button {
-                            UIPasteboard.general.string = content
-                            showCopiedAlert = true
-                        } label: {
-                            Label("Copy to Clipboard", systemImage: "doc.on.doc")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.accentColor)
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-
-                        // Open URL (if applicable)
-                        if isURL {
-                            Button {
-                                openURL()
-                            } label: {
-                                Label("Open in Browser", systemImage: "safari")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color(.systemGray5))
-                                    .foregroundStyle(.primary)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    // Content Card + Action Buttons
+                    VStack(spacing: 8) {
+                        // Scanned Content Card
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 4) {
+                                Image(typeIconAsset)
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .frame(width: 16, height: 16)
+                                    .foregroundStyle(DesignColors.labelText)
+                                Text("Scanned Content")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(DesignColors.labelText)
                             }
-                        }
 
-                        // Share Button
-                        ShareLink(item: content) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            Text(content)
+                                .font(.system(size: 16))
+                                .foregroundStyle(DesignColors.primaryText)
+                                .textSelection(.enabled)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .background(DesignColors.detailCardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(DesignColors.detailCardStroke, lineWidth: 1)
+                        )
 
-                        // Scan Again Button
-                        Button {
-                            onScanAgain()
-                        } label: {
-                            Label("Scan Again", systemImage: "camera.viewfinder")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
+                        // Action Buttons
+                        actionButtons
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                    .padding(16)
                 }
             }
-            .navigationTitle("Scan Result")
+            .background(DesignColors.background)
+            .navigationTitle("Scan result")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button {
                         onDismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(DesignColors.primaryText)
                     }
                 }
             }
@@ -125,12 +92,89 @@ struct ScanResultView: View {
         }
     }
 
-    private var typeIcon: String {
+    // MARK: - Action Buttons
+
+    private var actionButtons: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ShareLink(item: content) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 16))
+                        Text("Share")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .padding(16)
+                    .background(DesignColors.primaryActionBackground)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+
+                Button {
+                    UIPasteboard.general.string = content
+                    showCopiedAlert = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 16))
+                        Text("Copy")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .padding(16)
+                    .background(DesignColors.actionButtonBackground)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+
+                if isURL {
+                    Button {
+                        openURL()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "safari")
+                                .font(.system(size: 16))
+                            Text("Open URL")
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        .padding(16)
+                        .background(DesignColors.actionButtonBackground)
+                        .foregroundStyle(DesignColors.primaryText)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+
+                Button {
+                    onScanAgain()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "barcode.viewfinder")
+                            .font(.system(size: 16))
+                        Text("Scan again")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .padding(16)
+                    .background(DesignColors.actionButtonBackground)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private var typeIconAsset: String {
         switch type {
-        case "qr", "datamatrix", "aztec":
-            return "qrcode"
+        case "qr":
+            return "icon-qr"
+        case "aztec":
+            return "icon-aztec"
+        case "pdf417":
+            return "icon-pdf417"
+        case "datamatrix":
+            return "icon-2d-section"
         default:
-            return "barcode"
+            return "icon-barcode1d"
         }
     }
 
