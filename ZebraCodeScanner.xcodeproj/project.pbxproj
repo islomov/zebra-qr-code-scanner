@@ -10,7 +10,6 @@
 		1581A58E2F30E52200B61DB5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1581A58D2F30E52200B61DB5 /* GoogleService-Info.plist */; };
 		15AE5A002F53B00000C8A8F0 /* privacy-policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A012F53B00000C8A8F0 /* privacy-policy.html */; };
 		15AE5A022F53B00000C8A8F1 /* terms-of-use.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A032F53B00000C8A8F1 /* terms-of-use.html */; };
-		1581A5DA2F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */; };
 		1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DB2F30E76400B61DB5 /* FirebaseCore */; };
 		1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */; };
 		1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */; };
@@ -38,7 +37,6 @@
 			files = (
 				1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */,
 				1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */,
-				1581A5DA2F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */,
 				1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,7 +83,6 @@
 			);
 			name = ZebraCodeScanner;
 			packageProductDependencies = (
-				1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */,
 				1581A5DB2F30E76400B61DB5 /* FirebaseCore */,
 				1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */,
 				1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */,
@@ -393,11 +390,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		1581A5D92F30E76400B61DB5 /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
 		1581A5DB2F30E76400B61DB5 /* FirebaseCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
