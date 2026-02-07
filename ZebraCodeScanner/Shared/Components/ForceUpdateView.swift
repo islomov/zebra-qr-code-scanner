@@ -2,40 +2,46 @@ import SwiftUI
 
 struct ForceUpdateView: View {
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 0) {
             Spacer()
 
-            Image(systemName: "arrow.down.app.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.blue)
+            VStack(spacing: 20) {
+                Image(systemName: "arrow.down.app.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(DesignColors.primaryText)
 
-            Text("Update Required")
-                .font(.title.bold())
+                Text("Update Required")
+                    .font(.custom("Inter-SemiBold", size: 20))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
 
-            Text("A new version of the app is available. Please update to continue using the app.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                Text("A new version of the app is available.\nPlease update to continue using the app.")
+                    .font(.custom("Inter-Regular", size: 14))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
+
+            Spacer()
 
             Button {
-                // TODO: Replace with your App Store URL
-                if let url = URL(string: "https://apps.apple.com/app/idYOUR_APP_ID") {
+                if let url = URL(string: "https://apps.apple.com/app/id6758623522") {
                     UIApplication.shared.open(url)
                 }
             } label: {
                 Text("Update Now")
-                    .font(.headline)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.blue)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .frame(height: 51)
+                    .background(DesignColors.primaryActionBackground)
+                    .foregroundStyle(DesignColors.primaryButtonText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .padding(.horizontal, 32)
-
-            Spacer()
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
+        .background(DesignColors.background)
         .interactiveDismissDisabled()
     }
 }
