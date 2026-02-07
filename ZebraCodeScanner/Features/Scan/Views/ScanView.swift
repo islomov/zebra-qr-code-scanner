@@ -129,21 +129,25 @@ struct ScanView: View {
                         .padding(.bottom, 20)
                 }
             } else {
-                Color(.systemBackground)
+                DesignColors.background
 
                 VStack(spacing: 24) {
-                    Image(systemName: "camera.viewfinder")
-                        .font(.system(size: 80))
-                        .foregroundStyle(.tint)
+                    Image("icon-scan")
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 80, height: 80)
+                        .foregroundStyle(DesignColors.secondaryText)
 
                     Text("Scan QR & Barcodes")
                         .font(.custom("Inter-SemiBold", size: 20))
                         .tracking(-0.408)
+                        .foregroundStyle(DesignColors.primaryText)
 
                     Text("Use your camera to scan QR codes and barcodes.")
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignColors.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
@@ -155,8 +159,8 @@ struct ScanView: View {
                             .tracking(-0.408)
                             .padding()
                             .frame(maxWidth: 200)
-                            .background(DesignColors.primaryText)
-                            .foregroundStyle(.white)
+                            .background(DesignColors.primaryActionBackground)
+                            .foregroundStyle(DesignColors.primaryButtonText)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                 }
