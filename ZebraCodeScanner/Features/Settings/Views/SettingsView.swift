@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("vibrateOnScan") private var vibrateOnScan = true
     @AppStorage("soundOnScan") private var soundOnScan = true
     @AppStorage("appearanceMode") private var appearanceMode = "system"
+    @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @State private var showClearHistoryAlert = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfUse = false
@@ -35,6 +36,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     scanningSection
+                    notificationsSection
                     storageSection
                     appearanceSection
                     dataSection
@@ -100,6 +102,38 @@ struct SettingsView: View {
                 settingsToggleRow(title: String(localized: "settings.scanning.vibrate_on_scan", defaultValue: "Vibrate on Scan"), isOn: $vibrateOnScan)
                 settingsToggleRow(title: String(localized: "settings.scanning.sound_on_scan", defaultValue: "Sound on Scan"), isOn: $soundOnScan)
             }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Notifications Section
+
+    private var notificationsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionTitle(String(localized: "settings.notifications.section_title", defaultValue: "Notifications"))
+
+            settingsToggleRow(
+                title: String(localized: "settings.notifications.daily_reminders", defaultValue: "Daily Reminders"),
+                isOn: Binding(
+                    get: { notificationsEnabled },
+                    set: { newValue in
+                        if newValue {
+                            Task {
+                                let granted = await NotificationService.shared.requestPermission()
+                                if granted {
+                                    notificationsEnabled = true
+                                    NotificationService.shared.scheduleDailyNotifications()
+                                } else {
+                                    notificationsEnabled = false
+                                }
+                            }
+                        } else {
+                            notificationsEnabled = false
+                            NotificationService.shared.cancelAllNotifications()
+                        }
+                    }
+                )
+            )
         }
         .padding(.horizontal, 16)
     }

@@ -13,6 +13,8 @@ import FirebaseCrashlytics
 @main
 struct ZebraCodeScannerApp: App {
     @StateObject private var forceUpdateService = ForceUpdateService()
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("notificationsEnabled") private var notificationsEnabled = false
 
     init() {
         FirebaseApp.configure()
@@ -39,6 +41,16 @@ struct ZebraCodeScannerApp: App {
                 .onAppear {
                     forceUpdateService.checkForUpdate()
                 }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active && notificationsEnabled {
+                Task {
+                    await NotificationService.shared.checkAuthorizationStatus()
+                    if NotificationService.shared.isAuthorized {
+                        await NotificationService.shared.rescheduleIfNeeded()
+                    }
+                }
+            }
         }
     }
 }

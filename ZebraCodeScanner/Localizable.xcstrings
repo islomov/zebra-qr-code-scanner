@@ -1029,6 +1029,138 @@
         }
       }
     },
+    "notification.body.barcode_scan_1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Need to check a product? Scan its barcode now!"
+          }
+        }
+      }
+    },
+    "notification.body.barcode_scan_2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping? Scan barcodes to compare products easily!"
+          }
+        }
+      }
+    },
+    "notification.body.barcode_scan_3" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your barcode scanner is ready. Check any product in a tap!"
+          }
+        }
+      }
+    },
+    "notification.body.product_lookup_1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan any barcode to discover product details instantly!"
+          }
+        }
+      }
+    },
+    "notification.body.product_lookup_2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curious about a product? Scan its barcode for instant info!"
+          }
+        }
+      }
+    },
+    "notification.body.product_lookup_3" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wondering what's in that product? Scan and find out!"
+          }
+        }
+      }
+    },
+    "notification.body.qr_scan_1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Found a QR code? Scan it in seconds!"
+          }
+        }
+      }
+    },
+    "notification.body.qr_scan_2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR codes are everywhere! Open Zebra to scan one now."
+          }
+        }
+      }
+    },
+    "notification.body.qr_scan_3" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See a QR code on a poster or package? Scan it instantly!"
+          }
+        }
+      }
+    },
+    "notification.title.barcode_scan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barcode Scanner"
+          }
+        }
+      }
+    },
+    "notification.title.product_lookup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover Products"
+          }
+        }
+      }
+    },
+    "notification.title.qr_scan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR Code Ready"
+          }
+        }
+      }
+    },
     "preview.background_color.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2146,6 +2278,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Data"
+          }
+        }
+      }
+    },
+    "settings.notifications.daily_reminders" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Reminders"
+          }
+        }
+      }
+    },
+    "settings.notifications.section_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
           }
         }
       }
