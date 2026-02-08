@@ -44,24 +44,24 @@ struct HistoryDetailView: View {
         .background(DesignColors.background)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .alert("Saved!", isPresented: $showSaveSuccess) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.alert.saved", defaultValue: "Saved!"), isPresented: $showSaveSuccess) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("Image saved to your photo library.")
+            Text(String(localized: "history_detail.saved_message", defaultValue: "Image saved to your photo library."))
         }
-        .alert("Error", isPresented: $showSaveError) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.error", defaultValue: "Error"), isPresented: $showSaveError) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("Failed to save. Please check photo library permissions.")
+            Text(String(localized: "history_detail.save_error", defaultValue: "Failed to save. Please check photo library permissions."))
         }
-        .alert("Delete Code", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
+        .alert(String(localized: "history_detail.delete_title", defaultValue: "Delete Code"), isPresented: $showDeleteConfirmation) {
+            Button(String(localized: "common.delete", defaultValue: "Delete"), role: .destructive) {
                 CoreDataManager.shared.deleteGeneratedCode(entity)
                 dismiss()
             }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) {}
         } message: {
-            Text("Are you sure you want to delete this code?")
+            Text(String(localized: "history_detail.delete_message", defaultValue: "Are you sure you want to delete this code?"))
         }
     }
 
@@ -69,7 +69,7 @@ struct HistoryDetailView: View {
 
     private var detailHeader: some View {
         ZStack {
-            Text(entity.type == "qr" ? "QR Code" : "Barcode")
+            Text(entity.type == "qr" ? String(localized: "common.qr_code", defaultValue: "QR Code") : String(localized: "common.barcode", defaultValue: "Barcode"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -91,7 +91,7 @@ struct HistoryDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Text("Done")
+                    Text(String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -165,10 +165,10 @@ struct HistoryDetailView: View {
 
     private var detailsSection: some View {
         VStack(spacing: 0) {
-            detailRow(label: "Type", value: entity.type == "qr" ? "QR Code" : "Barcode")
-            detailRow(label: "Content type", value: typeTitle)
-            detailRow(label: "Content", value: entity.content ?? "")
-            detailRow(label: "Created", value: formatDate(entity.createdAt))
+            detailRow(label: String(localized: "history_detail.label.type", defaultValue: "Type"), value: entity.type == "qr" ? String(localized: "common.qr_code", defaultValue: "QR Code") : String(localized: "common.barcode", defaultValue: "Barcode"))
+            detailRow(label: String(localized: "history_detail.label.content_type", defaultValue: "Content type"), value: typeTitle)
+            detailRow(label: String(localized: "history_detail.label.content", defaultValue: "Content"), value: entity.content ?? "")
+            detailRow(label: String(localized: "history_detail.label.created", defaultValue: "Created"), value: formatDate(entity.createdAt))
         }
         .padding(8)
         .background(DesignColors.cardBackground)
@@ -204,7 +204,7 @@ struct HistoryDetailView: View {
                         item: Image(uiImage: image),
                         preview: SharePreview(typeTitle, image: Image(uiImage: image))
                     ) {
-                        actionButton(icon: "square.and.arrow.up", title: "Share", isPrimary: true)
+                        actionButton(icon: "square.and.arrow.up", title: String(localized: "common.share", defaultValue: "Share"), isPrimary: true)
                     }
                 }
 
@@ -212,14 +212,14 @@ struct HistoryDetailView: View {
                 Button {
                     saveToPhotos()
                 } label: {
-                    actionButton(icon: "arrow.down.to.line", title: "Save to Photos")
+                    actionButton(icon: "arrow.down.to.line", title: String(localized: "common.save_to_photos", defaultValue: "Save to Photos"))
                 }
 
                 // Copy Content
                 Button {
                     UIPasteboard.general.string = entity.content
                 } label: {
-                    actionButton(icon: "doc.on.doc", title: "Copy content")
+                    actionButton(icon: "doc.on.doc", title: String(localized: "history_detail.copy_content", defaultValue: "Copy content"))
                 }
 
                 // Copy Image
@@ -228,14 +228,14 @@ struct HistoryDetailView: View {
                         UIPasteboard.general.image = image
                     }
                 } label: {
-                    actionButton(icon: "photo.on.rectangle", title: "Copy Image")
+                    actionButton(icon: "photo.on.rectangle", title: String(localized: "common.copy_image", defaultValue: "Copy Image"))
                 }
 
                 // Delete
                 Button {
                     showDeleteConfirmation = true
                 } label: {
-                    actionButton(icon: "trash", title: "Delete", isDestructive: true)
+                    actionButton(icon: "trash", title: String(localized: "common.delete", defaultValue: "Delete"), isDestructive: true)
                 }
             }
             .padding(.horizontal, 16)
@@ -349,7 +349,7 @@ struct ScannedDetailView: View {
 
     private var detailHeader: some View {
         ZStack {
-            Text(isQR ? "QR Code" : "Barcode")
+            Text(isQR ? String(localized: "common.qr_code", defaultValue: "QR Code") : String(localized: "common.barcode", defaultValue: "Barcode"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -371,7 +371,7 @@ struct ScannedDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Text("Done")
+                    Text(String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -409,7 +409,7 @@ struct ScannedDetailView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(DesignColors.primaryText)
 
-            Text(entity.type?.capitalized ?? "Unknown")
+            Text(entity.type?.capitalized ?? String(localized: "common.unknown", defaultValue: "Unknown"))
                 .font(.custom("Inter-Regular", size: 14))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -424,15 +424,15 @@ struct ScannedDetailView: View {
 
     private var detailsSection: some View {
         VStack(spacing: 0) {
-            detailRow(label: "Type", value: isQR ? "QR Code" : "Barcode")
-            detailRow(label: "Content", value: entity.content ?? "")
+            detailRow(label: String(localized: "history_detail.label.type", defaultValue: "Type"), value: isQR ? String(localized: "common.qr_code", defaultValue: "QR Code") : String(localized: "common.barcode", defaultValue: "Barcode"))
+            detailRow(label: String(localized: "history_detail.label.content", defaultValue: "Content"), value: entity.content ?? "")
             if let productName = entity.productName, !productName.isEmpty {
-                detailRow(label: "Product", value: productName)
+                detailRow(label: String(localized: "history_detail.label.product", defaultValue: "Product"), value: productName)
             }
             if let productBrand = entity.productBrand, !productBrand.isEmpty {
-                detailRow(label: "Brand", value: productBrand)
+                detailRow(label: String(localized: "history_detail.label.brand", defaultValue: "Brand"), value: productBrand)
             }
-            detailRow(label: "Scanned", value: formatDate(entity.scannedAt))
+            detailRow(label: String(localized: "history_detail.label.scanned", defaultValue: "Scanned"), value: formatDate(entity.scannedAt))
         }
         .padding(8)
         .background(DesignColors.cardBackground)
@@ -466,7 +466,7 @@ struct ScannedDetailView: View {
                 Button {
                     UIPasteboard.general.string = entity.content
                 } label: {
-                    actionButton(icon: "doc.on.doc", title: "Copy Content", isPrimary: true)
+                    actionButton(icon: "doc.on.doc", title: String(localized: "history_detail.copy_content", defaultValue: "Copy content"), isPrimary: true)
                 }
 
                 // Open Link (if URL)
@@ -476,7 +476,7 @@ struct ScannedDetailView: View {
                     Button {
                         UIApplication.shared.open(url)
                     } label: {
-                        actionButton(icon: "safari", title: "Open Link")
+                        actionButton(icon: "safari", title: String(localized: "history_detail.open_link", defaultValue: "Open Link"))
                     }
                 }
             }

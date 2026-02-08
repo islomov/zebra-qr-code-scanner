@@ -9,9 +9,17 @@ import SwiftUI
 import Combine
 
 enum HistoryFilterTab: String, CaseIterable {
-    case all = "All"
-    case generated = "Generated"
-    case scanned = "Scanned"
+    case all = "all"
+    case generated = "generated"
+    case scanned = "scanned"
+
+    var title: String {
+        switch self {
+        case .all: return String(localized: "history.filter.all", defaultValue: "All")
+        case .generated: return String(localized: "history.filter.generated", defaultValue: "Generated")
+        case .scanned: return String(localized: "history.filter.scanned", defaultValue: "Scanned")
+        }
+    }
 }
 
 @MainActor
@@ -106,7 +114,7 @@ final class HistoryViewModel: ObservableObject {
                 return barcodeType.title
             }
         }
-        return entity.contentType ?? "Unknown"
+        return entity.contentType ?? String(localized: "common.unknown", defaultValue: "Unknown")
     }
 
     func getTypeIcon(for entity: GeneratedCodeEntity) -> String {
@@ -122,7 +130,7 @@ final class HistoryViewModel: ObservableObject {
     }
 
     func getScannedTypeTitle(for entity: ScannedCodeEntity) -> String {
-        entity.type?.capitalized ?? "Unknown"
+        entity.type?.capitalized ?? String(localized: "common.unknown", defaultValue: "Unknown")
     }
 
     func getScannedTypeIcon(for entity: ScannedCodeEntity) -> String {

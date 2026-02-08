@@ -51,25 +51,25 @@ struct BarcodePreviewView: View {
         .onAppear {
             saveToHistory()
         }
-        .alert("Saved!", isPresented: $showSaveSuccess) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.alert.saved", defaultValue: "Saved!"), isPresented: $showSaveSuccess) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("Barcode saved to your photo library.")
+            Text(String(localized: "preview.barcode_saved_message", defaultValue: "Barcode saved to your photo library."))
         }
-        .alert("Error", isPresented: $showSaveError) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.error", defaultValue: "Error"), isPresented: $showSaveError) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("Failed to save barcode. Please check photo library permissions.")
+            Text(String(localized: "preview.barcode_save_error", defaultValue: "Failed to save barcode. Please check photo library permissions."))
         }
-        .alert("Delete Barcode?", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
+        .alert(String(localized: "preview.delete_barcode_title", defaultValue: "Delete Barcode?"), isPresented: $showDeleteConfirmation) {
+            Button(String(localized: "common.delete", defaultValue: "Delete"), role: .destructive) {
                 viewModel.deleteCurrentCode()
                 viewModel.reset()
                 dismiss()
             }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) {}
         } message: {
-            Text("This will remove the barcode from your history.")
+            Text(String(localized: "preview.delete_barcode_message", defaultValue: "This will remove the barcode from your history."))
         }
     }
 
@@ -77,7 +77,7 @@ struct BarcodePreviewView: View {
 
     private var navigationHeader: some View {
         ZStack {
-            Text("Barcode")
+            Text(String(localized: "common.barcode", defaultValue: "Barcode"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -100,7 +100,7 @@ struct BarcodePreviewView: View {
                     viewModel.reset()
                     dismiss()
                 } label: {
-                    Text("Done")
+                    Text(String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -174,12 +174,12 @@ struct BarcodePreviewView: View {
                 if let image = viewModel.generatedImage {
                     ShareLink(
                         item: Image(uiImage: image),
-                        preview: SharePreview("Barcode", image: Image(uiImage: image))
+                        preview: SharePreview(String(localized: "common.barcode", defaultValue: "Barcode"), image: Image(uiImage: image))
                     ) {
                         HStack(spacing: 8) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.system(size: 16, weight: .medium))
-                            Text("Share")
+                            Text(String(localized: "common.share", defaultValue: "Share"))
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
                         }
@@ -196,7 +196,7 @@ struct BarcodePreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.down.to.line")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Save to Photos")
+                        Text(String(localized: "common.save_to_photos", defaultValue: "Save to Photos"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }
@@ -213,7 +213,7 @@ struct BarcodePreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Copy Image")
+                        Text(String(localized: "common.copy_image", defaultValue: "Copy Image"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }
@@ -230,7 +230,7 @@ struct BarcodePreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "trash")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Delete")
+                        Text(String(localized: "common.delete", defaultValue: "Delete"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }

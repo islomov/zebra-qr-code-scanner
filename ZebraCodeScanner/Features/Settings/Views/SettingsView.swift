@@ -44,20 +44,20 @@ struct SettingsView: View {
             }
         }
         .background(DesignColors.background)
-        .alert("Clear History", isPresented: $showClearHistoryAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Clear All", role: .destructive) {
+        .alert(String(localized: "settings.data.clear_history_title", defaultValue: "Clear History"), isPresented: $showClearHistoryAlert) {
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) { }
+            Button(String(localized: "settings.data.clear_all", defaultValue: "Clear All"), role: .destructive) {
                 dataManager.deleteAllGeneratedCodes()
                 dataManager.deleteAllScannedCodes()
             }
         } message: {
-            Text("This will permanently delete all generated and scanned code history.")
+            Text(String(localized: "settings.data.clear_history_message", defaultValue: "This will permanently delete all generated and scanned code history."))
         }
         .sheet(isPresented: $showPrivacyPolicy) {
-            LegalDocumentView(title: "Privacy Policy", fileName: "privacy-policy")
+            LegalDocumentView(title: String(localized: "settings.about.privacy_policy", defaultValue: "Privacy Policy"), fileName: "privacy-policy")
         }
         .sheet(isPresented: $showTermsOfUse) {
-            LegalDocumentView(title: "Terms of Use", fileName: "terms-of-use")
+            LegalDocumentView(title: String(localized: "settings.about.terms_of_use", defaultValue: "Terms of Use"), fileName: "terms-of-use")
         }
     }
 
@@ -65,7 +65,7 @@ struct SettingsView: View {
 
     private var settingsHeader: some View {
         ZStack {
-            Text("Settings")
+            Text(String(localized: "settings.title", defaultValue: "Settings"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -94,11 +94,11 @@ struct SettingsView: View {
 
     private var scanningSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionTitle("Scanning")
+            sectionTitle(String(localized: "settings.scanning.section_title", defaultValue: "Scanning"))
 
             VStack(spacing: 8) {
-                settingsToggleRow(title: "Vibrate on Scan", isOn: $vibrateOnScan)
-                settingsToggleRow(title: "Sound on Scan", isOn: $soundOnScan)
+                settingsToggleRow(title: String(localized: "settings.scanning.vibrate_on_scan", defaultValue: "Vibrate on Scan"), isOn: $vibrateOnScan)
+                settingsToggleRow(title: String(localized: "settings.scanning.sound_on_scan", defaultValue: "Sound on Scan"), isOn: $soundOnScan)
             }
         }
         .padding(.horizontal, 16)
@@ -108,17 +108,17 @@ struct SettingsView: View {
 
     private var storageSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionTitle("Storage")
+            sectionTitle(String(localized: "settings.storage.section_title", defaultValue: "Storage"))
 
             HStack {
-                Text("Default Save Location")
+                Text(String(localized: "settings.storage.default_save_location", defaultValue: "Default Save Location"))
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryText)
 
                 Spacer()
 
-                Text("Photos")
+                Text(String(localized: "settings.storage.photos", defaultValue: "Photos"))
                     .font(.custom("Inter-Regular", size: 14))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.secondaryText)
@@ -139,11 +139,11 @@ struct SettingsView: View {
 
     private var appearanceSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionTitle("Appearance")
+            sectionTitle(String(localized: "settings.appearance.section_title", defaultValue: "Appearance"))
 
             HStack(spacing: 16) {
                 appearanceCard(
-                    title: "System",
+                    title: String(localized: "settings.appearance.system", defaultValue: "System"),
                     icon: "circle.lefthalf.filled",
                     iconBgColor: Color(red: 0x35/255, green: 0x35/255, blue: 0x35/255),
                     isSelected: appearanceMode == "system"
@@ -152,7 +152,7 @@ struct SettingsView: View {
                 }
 
                 appearanceCard(
-                    title: "Light",
+                    title: String(localized: "settings.appearance.light", defaultValue: "Light"),
                     icon: "sun.max.fill",
                     iconBgColor: Color.white,
                     isSelected: appearanceMode == "light"
@@ -161,7 +161,7 @@ struct SettingsView: View {
                 }
 
                 appearanceCard(
-                    title: "Dark",
+                    title: String(localized: "settings.appearance.dark", defaultValue: "Dark"),
                     icon: "moon.fill",
                     iconBgColor: Color.white,
                     isSelected: appearanceMode == "dark"
@@ -177,13 +177,13 @@ struct SettingsView: View {
 
     private var dataSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionTitle("Data")
+            sectionTitle(String(localized: "settings.data.section_title", defaultValue: "Data"))
 
             Button {
                 showClearHistoryAlert = true
             } label: {
                 HStack {
-                    Text("Clear History")
+                    Text(String(localized: "settings.data.clear_history", defaultValue: "Clear History"))
                         .font(.custom("Inter-Medium", size: 16))
                         .tracking(-0.408)
                         .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
@@ -208,7 +208,7 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionTitle("About")
+            sectionTitle(String(localized: "settings.about.section_title", defaultValue: "About"))
 
             VStack(spacing: 0) {
                 // Rate app row (top rounded)
@@ -218,7 +218,7 @@ struct SettingsView: View {
                     }
                 } label: {
                     HStack {
-                        Text("Rate app")
+                        Text(String(localized: "settings.about.rate_app", defaultValue: "Rate app"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                             .foregroundStyle(DesignColors.primaryText)
@@ -243,7 +243,7 @@ struct SettingsView: View {
                     showPrivacyPolicy = true
                 } label: {
                     HStack {
-                        Text("Privacy Policy")
+                        Text(String(localized: "settings.about.privacy_policy", defaultValue: "Privacy Policy"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                             .foregroundStyle(DesignColors.primaryText)
@@ -268,7 +268,7 @@ struct SettingsView: View {
                     showTermsOfUse = true
                 } label: {
                     HStack {
-                        Text("Terms of Use")
+                        Text(String(localized: "settings.about.terms_of_use", defaultValue: "Terms of Use"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                             .foregroundStyle(DesignColors.primaryText)
@@ -290,7 +290,7 @@ struct SettingsView: View {
 
                 // Version row (bottom rounded)
                 HStack {
-                    Text("Version")
+                    Text(String(localized: "settings.about.version", defaultValue: "Version"))
                         .font(.custom("Inter-Medium", size: 16))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.secondaryText)

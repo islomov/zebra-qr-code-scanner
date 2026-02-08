@@ -29,7 +29,7 @@ struct ProductResultView: View {
                 }
             }
             .background(DesignColors.background)
-            .navigationTitle("Product result")
+            .navigationTitle(String(localized: "product_result.nav_title", defaultValue: "Product result"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -42,10 +42,10 @@ struct ProductResultView: View {
                     }
                 }
             }
-            .alert("Copied!", isPresented: $showCopiedAlert) {
-                Button("OK", role: .cancel) {}
+            .alert(String(localized: "common.alert.copied", defaultValue: "Copied!"), isPresented: $showCopiedAlert) {
+                Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
             } message: {
-                Text("Barcode copied to clipboard.")
+                Text(String(localized: "product_result.copied_message", defaultValue: "Barcode copied to clipboard."))
             }
         }
     }
@@ -102,7 +102,7 @@ struct ProductResultView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let category = product.category, !category.isEmpty {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Category")
+                                Text(String(localized: "product_result.category", defaultValue: "Category"))
                                     .font(.system(size: 14))
                                     .foregroundStyle(DesignColors.labelText)
                                 Text(category)
@@ -113,7 +113,7 @@ struct ProductResultView: View {
 
                         if let ingredients = product.ingredients, !ingredients.isEmpty {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Ingredients")
+                                Text(String(localized: "product_result.ingredients", defaultValue: "Ingredients"))
                                     .font(.system(size: 14))
                                     .foregroundStyle(DesignColors.labelText)
                                 Text(ingredients)
@@ -178,12 +178,12 @@ struct ProductResultView: View {
                     .foregroundStyle(DesignColors.primaryText)
 
                 VStack(spacing: 8) {
-                    Text("Product Not Found")
+                    Text(String(localized: "product_result.not_found.title", defaultValue: "Product Not Found"))
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(DesignColors.primaryText)
                         .multilineTextAlignment(.center)
 
-                    Text("No product information available for this barcode")
+                    Text(String(localized: "product_result.not_found.message", defaultValue: "No product information available for this barcode"))
                         .font(.system(size: 14))
                         .foregroundStyle(DesignColors.labelText)
                         .multilineTextAlignment(.center)
@@ -204,7 +204,7 @@ struct ProductResultView: View {
             ProgressView()
                 .scaleEffect(1.5)
 
-            Text("Looking up product...")
+            Text(String(localized: "product_result.loading", defaultValue: "Looking up product..."))
                 .font(.system(size: 14))
                 .foregroundStyle(DesignColors.secondaryText)
         }
@@ -220,7 +220,7 @@ struct ProductResultView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16))
-                        Text("Share")
+                        Text(String(localized: "common.share", defaultValue: "Share"))
                             .font(.system(size: 16, weight: .medium))
                     }
                     .padding(16)
@@ -236,7 +236,7 @@ struct ProductResultView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 16))
-                        Text("Copy barcode")
+                        Text(String(localized: "product_result.copy_barcode", defaultValue: "Copy barcode"))
                             .font(.system(size: 16, weight: .medium))
                     }
                     .padding(16)
@@ -251,7 +251,7 @@ struct ProductResultView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "barcode.viewfinder")
                             .font(.system(size: 16))
-                        Text("Scan again")
+                        Text(String(localized: "scan_result.scan_again", defaultValue: "Scan again"))
                             .font(.system(size: 16, weight: .medium))
                     }
                     .padding(16)
@@ -285,21 +285,21 @@ struct ProductResultView: View {
     private var typeDisplayName: String {
         switch type {
         case "code128":
-            return "Code 128"
+            return String(localized: "code_type.code128", defaultValue: "Code 128")
         case "ean13":
-            return "EAN-13"
+            return String(localized: "code_type.ean13", defaultValue: "EAN-13")
         case "ean8":
-            return "EAN-8"
+            return String(localized: "code_type.ean8", defaultValue: "EAN-8")
         case "upce":
-            return "UPC-E"
+            return String(localized: "code_type.upce", defaultValue: "UPC-E")
         case "code39":
-            return "Code 39"
+            return String(localized: "code_type.code39", defaultValue: "Code 39")
         case "code93":
-            return "Code 93"
+            return String(localized: "code_type.code93", defaultValue: "Code 93")
         case "itf14":
-            return "ITF-14"
+            return String(localized: "code_type.itf14", defaultValue: "ITF-14")
         default:
-            return "Barcode"
+            return String(localized: "common.barcode", defaultValue: "Barcode")
         }
     }
 

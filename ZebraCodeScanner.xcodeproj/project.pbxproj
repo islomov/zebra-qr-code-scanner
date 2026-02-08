@@ -13,6 +13,7 @@
 		1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */; };
 		15AE5A002F53B00000C8A8F0 /* privacy-policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A012F53B00000C8A8F0 /* privacy-policy.html */; };
 		15AE5A022F53B00000C8A8F1 /* terms-of-use.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A032F53B00000C8A8F1 /* terms-of-use.html */; };
+		15AE5A052F53B10000C8A8F3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		15AE59BC2F263F2C002C8A8F /* ZebraCodeScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZebraCodeScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15AE5A012F53B00000C8A8F0 /* privacy-policy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "privacy-policy.html"; sourceTree = "<group>"; };
 		15AE5A032F53B00000C8A8F1 /* terms-of-use.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "terms-of-use.html"; sourceTree = "<group>"; };
+		15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = "Localizable.xcstrings"; path = "ZebraCodeScanner/Localizable.xcstrings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -50,6 +52,7 @@
 				1581A58D2F30E52200B61DB5 /* GoogleService-Info.plist */,
 				15AE5A012F53B00000C8A8F0 /* privacy-policy.html */,
 				15AE5A032F53B00000C8A8F1 /* terms-of-use.html */,
+				15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */,
 				15AE59BE2F263F2C002C8A8F /* ZebraCodeScanner */,
 				15AE59BD2F263F2C002C8A8F /* Products */,
 			);
@@ -136,6 +139,7 @@
 				1581A58E2F30E52200B61DB5 /* GoogleService-Info.plist in Resources */,
 				15AE5A002F53B00000C8A8F0 /* privacy-policy.html in Resources */,
 				15AE5A022F53B00000C8A8F1 /* terms-of-use.html in Resources */,
+				15AE5A052F53B10000C8A8F3 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

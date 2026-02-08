@@ -54,7 +54,7 @@ struct QRCodeFormView: View {
 
     private var navigationHeader: some View {
         ZStack {
-            Text("QR Codes")
+            Text(String(localized: "generate.section.qr_codes", defaultValue: "QR Codes"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -155,7 +155,7 @@ struct QRCodeFormView: View {
     private var textFields: some View {
         customTextEditor(
             text: $viewModel.text,
-            placeholder: "Enter text",
+            placeholder: String(localized: "qr_form.placeholder.enter_text", defaultValue: "Enter text"),
             fieldKey: "text",
             isRequired: true
         )
@@ -167,7 +167,7 @@ struct QRCodeFormView: View {
     private var urlFields: some View {
         customTextField(
             text: $viewModel.url,
-            placeholder: "Example.com",
+            placeholder: String(localized: "qr_form.placeholder.example_url", defaultValue: "Example.com"),
             fieldKey: "url",
             isRequired: true,
             keyboardType: .URL,
@@ -182,7 +182,7 @@ struct QRCodeFormView: View {
     private var phoneFields: some View {
         customTextField(
             text: $viewModel.phone,
-            placeholder: "+123 456 789",
+            placeholder: String(localized: "qr_form.placeholder.phone", defaultValue: "+123 456 789"),
             fieldKey: "phone",
             isRequired: true,
             keyboardType: .phonePad,
@@ -197,7 +197,7 @@ struct QRCodeFormView: View {
         VStack(spacing: 8) {
             customTextField(
                 text: $viewModel.emailTo,
-                placeholder: "Forexample@gmail.com",
+                placeholder: String(localized: "qr_form.placeholder.email", defaultValue: "Forexample@gmail.com"),
                 fieldKey: "emailTo",
                 isRequired: true,
                 keyboardType: .emailAddress,
@@ -207,14 +207,14 @@ struct QRCodeFormView: View {
 
             customTextField(
                 text: $viewModel.emailSubject,
-                placeholder: "Subject (Optional)",
+                placeholder: String(localized: "qr_form.placeholder.subject_optional", defaultValue: "Subject (Optional)"),
                 fieldKey: "emailSubject",
                 isRequired: false
             )
 
             customTextEditor(
                 text: $viewModel.emailBody,
-                placeholder: "Message",
+                placeholder: String(localized: "qr_form.placeholder.message", defaultValue: "Message"),
                 fieldKey: "emailBody",
                 isRequired: false
             )
@@ -228,7 +228,7 @@ struct QRCodeFormView: View {
         VStack(spacing: 12) {
             customTextField(
                 text: $viewModel.wifiSSID,
-                placeholder: "Wi-Fi Name (SSD)",
+                placeholder: String(localized: "qr_form.placeholder.wifi_name", defaultValue: "Wi-Fi Name (SSD)"),
                 fieldKey: "wifiSSID",
                 isRequired: true,
                 autocapitalization: false
@@ -239,7 +239,7 @@ struct QRCodeFormView: View {
             if viewModel.wifiSecurity != .none {
                 customTextField(
                     text: $viewModel.wifiPassword,
-                    placeholder: "Wi-Fi Password",
+                    placeholder: String(localized: "qr_form.placeholder.wifi_password", defaultValue: "Wi-Fi Password"),
                     fieldKey: "wifiPassword",
                     isRequired: false,
                     isSecure: true
@@ -301,7 +301,7 @@ struct QRCodeFormView: View {
                         .frame(width: 24, height: 24)
                         .foregroundStyle(Color(red: 0x27/255, green: 0x61/255, blue: 0xF4/255))
 
-                    Text("Import from Contacts")
+                    Text(String(localized: "qr_form.button.import_contacts", defaultValue: "Import from Contacts"))
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(Color(red: 0x27/255, green: 0x61/255, blue: 0xF4/255))
@@ -335,7 +335,7 @@ struct QRCodeFormView: View {
 
             customTextField(
                 text: $viewModel.vcardName,
-                placeholder: "Full name",
+                placeholder: String(localized: "qr_form.placeholder.full_name", defaultValue: "Full name"),
                 fieldKey: "vcardName",
                 isRequired: true,
                 contentType: .name
@@ -343,7 +343,7 @@ struct QRCodeFormView: View {
 
             customTextField(
                 text: $viewModel.vcardPhone,
-                placeholder: "Phone (Optional)",
+                placeholder: String(localized: "qr_form.placeholder.phone_optional", defaultValue: "Phone (Optional)"),
                 fieldKey: "vcardPhone",
                 isRequired: false,
                 keyboardType: .phonePad,
@@ -352,7 +352,7 @@ struct QRCodeFormView: View {
 
             customTextField(
                 text: $viewModel.vcardEmail,
-                placeholder: "Email (Optional)",
+                placeholder: String(localized: "qr_form.placeholder.email_optional", defaultValue: "Email (Optional)"),
                 fieldKey: "vcardEmail",
                 isRequired: false,
                 keyboardType: .emailAddress,
@@ -362,7 +362,7 @@ struct QRCodeFormView: View {
 
             customTextField(
                 text: $viewModel.vcardCompany,
-                placeholder: "Company name (Optional)",
+                placeholder: String(localized: "qr_form.placeholder.company_optional", defaultValue: "Company name (Optional)"),
                 fieldKey: "vcardCompany",
                 isRequired: false,
                 contentType: .organizationName
@@ -377,7 +377,7 @@ struct QRCodeFormView: View {
         VStack(spacing: 8) {
             customTextField(
                 text: $viewModel.smsPhone,
-                placeholder: "+123 456 789",
+                placeholder: String(localized: "qr_form.placeholder.sms_phone", defaultValue: "+123 456 789"),
                 fieldKey: "smsPhone",
                 isRequired: true,
                 keyboardType: .phonePad,
@@ -386,7 +386,7 @@ struct QRCodeFormView: View {
 
             customTextEditor(
                 text: $viewModel.smsMessage,
-                placeholder: "Message (Optional)",
+                placeholder: String(localized: "qr_form.placeholder.message_optional", defaultValue: "Message (Optional)"),
                 fieldKey: "smsMessage",
                 isRequired: false
             )
@@ -414,7 +414,7 @@ struct QRCodeFormView: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(DesignColors.primaryButtonText)
 
-                Text("Generate QR Code")
+                Text(String(localized: "qr_form.button.generate", defaultValue: "Generate QR Code"))
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryButtonText)

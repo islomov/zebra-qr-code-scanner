@@ -52,7 +52,7 @@ struct BarcodeFormView: View {
 
     private var navigationHeader: some View {
         ZStack {
-            Text(type.is2D ? "2D Barcodes" : "1D Barcodes")
+            Text(type.is2D ? String(localized: "generate.section.2d_barcodes", defaultValue: "2D Barcodes") : String(localized: "generate.section.1d_barcodes", defaultValue: "1D Barcodes"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -162,34 +162,34 @@ struct BarcodeFormView: View {
     private var placeholderText: String {
         switch type {
         case .code128:
-            return "Enter text or numbers"
+            return String(localized: "barcode_form.placeholder.text_or_numbers", defaultValue: "Enter text or numbers")
         case .ean13:
-            return "Enter 13 digits"
+            return String(localized: "barcode_form.placeholder.enter_13_digits", defaultValue: "Enter 13 digits")
         case .ean8:
-            return "Enter 8 digits"
+            return String(localized: "barcode_form.placeholder.enter_8_digits", defaultValue: "Enter 8 digits")
         case .upca:
-            return "Enter 12 digits"
+            return String(localized: "barcode_form.placeholder.enter_12_digits", defaultValue: "Enter 12 digits")
         case .aztec:
-            return "Enter text or numbers"
+            return String(localized: "barcode_form.placeholder.text_or_numbers", defaultValue: "Enter text or numbers")
         case .pdf417:
-            return "Enter text or numbers"
+            return String(localized: "barcode_form.placeholder.text_or_numbers", defaultValue: "Enter text or numbers")
         }
     }
 
     private var footerText: String {
         switch type {
         case .code128:
-            return "Code 128 supports letters, numbers, and special characters"
+            return String(localized: "barcode_form.footer.code128", defaultValue: "Code 128 supports letters, numbers, and special characters")
         case .ean13:
-            return "Enter 12 or 13 digits. Check digit will be calculated automatically"
+            return String(localized: "barcode_form.footer.ean13", defaultValue: "Enter 12 or 13 digits. Check digit will be calculated automatically")
         case .ean8:
-            return "Enter 7 or 8 digits. Check digit will be calculated automatically"
+            return String(localized: "barcode_form.footer.ean8", defaultValue: "Enter 7 or 8 digits. Check digit will be calculated automatically")
         case .upca:
-            return "Enter 11 or 12 digits. Check digit will be calculated automatically"
+            return String(localized: "barcode_form.footer.upca", defaultValue: "Enter 11 or 12 digits. Check digit will be calculated automatically")
         case .aztec:
-            return "Aztec codes support text, numbers, and special characters"
+            return String(localized: "barcode_form.footer.aztec", defaultValue: "Aztec codes support text, numbers, and special characters")
         case .pdf417:
-            return "PDF417 codes support text, numbers, and special characters"
+            return String(localized: "barcode_form.footer.pdf417", defaultValue: "PDF417 codes support text, numbers, and special characters")
         }
     }
 
@@ -213,7 +213,7 @@ struct BarcodeFormView: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(DesignColors.primaryButtonText)
 
-                Text("Generate Barcode")
+                Text(String(localized: "barcode_form.button.generate", defaultValue: "Generate Barcode"))
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryButtonText)

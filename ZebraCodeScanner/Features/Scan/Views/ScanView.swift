@@ -66,22 +66,22 @@ struct ScanView: View {
         .sheet(isPresented: $viewModel.showManualEntry) {
             ManualBarcodeEntryView(viewModel: viewModel)
         }
-        .alert("Camera Access Required", isPresented: $viewModel.showPermissionAlert) {
-            Button("Open Settings") {
+        .alert(String(localized: "scan.permission.title", defaultValue: "Camera Access Required"), isPresented: $viewModel.showPermissionAlert) {
+            Button(String(localized: "scan.permission.open_settings", defaultValue: "Open Settings")) {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) {}
         } message: {
-            Text("Please allow camera access in Settings to scan QR codes and barcodes.")
+            Text(String(localized: "scan.permission.message", defaultValue: "Please allow camera access in Settings to scan QR codes and barcodes."))
         }
-        .alert("Scanning Unavailable", isPresented: .constant(viewModel.errorMessage != nil)) {
-            Button("OK") {
+        .alert(String(localized: "scan.unavailable.title", defaultValue: "Scanning Unavailable"), isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button(String(localized: "common.ok", defaultValue: "OK")) {
                 viewModel.errorMessage = nil
             }
         } message: {
-            Text(viewModel.errorMessage ?? "An error occurred")
+            Text(viewModel.errorMessage ?? String(localized: "scan.unavailable.default_error", defaultValue: "An error occurred"))
         }
     }
 
@@ -140,12 +140,12 @@ struct ScanView: View {
                         .frame(width: 72, height: 72)
                         .foregroundStyle(DesignColors.primaryText)
 
-                    Text("Scan QR & Barcodes")
+                    Text(String(localized: "scan.welcome.title", defaultValue: "Scan QR & Barcodes"))
                         .font(.custom("Inter-SemiBold", size: 20))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
 
-                    Text("Use your camera to scan QR codes and barcodes.")
+                    Text(String(localized: "scan.welcome.message", defaultValue: "Use your camera to scan QR codes and barcodes."))
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.secondaryText)
@@ -157,7 +157,7 @@ struct ScanView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "camera")
                                 .font(.system(size: 16, weight: .medium))
-                            Text("Start Scanning")
+                            Text(String(localized: "scan.welcome.start_scanning", defaultValue: "Start Scanning"))
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
                         }
@@ -177,7 +177,7 @@ struct ScanView: View {
 
     private var scanHeader: some View {
         ZStack {
-            Text("Scan")
+            Text(String(localized: "scan.header.title", defaultValue: "Scan"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(.white)
@@ -253,12 +253,12 @@ struct ScanView: View {
                     .font(.system(size: 72))
                     .foregroundStyle(DesignColors.primaryText)
 
-                Text("Scanner Not Available")
+                Text(String(localized: "scan.unsupported.title", defaultValue: "Scanner Not Available"))
                     .font(.custom("Inter-SemiBold", size: 20))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryText)
 
-                Text("This device doesn't support barcode scanning. You can still import images from your photo library.")
+                Text(String(localized: "scan.unsupported.message", defaultValue: "This device doesn't support barcode scanning. You can still import images from your photo library."))
                     .font(.custom("Inter-Regular", size: 14))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.secondaryText)
@@ -271,7 +271,7 @@ struct ScanView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "photo.on.rectangle")
                         .font(.system(size: 16, weight: .medium))
-                    Text("Import from Photos")
+                    Text(String(localized: "scan.unsupported.import_from_photos", defaultValue: "Import from Photos"))
                         .font(.custom("Inter-Medium", size: 16))
                         .tracking(-0.408)
                 }
@@ -434,7 +434,7 @@ struct ScanModePicker: View {
                         selectedMode = mode
                     }
                 } label: {
-                    Text(mode.rawValue)
+                    Text(mode.title)
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -482,7 +482,7 @@ struct ManualBarcodeEntryView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             ZStack {
-                Text("Enter Barcode")
+                Text(String(localized: "scan.manual_entry.title", defaultValue: "Enter Barcode"))
                     .font(.custom("Inter-SemiBold", size: 20))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryText)
@@ -543,7 +543,7 @@ struct ManualBarcodeEntryView: View {
             .padding(.top, 16)
 
             // Input field
-            TextField("Enter barcode number", text: $viewModel.manualBarcodeText)
+            TextField(String(localized: "scan.manual_entry.placeholder", defaultValue: "Enter barcode number"), text: $viewModel.manualBarcodeText)
                 .font(.custom("Inter-Regular", size: 16))
                 .tracking(-0.408)
                 .keyboardType(.numberPad)
@@ -568,7 +568,7 @@ struct ManualBarcodeEntryView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 16, weight: .medium))
-                    Text("Search")
+                    Text(String(localized: "scan.manual_entry.search", defaultValue: "Search"))
                         .font(.custom("Inter-Medium", size: 16))
                         .tracking(-0.408)
                 }

@@ -160,11 +160,11 @@ final class ScanViewModel: ObservableObject {
         if let scanError = error as? DataScannerViewController.ScanningUnavailable {
             switch scanError {
             case .unsupported:
-                errorMessage = "This device does not support barcode scanning."
+                errorMessage = String(localized: "scan.error.unsupported", defaultValue: "This device does not support barcode scanning.")
             case .cameraRestricted:
-                errorMessage = "Camera access is required to scan codes. Please enable it in Settings."
+                errorMessage = String(localized: "scan.error.camera_restricted", defaultValue: "Camera access is required to scan codes. Please enable it in Settings.")
             @unknown default:
-                errorMessage = "Scanning is currently unavailable. Please try again later."
+                errorMessage = String(localized: "scan.error.unavailable", defaultValue: "Scanning is currently unavailable. Please try again later.")
             }
         } else {
             errorMessage = error.localizedDescription
@@ -177,7 +177,7 @@ final class ScanViewModel: ObservableObject {
         Task {
             guard let data = try? await selectedPhoto.loadTransferable(type: Data.self),
                   let uiImage = UIImage(data: data) else {
-                errorMessage = "Failed to load image"
+                errorMessage = String(localized: "scan.error.failed_to_load_image", defaultValue: "Failed to load image")
                 return
             }
 
@@ -187,7 +187,7 @@ final class ScanViewModel: ObservableObject {
 
     private func scanImageForCodes(_ image: UIImage) async {
         guard let cgImage = image.cgImage else {
-            errorMessage = "Invalid image format"
+            errorMessage = String(localized: "scan.error.invalid_image", defaultValue: "Invalid image format")
             return
         }
 
@@ -198,7 +198,7 @@ final class ScanViewModel: ObservableObject {
             try handler.perform([request])
 
             guard let observations = request.results, !observations.isEmpty else {
-                errorMessage = "No QR code or barcode found in this image"
+                errorMessage = String(localized: "scan.error.no_code_found", defaultValue: "No QR code or barcode found in this image")
                 return
             }
 
@@ -211,7 +211,7 @@ final class ScanViewModel: ObservableObject {
                 }
             }
         } catch {
-            errorMessage = "Failed to scan image: \(error.localizedDescription)"
+            errorMessage = "\(String(localized: "scan.error.scan_failed", defaultValue: "Failed to scan image:")) \(error.localizedDescription)"
         }
     }
 
@@ -275,29 +275,29 @@ final class ScanViewModel: ObservableObject {
     func getTypeDisplayName(_ type: String) -> String {
         switch type {
         case "qr":
-            return "QR Code"
+            return String(localized: "code_type.qr_code", defaultValue: "QR Code")
         case "code128":
-            return "Code 128"
+            return String(localized: "code_type.code128", defaultValue: "Code 128")
         case "ean13":
-            return "EAN-13"
+            return String(localized: "code_type.ean13", defaultValue: "EAN-13")
         case "ean8":
-            return "EAN-8"
+            return String(localized: "code_type.ean8", defaultValue: "EAN-8")
         case "upce":
-            return "UPC-E"
+            return String(localized: "code_type.upce", defaultValue: "UPC-E")
         case "code39":
-            return "Code 39"
+            return String(localized: "code_type.code39", defaultValue: "Code 39")
         case "code93":
-            return "Code 93"
+            return String(localized: "code_type.code93", defaultValue: "Code 93")
         case "itf14":
-            return "ITF-14"
+            return String(localized: "code_type.itf14", defaultValue: "ITF-14")
         case "datamatrix":
-            return "Data Matrix"
+            return String(localized: "code_type.data_matrix", defaultValue: "Data Matrix")
         case "pdf417":
-            return "PDF417"
+            return String(localized: "code_type.pdf417", defaultValue: "PDF417")
         case "aztec":
-            return "Aztec"
+            return String(localized: "code_type.aztec", defaultValue: "Aztec")
         default:
-            return "Barcode"
+            return String(localized: "common.barcode", defaultValue: "Barcode")
         }
     }
 
