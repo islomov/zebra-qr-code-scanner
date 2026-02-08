@@ -58,6 +58,8 @@ final class GenerateViewModel: ObservableObject {
     @Published var qrBackgroundColor: Color = .white
     @Published var qrForegroundColor: Color = .black
     @Published var qrCenterLogo: UIImage? = nil
+    @Published var qrModuleStyle: QRModuleStyle = .square
+    @Published var isStyleDirty: Bool = false
     var savedEntity: GeneratedCodeEntity? = nil
 
     // MARK: - Services
@@ -73,12 +75,14 @@ final class GenerateViewModel: ObservableObject {
         qrBackgroundColor = .white
         qrForegroundColor = .black
         qrCenterLogo = nil
+        qrModuleStyle = .square
         generatedImage = qrService.generateStyledQRCode(
             from: content,
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
             foregroundColor: UIColor(qrForegroundColor),
-            centerLogo: qrCenterLogo
+            centerLogo: qrCenterLogo,
+            moduleStyle: qrModuleStyle
         )
     }
 
@@ -109,12 +113,14 @@ final class GenerateViewModel: ObservableObject {
         qrBackgroundColor = .white
         qrForegroundColor = .black
         qrCenterLogo = nil
+        qrModuleStyle = .square
         generatedImage = qrService.generateStyledQRCode(
             from: profileURL,
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
             foregroundColor: UIColor(qrForegroundColor),
-            centerLogo: qrCenterLogo
+            centerLogo: qrCenterLogo,
+            moduleStyle: qrModuleStyle
         )
     }
 
@@ -190,8 +196,16 @@ final class GenerateViewModel: ObservableObject {
             size: 300,
             backgroundColor: UIColor(qrBackgroundColor),
             foregroundColor: UIColor(qrForegroundColor),
-            centerLogo: qrCenterLogo
+            centerLogo: qrCenterLogo,
+            moduleStyle: qrModuleStyle
         )
+        isStyleDirty = true
+    }
+
+    func updateSavedImage() {
+        guard let entity = savedEntity, let image = generatedImage else { return }
+        entity.imageData = image.pngData()
+        dataManager.saveContext()
     }
 
     // MARK: - Delete
@@ -254,6 +268,8 @@ final class GenerateViewModel: ObservableObject {
         qrBackgroundColor = .white
         qrForegroundColor = .black
         qrCenterLogo = nil
+        qrModuleStyle = .square
+        isStyleDirty = false
         savedEntity = nil
     }
 }

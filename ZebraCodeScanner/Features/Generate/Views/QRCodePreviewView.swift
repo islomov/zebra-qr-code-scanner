@@ -85,6 +85,70 @@ struct ColorPickerRow: View {
     }
 }
 
+struct StylePickerRow: View {
+    let title: String
+    var subtitle: String = ""
+    @Binding var selectedStyle: QRModuleStyle
+    let onSelect: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.custom("Inter-Regular", size: 12))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.secondaryText)
+                }
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ForEach(QRModuleStyle.allCases) { style in
+                        Button {
+                            selectedStyle = style
+                            onSelect()
+                        } label: {
+                            VStack(spacing: 4) {
+                                ZStack {
+                                    Image(systemName: style.icon)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundStyle(DesignColors.primaryText)
+                                        .frame(width: 32, height: 32)
+
+                                    if selectedStyle == style {
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(DesignColors.primaryText, lineWidth: 2)
+                                            .frame(width: 36, height: 36)
+                                    }
+                                }
+
+                                Text(style.title)
+                                    .font(.custom("Inter-Regular", size: 11))
+                                    .tracking(-0.408)
+                                    .foregroundStyle(DesignColors.secondaryText)
+                            }
+                            .frame(width: 56, height: 56)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(3)
+            }
+            .background(DesignColors.lightText)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .padding(16)
+        .background(DesignColors.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
 struct QRCodePreviewView: View {
     let type: QRCodeContentType
     @ObservedObject var viewModel: GenerateViewModel
@@ -133,6 +197,17 @@ struct QRCodePreviewView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
+
+                // Dot shape picker
+                StylePickerRow(
+                    title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
+                    subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Customize the QR code dot pattern"),
+                    selectedStyle: $viewModel.qrModuleStyle
+                ) {
+                    viewModel.regenerateStyledQRCode()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
 
                 // Action buttons
                 actionButtons
@@ -199,10 +274,15 @@ struct QRCodePreviewView: View {
                 Spacer()
 
                 Button {
+                    if viewModel.isStyleDirty {
+                        viewModel.updateSavedImage()
+                    }
                     viewModel.reset()
                     dismiss()
                 } label: {
-                    Text(String(localized: "common.done", defaultValue: "Done"))
+                    Text(viewModel.isStyleDirty
+                         ? String(localized: "common.save", defaultValue: "Save")
+                         : String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
