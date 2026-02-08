@@ -157,7 +157,18 @@ final class ScanViewModel: ObservableObject {
     }
 
     func handleScanError(_ error: Error) {
-        errorMessage = error.localizedDescription
+        if let scanError = error as? DataScannerViewController.ScanningUnavailable {
+            switch scanError {
+            case .unsupported:
+                errorMessage = "This device does not support barcode scanning."
+            case .cameraRestricted:
+                errorMessage = "Camera access is required to scan codes. Please enable it in Settings."
+            @unknown default:
+                errorMessage = "Scanning is currently unavailable. Please try again later."
+            }
+        } else {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func processSelectedPhoto() {

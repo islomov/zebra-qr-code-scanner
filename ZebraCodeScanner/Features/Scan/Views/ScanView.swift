@@ -76,7 +76,7 @@ struct ScanView: View {
         } message: {
             Text("Please allow camera access in Settings to scan QR codes and barcodes.")
         }
-        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+        .alert("Scanning Unavailable", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.errorMessage = nil
             }
@@ -130,14 +130,15 @@ struct ScanView: View {
                 }
             } else {
                 DesignColors.background
+                    .ignoresSafeArea()
 
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     Image("icon-scan")
                         .renderingMode(.template)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 80, height: 80)
-                        .foregroundStyle(DesignColors.secondaryText)
+                        .frame(width: 72, height: 72)
+                        .foregroundStyle(DesignColors.primaryText)
 
                     Text("Scan QR & Barcodes")
                         .font(.custom("Inter-SemiBold", size: 20))
@@ -149,22 +150,25 @@ struct ScanView: View {
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.secondaryText)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal)
 
                     Button {
                         viewModel.startScanning()
                     } label: {
-                        Label("Start Scanning", systemImage: "camera")
-                            .font(.custom("Inter-Medium", size: 16))
-                            .tracking(-0.408)
-                            .padding()
-                            .frame(maxWidth: 200)
-                            .background(DesignColors.primaryActionBackground)
-                            .foregroundStyle(DesignColors.primaryButtonText)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        HStack(spacing: 8) {
+                            Image(systemName: "camera")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("Start Scanning")
+                                .font(.custom("Inter-Medium", size: 16))
+                                .tracking(-0.408)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: 200)
+                        .frame(height: 51)
+                        .background(DesignColors.primaryActionBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding()
             }
         }
     }
@@ -241,33 +245,46 @@ struct ScanView: View {
     // MARK: - Unsupported View
 
     private var unsupportedView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "camera.fill.badge.ellipsis")
-                .font(.system(size: 60))
-                .foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            Spacer()
 
-            Text("Scanner Not Available")
-                .font(.custom("Inter-SemiBold", size: 20))
-                .tracking(-0.408)
+            VStack(spacing: 20) {
+                Image(systemName: "camera.fill.badge.ellipsis")
+                    .font(.system(size: 72))
+                    .foregroundStyle(DesignColors.primaryText)
 
-            Text("This device doesn't support barcode scanning. You can still import images from your photo library.")
-                .font(.custom("Inter-Regular", size: 14))
-                .tracking(-0.408)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+                Text("Scanner Not Available")
+                    .font(.custom("Inter-SemiBold", size: 20))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+
+                Text("This device doesn't support barcode scanning. You can still import images from your photo library.")
+                    .font(.custom("Inter-Regular", size: 14))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
+
+            Spacer()
 
             PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
-                Label("Import from Photos", systemImage: "photo.on.rectangle")
-                    .font(.custom("Inter-Medium", size: 16))
-                    .tracking(-0.408)
-                    .padding()
-                    .frame(maxWidth: 200)
-                    .background(DesignColors.primaryText)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                HStack(spacing: 8) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Import from Photos")
+                        .font(.custom("Inter-Medium", size: 16))
+                        .tracking(-0.408)
+                }
+                .foregroundStyle(DesignColors.primaryButtonText)
+                .frame(maxWidth: .infinity)
+                .frame(height: 51)
+                .background(DesignColors.primaryActionBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
+        .background(DesignColors.background)
     }
 }
 
