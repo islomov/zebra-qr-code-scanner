@@ -233,3 +233,27 @@ enum BarcodeType: String, CaseIterable, Identifiable {
         allCases.filter { $0.is2D }
     }
 }
+
+enum QRModuleStyle: String, CaseIterable, Identifiable {
+    case square = "square"
+    case roundedSquare = "roundedSquare"
+    case circle = "circle"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .square: return String(localized: "qr_module_style.square.title", defaultValue: "Square")
+        case .roundedSquare: return String(localized: "qr_module_style.rounded_square.title", defaultValue: "Rounded")
+        case .circle: return String(localized: "qr_module_style.circle.title", defaultValue: "Circle")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .square: return "square.fill"
+        case .roundedSquare: return "app.fill"
+        case .circle: return "circle.fill"
+        }
+    }
+}

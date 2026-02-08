@@ -232,6 +232,17 @@ struct SocialMediaPreviewView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
 
+                // Dot shape picker
+                StylePickerRow(
+                    title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
+                    subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Customize the QR code dot pattern"),
+                    selectedStyle: $viewModel.qrModuleStyle
+                ) {
+                    viewModel.regenerateStyledQRCode()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
                 // Action buttons
                 actionButtons
                     .padding(.top, 24)
@@ -297,10 +308,15 @@ struct SocialMediaPreviewView: View {
                 Spacer()
 
                 Button {
+                    if viewModel.isStyleDirty {
+                        viewModel.updateSavedImage()
+                    }
                     viewModel.reset()
                     dismiss()
                 } label: {
-                    Text(String(localized: "common.done", defaultValue: "Done"))
+                    Text(viewModel.isStyleDirty
+                         ? String(localized: "common.save", defaultValue: "Save")
+                         : String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)

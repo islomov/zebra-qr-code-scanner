@@ -34,12 +34,27 @@ final class QRCodeGeneratorService {
         return UIImage(cgImage: cgImage)
     }
 
-    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, foregroundColor: UIColor = .black, centerLogo: UIImage? = nil) -> UIImage? {
+    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, foregroundColor: UIColor = .black, centerLogo: UIImage? = nil, moduleStyle: QRModuleStyle = .square) -> UIImage? {
         guard let data = content.data(using: .utf8) else { return nil }
+
+        let correctionLevel = centerLogo != nil ? "H" : "M"
+
+        // For non-square styles, use custom drawing path
+        if moduleStyle != .square {
+            return generateCustomStyledQRCode(
+                data: data,
+                size: size,
+                backgroundColor: backgroundColor,
+                foregroundColor: foregroundColor,
+                centerLogo: centerLogo,
+                moduleStyle: moduleStyle,
+                correctionLevel: correctionLevel
+            )
+        }
 
         let filter = CIFilter.qrCodeGenerator()
         filter.message = data
-        filter.correctionLevel = centerLogo != nil ? "H" : "M"
+        filter.correctionLevel = correctionLevel
 
         guard let outputImage = filter.outputImage else { return nil }
 
@@ -80,6 +95,227 @@ final class QRCodeGeneratorService {
                 let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
                 logo.draw(in: logoRect)
             }
+        }
+    }
+
+    // MARK: - Custom Styled QR Code Drawing
+
+    private func generateCustomStyledQRCode(data: Data, size: CGFloat, backgroundColor: UIColor, foregroundColor: UIColor, centerLogo: UIImage?, moduleStyle: QRModuleStyle, correctionLevel: String) -> UIImage? {
+        guard let matrix = extractModuleMatrix(data: data, correctionLevel: correctionLevel) else { return nil }
+        guard let bounds = findQRCodeBounds(in: matrix) else { return nil }
+
+        let qrSize = bounds.size
+        let moduleSize = size / CGFloat(qrSize)
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let cgCtx = ctx.cgContext
+
+            // Fill background
+            cgCtx.setFillColor(backgroundColor.cgColor)
+            cgCtx.fill(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+
+            // Draw data modules (skip finder pattern regions)
+            cgCtx.setFillColor(foregroundColor.cgColor)
+            for row in 0..<qrSize {
+                for col in 0..<qrSize {
+                    let matrixRow = row + bounds.originRow
+                    let matrixCol = col + bounds.originCol
+
+                    guard matrix[matrixRow][matrixCol] else { continue }
+                    guard !isFinderPattern(row: row, col: col, qrSize: qrSize) else { continue }
+
+                    let rect = CGRect(
+                        x: CGFloat(col) * moduleSize,
+                        y: CGFloat(row) * moduleSize,
+                        width: moduleSize,
+                        height: moduleSize
+                    )
+                    drawModule(in: cgCtx, rect: rect, style: moduleStyle)
+                }
+            }
+
+            // Draw finder patterns as composite shapes
+            let finderPositions = [
+                CGPoint(x: 0, y: 0),
+                CGPoint(x: CGFloat(qrSize - 7) * moduleSize, y: 0),
+                CGPoint(x: 0, y: CGFloat(qrSize - 7) * moduleSize)
+            ]
+            for origin in finderPositions {
+                drawFinderPattern(
+                    in: cgCtx,
+                    origin: origin,
+                    moduleSize: moduleSize,
+                    style: moduleStyle,
+                    foregroundColor: foregroundColor,
+                    backgroundColor: backgroundColor
+                )
+            }
+
+            // Overlay center logo
+            if let logo = centerLogo {
+                let logoSize = size * 0.22
+                let logoPadding: CGFloat = 6
+                let backgroundSize = logoSize + logoPadding * 2
+                let backgroundOrigin = CGPoint(x: (size - backgroundSize) / 2, y: (size - backgroundSize) / 2)
+                let backgroundRect = CGRect(origin: backgroundOrigin, size: CGSize(width: backgroundSize, height: backgroundSize))
+
+                cgCtx.setFillColor(UIColor.white.cgColor)
+                cgCtx.addPath(UIBezierPath(roundedRect: backgroundRect, cornerRadius: 8).cgPath)
+                cgCtx.fillPath()
+
+                let logoOrigin = CGPoint(x: (size - logoSize) / 2, y: (size - logoSize) / 2)
+                let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
+                logo.draw(in: logoRect)
+            }
+        }
+    }
+
+    private func extractModuleMatrix(data: Data, correctionLevel: String) -> [[Bool]]? {
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = data
+        filter.correctionLevel = correctionLevel
+
+        guard let outputImage = filter.outputImage else { return nil }
+
+        let extent = outputImage.extent
+        let width = Int(extent.width)
+        let height = Int(extent.height)
+
+        guard let cgImage = context.createCGImage(outputImage, from: extent) else { return nil }
+
+        let bytesPerPixel = cgImage.bitsPerPixel / 8
+        let bytesPerRow = cgImage.bytesPerRow
+
+        guard let dataProvider = cgImage.dataProvider,
+              let pixelData = dataProvider.data,
+              let pointer = CFDataGetBytePtr(pixelData) else { return nil }
+
+        var matrix: [[Bool]] = Array(repeating: Array(repeating: false, count: width), count: height)
+
+        for y in 0..<height {
+            for x in 0..<width {
+                let offset = y * bytesPerRow + x * bytesPerPixel
+                let pixelValue = pointer[offset]
+                matrix[y][x] = (pixelValue == 0)
+            }
+        }
+
+        return matrix
+    }
+
+    private func findQRCodeBounds(in matrix: [[Bool]]) -> (originRow: Int, originCol: Int, size: Int)? {
+        let height = matrix.count
+        let width = matrix[0].count
+
+        var minRow = height, minCol = width
+        var maxRow = 0, maxCol = 0
+
+        for row in 0..<height {
+            for col in 0..<width {
+                if matrix[row][col] {
+                    minRow = min(minRow, row)
+                    minCol = min(minCol, col)
+                    maxRow = max(maxRow, row)
+                    maxCol = max(maxCol, col)
+                }
+            }
+        }
+
+        guard minRow <= maxRow && minCol <= maxCol else { return nil }
+
+        let size = max(maxRow - minRow + 1, maxCol - minCol + 1)
+        return (minRow, minCol, size)
+    }
+
+    private func isFinderPattern(row: Int, col: Int, qrSize: Int) -> Bool {
+        // Top-left finder: 0..6, 0..6
+        if row <= 6 && col <= 6 { return true }
+        // Top-right finder: 0..6, (qrSize-7)..(qrSize-1)
+        if row <= 6 && col >= qrSize - 7 { return true }
+        // Bottom-left finder: (qrSize-7)..(qrSize-1), 0..6
+        if row >= qrSize - 7 && col <= 6 { return true }
+        return false
+    }
+
+    private func drawModule(in context: CGContext, rect: CGRect, style: QRModuleStyle) {
+        let inset: CGFloat = rect.width * 0.05
+        let insetRect = rect.insetBy(dx: inset, dy: inset)
+
+        switch style {
+        case .square:
+            context.fill(insetRect)
+
+        case .roundedSquare:
+            let radius = insetRect.width * 0.3
+            let path = UIBezierPath(roundedRect: insetRect, cornerRadius: radius)
+            context.addPath(path.cgPath)
+            context.fillPath()
+
+        case .circle:
+            let path = UIBezierPath(ovalIn: insetRect)
+            context.addPath(path.cgPath)
+            context.fillPath()
+        }
+    }
+
+    private func drawFinderPattern(in context: CGContext, origin: CGPoint, moduleSize: CGFloat, style: QRModuleStyle, foregroundColor: UIColor, backgroundColor: UIColor) {
+        let outerSize = moduleSize * 7
+        let middleSize = moduleSize * 5
+        let innerSize = moduleSize * 3
+
+        let outerRect = CGRect(origin: origin, size: CGSize(width: outerSize, height: outerSize))
+        let middleRect = CGRect(
+            x: origin.x + moduleSize,
+            y: origin.y + moduleSize,
+            width: middleSize,
+            height: middleSize
+        )
+        let innerRect = CGRect(
+            x: origin.x + moduleSize * 2,
+            y: origin.y + moduleSize * 2,
+            width: innerSize,
+            height: innerSize
+        )
+
+        switch style {
+        case .square:
+            context.setFillColor(foregroundColor.cgColor)
+            context.fill(outerRect)
+            context.setFillColor(backgroundColor.cgColor)
+            context.fill(middleRect)
+            context.setFillColor(foregroundColor.cgColor)
+            context.fill(innerRect)
+
+        case .roundedSquare:
+            let outerRadius = moduleSize * 1.0
+            let middleRadius = moduleSize * 0.8
+            let innerRadius = moduleSize * 0.6
+
+            context.setFillColor(foregroundColor.cgColor)
+            context.addPath(UIBezierPath(roundedRect: outerRect, cornerRadius: outerRadius).cgPath)
+            context.fillPath()
+
+            context.setFillColor(backgroundColor.cgColor)
+            context.addPath(UIBezierPath(roundedRect: middleRect, cornerRadius: middleRadius).cgPath)
+            context.fillPath()
+
+            context.setFillColor(foregroundColor.cgColor)
+            context.addPath(UIBezierPath(roundedRect: innerRect, cornerRadius: innerRadius).cgPath)
+            context.fillPath()
+
+        case .circle:
+            context.setFillColor(foregroundColor.cgColor)
+            context.addPath(UIBezierPath(ovalIn: outerRect).cgPath)
+            context.fillPath()
+
+            context.setFillColor(backgroundColor.cgColor)
+            context.addPath(UIBezierPath(ovalIn: middleRect).cgPath)
+            context.fillPath()
+
+            context.setFillColor(foregroundColor.cgColor)
+            context.addPath(UIBezierPath(ovalIn: innerRect).cgPath)
+            context.fillPath()
         }
     }
 
