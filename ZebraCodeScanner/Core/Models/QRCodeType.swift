@@ -20,13 +20,13 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .text: return "Text"
-        case .url: return "URL"
-        case .phone: return "Phone"
-        case .email: return "Email"
-        case .wifi: return "WiFi"
-        case .vcard: return "Contact"
-        case .sms: return "SMS"
+        case .text: return String(localized: "qr_content_type.text.title", defaultValue: "Text")
+        case .url: return String(localized: "qr_content_type.url.title", defaultValue: "URL")
+        case .phone: return String(localized: "qr_content_type.phone.title", defaultValue: "Phone")
+        case .email: return String(localized: "qr_content_type.email.title", defaultValue: "Email")
+        case .wifi: return String(localized: "qr_content_type.wifi.title", defaultValue: "WiFi")
+        case .vcard: return String(localized: "qr_content_type.vcard.title", defaultValue: "Contact")
+        case .sms: return String(localized: "qr_content_type.sms.title", defaultValue: "SMS")
         }
     }
 
@@ -44,13 +44,13 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .text: return "Plain text content"
-        case .url: return "Website link"
-        case .phone: return "Phone number"
-        case .email: return "Email address"
-        case .wifi: return "WiFi credentials"
-        case .vcard: return "Contact card"
-        case .sms: return "SMS message"
+        case .text: return String(localized: "qr_content_type.text.description", defaultValue: "Plain text content")
+        case .url: return String(localized: "qr_content_type.url.description", defaultValue: "Website link")
+        case .phone: return String(localized: "qr_content_type.phone.description", defaultValue: "Phone number")
+        case .email: return String(localized: "qr_content_type.email.description", defaultValue: "Email address")
+        case .wifi: return String(localized: "qr_content_type.wifi.description", defaultValue: "WiFi credentials")
+        case .vcard: return String(localized: "qr_content_type.vcard.description", defaultValue: "Contact card")
+        case .sms: return String(localized: "qr_content_type.sms.description", defaultValue: "SMS message")
         }
     }
 }
@@ -64,9 +64,9 @@ enum WiFiSecurityType: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .none: return "None"
-        case .wpa: return "WPA/WPA2"
-        case .wep: return "WEP"
+        case .none: return String(localized: "wifi_security.none.title", defaultValue: "None")
+        case .wpa: return String(localized: "wifi_security.wpa.title", defaultValue: "WPA/WPA2")
+        case .wep: return String(localized: "wifi_security.wep.title", defaultValue: "WEP")
         }
     }
 }
@@ -85,14 +85,14 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .facebook: return "Facebook"
-        case .instagram: return "Instagram"
-        case .x: return "X"
-        case .reddit: return "Reddit"
-        case .tiktok: return "TikTok"
-        case .snapchat: return "Snapchat"
-        case .threads: return "Threads"
-        case .youtube: return "YouTube"
+        case .facebook: return String(localized: "social_media.facebook.title", defaultValue: "Facebook")
+        case .instagram: return String(localized: "social_media.instagram.title", defaultValue: "Instagram")
+        case .x: return String(localized: "social_media.x.title", defaultValue: "X")
+        case .reddit: return String(localized: "social_media.reddit.title", defaultValue: "Reddit")
+        case .tiktok: return String(localized: "social_media.tiktok.title", defaultValue: "TikTok")
+        case .snapchat: return String(localized: "social_media.snapchat.title", defaultValue: "Snapchat")
+        case .threads: return String(localized: "social_media.threads.title", defaultValue: "Threads")
+        case .youtube: return String(localized: "social_media.youtube.title", defaultValue: "YouTube")
         }
     }
 
@@ -111,14 +111,14 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .facebook: return "Facebook profile"
-        case .instagram: return "Instagram profile"
-        case .x: return "X (Twitter) profile"
-        case .reddit: return "Reddit profile"
-        case .tiktok: return "TikTok profile"
-        case .snapchat: return "Snapchat profile"
-        case .threads: return "Threads profile"
-        case .youtube: return "YouTube channel"
+        case .facebook: return String(localized: "social_media.facebook.description", defaultValue: "Facebook profile")
+        case .instagram: return String(localized: "social_media.instagram.description", defaultValue: "Instagram profile")
+        case .x: return String(localized: "social_media.x.description", defaultValue: "X (Twitter) profile")
+        case .reddit: return String(localized: "social_media.reddit.description", defaultValue: "Reddit profile")
+        case .tiktok: return String(localized: "social_media.tiktok.description", defaultValue: "TikTok profile")
+        case .snapchat: return String(localized: "social_media.snapchat.description", defaultValue: "Snapchat profile")
+        case .threads: return String(localized: "social_media.threads.description", defaultValue: "Threads profile")
+        case .youtube: return String(localized: "social_media.youtube.description", defaultValue: "YouTube channel")
         }
     }
 
@@ -137,14 +137,14 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
 
     var placeholder: String {
         switch self {
-        case .facebook: return "username or page name"
-        case .instagram: return "username"
-        case .x: return "username"
-        case .reddit: return "username"
-        case .tiktok: return "username"
-        case .snapchat: return "username"
-        case .threads: return "username"
-        case .youtube: return "channel name"
+        case .facebook: return String(localized: "social_media.facebook.placeholder", defaultValue: "username or page name")
+        case .instagram: return String(localized: "social_media.instagram.placeholder", defaultValue: "username")
+        case .x: return String(localized: "social_media.x.placeholder", defaultValue: "username")
+        case .reddit: return String(localized: "social_media.reddit.placeholder", defaultValue: "username")
+        case .tiktok: return String(localized: "social_media.tiktok.placeholder", defaultValue: "username")
+        case .snapchat: return String(localized: "social_media.snapchat.placeholder", defaultValue: "username")
+        case .threads: return String(localized: "social_media.threads.placeholder", defaultValue: "username")
+        case .youtube: return String(localized: "social_media.youtube.placeholder", defaultValue: "channel name")
         }
     }
 }
@@ -161,12 +161,12 @@ enum BarcodeType: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .code128: return "Code 128"
-        case .ean13: return "EAN-13"
-        case .ean8: return "EAN-8"
-        case .upca: return "UPC-A"
-        case .aztec: return "Aztec"
-        case .pdf417: return "PDF417"
+        case .code128: return String(localized: "barcode_type.code128.title", defaultValue: "Code 128")
+        case .ean13: return String(localized: "barcode_type.ean13.title", defaultValue: "EAN-13")
+        case .ean8: return String(localized: "barcode_type.ean8.title", defaultValue: "EAN-8")
+        case .upca: return String(localized: "barcode_type.upca.title", defaultValue: "UPC-A")
+        case .aztec: return String(localized: "barcode_type.aztec.title", defaultValue: "Aztec")
+        case .pdf417: return String(localized: "barcode_type.pdf417.title", defaultValue: "PDF417")
         }
     }
 
@@ -180,12 +180,12 @@ enum BarcodeType: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .code128: return "Alphanumeric barcode"
-        case .ean13: return "13-digit product code"
-        case .ean8: return "8-digit product code"
-        case .upca: return "12-digit US product code"
-        case .aztec: return "2D matrix barcode"
-        case .pdf417: return "2D stacked barcode"
+        case .code128: return String(localized: "barcode_type.code128.description", defaultValue: "Alphanumeric barcode")
+        case .ean13: return String(localized: "barcode_type.ean13.description", defaultValue: "13-digit product code")
+        case .ean8: return String(localized: "barcode_type.ean8.description", defaultValue: "8-digit product code")
+        case .upca: return String(localized: "barcode_type.upca.description", defaultValue: "12-digit US product code")
+        case .aztec: return String(localized: "barcode_type.aztec.description", defaultValue: "2D matrix barcode")
+        case .pdf417: return String(localized: "barcode_type.pdf417.description", defaultValue: "2D stacked barcode")
         }
     }
 
@@ -209,12 +209,12 @@ enum BarcodeType: String, CaseIterable, Identifiable {
 
     var placeholder: String {
         switch self {
-        case .code128: return "Enter text or numbers"
-        case .ean13: return "Enter 13 digits"
-        case .ean8: return "Enter 8 digits"
-        case .upca: return "Enter 12 digits"
-        case .aztec: return "Enter text or numbers"
-        case .pdf417: return "Enter text or numbers"
+        case .code128: return String(localized: "barcode_type.code128.placeholder", defaultValue: "Enter text or numbers")
+        case .ean13: return String(localized: "barcode_type.ean13.placeholder", defaultValue: "Enter 13 digits")
+        case .ean8: return String(localized: "barcode_type.ean8.placeholder", defaultValue: "Enter 8 digits")
+        case .upca: return String(localized: "barcode_type.upca.placeholder", defaultValue: "Enter 12 digits")
+        case .aztec: return String(localized: "barcode_type.aztec.placeholder", defaultValue: "Enter text or numbers")
+        case .pdf417: return String(localized: "barcode_type.pdf417.placeholder", defaultValue: "Enter text or numbers")
         }
     }
 

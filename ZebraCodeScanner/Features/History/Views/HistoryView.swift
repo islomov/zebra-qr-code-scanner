@@ -46,7 +46,7 @@ struct HistoryView: View {
 
     private var historyHeader: some View {
         HStack {
-            Text("History")
+            Text(String(localized: "history.title", defaultValue: "History"))
                 .font(.custom("Inter-SemiBold", size: 28))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -79,7 +79,7 @@ struct HistoryView: View {
                 .font(.system(size: 18))
                 .foregroundStyle(DesignColors.secondaryText)
 
-            TextField("Search codes", text: $viewModel.searchText)
+            TextField(String(localized: "history.search_placeholder", defaultValue: "Search codes"), text: $viewModel.searchText)
                 .font(.custom("Inter-Regular", size: 14))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -110,7 +110,7 @@ struct HistoryView: View {
                         viewModel.selectedTab = tab
                     }
                 } label: {
-                    Text(tab.rawValue)
+                    Text(tab.title)
                         .font(.custom("Inter-Regular", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -152,7 +152,7 @@ struct HistoryView: View {
                 .clipShape(Circle())
 
             VStack(spacing: 8) {
-                Text("No history yet")
+                Text(String(localized: "history.empty.title", defaultValue: "No history yet"))
                     .font(.custom("Inter-SemiBold", size: 18))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryText)
@@ -171,11 +171,11 @@ struct HistoryView: View {
     private var emptyStateMessage: String {
         switch viewModel.selectedTab {
         case .all:
-            return "Generated and scanned codes will appear here"
+            return String(localized: "history.empty.all", defaultValue: "Generated and scanned codes will appear here")
         case .generated:
-            return "Generated QR codes and barcodes will appear here"
+            return String(localized: "history.empty.generated", defaultValue: "Generated QR codes and barcodes will appear here")
         case .scanned:
-            return "Scanned QR codes and barcodes will appear here"
+            return String(localized: "history.empty.scanned", defaultValue: "Scanned QR codes and barcodes will appear here")
         }
     }
 
@@ -198,7 +198,7 @@ struct HistoryView: View {
     @ViewBuilder
     private var generatedSections: some View {
         if !viewModel.qrCodes.isEmpty {
-            sectionHeader(icon: "icon-qr", title: "QR Codes")
+            sectionHeader(icon: "icon-qr", title: String(localized: "history.section.qr_codes", defaultValue: "QR Codes"))
 
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.qrCodes.enumerated()), id: \.element.id) { index, entity in
@@ -223,7 +223,7 @@ struct HistoryView: View {
         }
 
         if !viewModel.barcodes.isEmpty {
-            sectionHeader(icon: "icon-barcode1d", title: "Barcodes")
+            sectionHeader(icon: "icon-barcode1d", title: String(localized: "history.section.barcodes", defaultValue: "Barcodes"))
 
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.barcodes.enumerated()), id: \.element.id) { index, entity in
@@ -285,7 +285,7 @@ struct HistoryView: View {
                 .foregroundStyle(DesignColors.primaryText)
                 .frame(width: 24, height: 24)
 
-            Text("Scanned")
+            Text(String(localized: "history.section.scanned", defaultValue: "Scanned"))
                 .font(.custom("Inter-Medium", size: 16))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)

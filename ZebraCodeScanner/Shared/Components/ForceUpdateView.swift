@@ -10,12 +10,12 @@ struct ForceUpdateView: View {
                     .font(.system(size: 72))
                     .foregroundStyle(DesignColors.primaryText)
 
-                Text("Update Required")
+                Text(String(localized: "force_update.title", defaultValue: "Update Required"))
                     .font(.custom("Inter-SemiBold", size: 20))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryText)
 
-                Text("A new version of the app is available.\nPlease update to continue using the app.")
+                Text(String(localized: "force_update.message", defaultValue: "A new version of the app is available.\nPlease update to continue using the app."))
                     .font(.custom("Inter-Regular", size: 14))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.secondaryText)
@@ -29,7 +29,7 @@ struct ForceUpdateView: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                Text("Update Now")
+                Text(String(localized: "force_update.button", defaultValue: "Update Now"))
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
                     .frame(maxWidth: .infinity)

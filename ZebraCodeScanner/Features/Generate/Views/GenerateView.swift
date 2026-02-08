@@ -17,7 +17,7 @@ struct GenerateView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     // Custom Header
                     HStack {
-                        Text("Generate")
+                        Text(String(localized: "generate.title", defaultValue: "Generate"))
                             .font(.custom("Inter-SemiBold", size: 28))
                             .tracking(-0.408)
                             .foregroundStyle(DesignColors.primaryText)
@@ -43,7 +43,7 @@ struct GenerateView: View {
                     .padding(.bottom, 8)
 
                     // QR Codes Section
-                    sectionHeader(icon: "icon-qr", title: "QR Codes", iconColor: Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
+                    sectionHeader(icon: "icon-qr", title: String(localized: "generate.section.qr_codes", defaultValue: "QR Codes"), iconColor: Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
 
                     gridLayout(items: Array(QRCodeContentType.allCases)) { type in
                         NavigationLink {
@@ -59,7 +59,7 @@ struct GenerateView: View {
                     .padding(.horizontal, 16)
 
                     // 1D Barcodes Section
-                    sectionHeader(icon: "icon-1d-section", title: "1D Barcodes", iconColor: Color(red: 0xF2/255, green: 0x99/255, blue: 0x0A/255))
+                    sectionHeader(icon: "icon-1d-section", title: String(localized: "generate.section.1d_barcodes", defaultValue: "1D Barcodes"), iconColor: Color(red: 0xF2/255, green: 0x99/255, blue: 0x0A/255))
 
                     gridLayout(items: BarcodeType.barcodes1D) { type in
                         NavigationLink {
@@ -75,7 +75,7 @@ struct GenerateView: View {
                     .padding(.horizontal, 16)
 
                     // 2D Barcodes Section
-                    sectionHeader(icon: "icon-2d-section", title: "2D Barcodes", iconColor: Color(red: 0x2D/255, green: 0xD9/255, blue: 0x16/255))
+                    sectionHeader(icon: "icon-2d-section", title: String(localized: "generate.section.2d_barcodes", defaultValue: "2D Barcodes"), iconColor: Color(red: 0x2D/255, green: 0xD9/255, blue: 0x16/255))
 
                     gridLayout(items: BarcodeType.barcodes2D) { type in
                         NavigationLink {
@@ -91,7 +91,7 @@ struct GenerateView: View {
                     .padding(.horizontal, 16)
 
                     // Social Media Section
-                    sectionHeader(icon: "icon-social-section", title: "Social Media", iconColor: Color(red: 0xC2/255, green: 0x0E/255, blue: 0xEF/255))
+                    sectionHeader(icon: "icon-social-section", title: String(localized: "generate.section.social_media", defaultValue: "Social Media"), iconColor: Color(red: 0xC2/255, green: 0x0E/255, blue: 0xEF/255))
 
                     gridLayout(items: Array(SocialMediaType.allCases)) { type in
                         NavigationLink {
@@ -116,12 +116,12 @@ struct GenerateView: View {
                             .foregroundStyle(DesignColors.primaryText)
 
                         VStack(spacing: 8) {
-                            Text("Need a different code type?")
+                            Text(String(localized: "generate.request.title", defaultValue: "Need a different code type?"))
                                 .font(.custom("Inter-SemiBold", size: 20))
                                 .tracking(-0.408)
                                 .foregroundStyle(DesignColors.primaryText)
 
-                            Text("If you need additional QR codes or barcodes, let us know!")
+                            Text(String(localized: "generate.request.message", defaultValue: "If you need additional QR codes or barcodes, let us know!"))
                                 .font(.custom("Inter-Regular", size: 14))
                                 .tracking(-0.408)
                                 .foregroundStyle(DesignColors.secondaryText)
@@ -129,7 +129,7 @@ struct GenerateView: View {
                         .multilineTextAlignment(.center)
 
                         Link(destination: URL(string: "mailto:sardor.islomov.96@gmail.com?subject=Code%20Scanner%20-%20Feature%20Request")!) {
-                            Text("Send a Request")
+                            Text(String(localized: "generate.request.button", defaultValue: "Send a Request"))
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
                                 .foregroundStyle(DesignColors.lightText)

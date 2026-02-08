@@ -41,8 +41,15 @@ final class ScannerService: ObservableObject {
 
 // MARK: - Scan Mode Enum (shared with ScanViewModel)
 enum ScanMode: String, CaseIterable {
-    case qrCode = "QR Code"
-    case barcode = "Barcode"
+    case qrCode = "qrCode"
+    case barcode = "barcode"
+
+    var title: String {
+        switch self {
+        case .qrCode: return String(localized: "scan_mode.qr_code", defaultValue: "QR Code")
+        case .barcode: return String(localized: "scan_mode.barcode", defaultValue: "Barcode")
+        }
+    }
 
     var recognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> {
         switch self {

@@ -53,7 +53,7 @@ struct SocialMediaFormView: View {
 
     private var navigationHeader: some View {
         ZStack {
-            Text("Social media")
+            Text(String(localized: "social_media_form.title", defaultValue: "Social media"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -141,8 +141,8 @@ struct SocialMediaFormView: View {
 
     private var placeholderText: String {
         switch type {
-        case .facebook: return "Username or page name"
-        default: return "Username"
+        case .facebook: return String(localized: "social_media_form.placeholder.username_or_page", defaultValue: "Username or page name")
+        default: return String(localized: "social_media_form.placeholder.username", defaultValue: "Username")
         }
     }
 
@@ -166,7 +166,7 @@ struct SocialMediaFormView: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(DesignColors.primaryButtonText)
 
-                Text("Generate QR Code")
+                Text(String(localized: "qr_form.button.generate", defaultValue: "Generate QR Code"))
                     .font(.custom("Inter-Medium", size: 16))
                     .tracking(-0.408)
                     .foregroundStyle(DesignColors.primaryButtonText)
@@ -210,8 +210,8 @@ struct SocialMediaPreviewView: View {
                 // Color pickers
                 VStack(spacing: 12) {
                     ColorPickerRow(
-                        title: "Background color",
-                        subtitle: "Choose a preferred background color",
+                        title: String(localized: "preview.background_color.title", defaultValue: "Background color"),
+                        subtitle: String(localized: "preview.background_color.subtitle", defaultValue: "Choose a preferred background color"),
                         selectedColor: $viewModel.qrBackgroundColor,
                         borderColor: .white,
                         disabledColor: viewModel.qrForegroundColor
@@ -220,8 +220,8 @@ struct SocialMediaPreviewView: View {
                     }
 
                     ColorPickerRow(
-                        title: "QR Code Color",
-                        subtitle: "Choose a preferred QR code color",
+                        title: String(localized: "preview.qr_code_color.title", defaultValue: "QR Code Color"),
+                        subtitle: String(localized: "preview.qr_code_color.subtitle", defaultValue: "Choose a preferred QR code color"),
                         selectedColor: $viewModel.qrForegroundColor,
                         borderColor: .black,
                         disabledColor: viewModel.qrBackgroundColor
@@ -251,25 +251,25 @@ struct SocialMediaPreviewView: View {
                 }
             }
         }
-        .alert("Saved!", isPresented: $showSaveSuccess) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.alert.saved", defaultValue: "Saved!"), isPresented: $showSaveSuccess) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("QR code saved to your photo library.")
+            Text(String(localized: "preview.qr_saved_message", defaultValue: "QR code saved to your photo library."))
         }
-        .alert("Error", isPresented: $showSaveError) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "common.error", defaultValue: "Error"), isPresented: $showSaveError) {
+            Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
-            Text("Failed to save QR code. Please check photo library permissions.")
+            Text(String(localized: "preview.qr_save_error", defaultValue: "Failed to save QR code. Please check photo library permissions."))
         }
-        .alert("Delete QR Code?", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
+        .alert(String(localized: "preview.delete_qr_title", defaultValue: "Delete QR Code?"), isPresented: $showDeleteConfirmation) {
+            Button(String(localized: "common.delete", defaultValue: "Delete"), role: .destructive) {
                 viewModel.deleteCurrentCode()
                 viewModel.reset()
                 dismiss()
             }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) {}
         } message: {
-            Text("This will remove the QR code from your history.")
+            Text(String(localized: "preview.delete_qr_message", defaultValue: "This will remove the QR code from your history."))
         }
     }
 
@@ -277,7 +277,7 @@ struct SocialMediaPreviewView: View {
 
     private var navigationHeader: some View {
         ZStack {
-            Text("QR Code")
+            Text(String(localized: "common.qr_code", defaultValue: "QR Code"))
                 .font(.custom("Inter-SemiBold", size: 20))
                 .tracking(-0.408)
                 .foregroundStyle(DesignColors.primaryText)
@@ -300,7 +300,7 @@ struct SocialMediaPreviewView: View {
                     viewModel.reset()
                     dismiss()
                 } label: {
-                    Text("Done")
+                    Text(String(localized: "common.done", defaultValue: "Done"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(DesignColors.primaryText)
@@ -380,7 +380,7 @@ struct SocialMediaPreviewView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    Text("Change")
+                    Text(String(localized: "preview.logo.change", defaultValue: "Change"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
@@ -390,7 +390,7 @@ struct SocialMediaPreviewView: View {
                     viewModel.qrCenterLogo = nil
                     viewModel.regenerateStyledQRCode()
                 } label: {
-                    Text("Remove")
+                    Text(String(localized: "preview.logo.remove", defaultValue: "Remove"))
                         .font(.custom("Inter-Medium", size: 14))
                         .tracking(-0.408)
                         .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
@@ -402,7 +402,7 @@ struct SocialMediaPreviewView: View {
                             .font(.system(size: 24))
                             .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
 
-                        Text("Add Logo")
+                        Text(String(localized: "preview.logo.add", defaultValue: "Add Logo"))
                             .font(.custom("Inter-Medium", size: 14))
                             .tracking(-0.408)
                             .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
@@ -421,12 +421,12 @@ struct SocialMediaPreviewView: View {
                 if let image = viewModel.generatedImage {
                     ShareLink(
                         item: Image(uiImage: image),
-                        preview: SharePreview("\(type.title) QR Code", image: Image(uiImage: image))
+                        preview: SharePreview(String(localized: "common.qr_code", defaultValue: "QR Code"), image: Image(uiImage: image))
                     ) {
                         HStack(spacing: 8) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.system(size: 16, weight: .medium))
-                            Text("Share")
+                            Text(String(localized: "common.share", defaultValue: "Share"))
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
                         }
@@ -443,7 +443,7 @@ struct SocialMediaPreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.down.to.line")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Save to Photos")
+                        Text(String(localized: "common.save_to_photos", defaultValue: "Save to Photos"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }
@@ -460,7 +460,7 @@ struct SocialMediaPreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Copy Image")
+                        Text(String(localized: "common.copy_image", defaultValue: "Copy Image"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }
@@ -477,7 +477,7 @@ struct SocialMediaPreviewView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "trash")
                             .font(.system(size: 16, weight: .medium))
-                        Text("Delete")
+                        Text(String(localized: "common.delete", defaultValue: "Delete"))
                             .font(.custom("Inter-Medium", size: 16))
                             .tracking(-0.408)
                     }
