@@ -6,11 +6,9 @@
 //
 
 import SwiftUI
-import StoreKit
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.requestReview) private var requestReview
     @AppStorage("vibrateOnScan") private var vibrateOnScan = true
     @AppStorage("soundOnScan") private var soundOnScan = true
     @AppStorage("appearanceMode") private var appearanceMode = "system"
@@ -215,7 +213,9 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 // Rate app row (top rounded)
                 Button {
-                    requestReview()
+                    if let url = URL(string: "https://apps.apple.com/app/id6758623522?action=write-review") {
+                        UIApplication.shared.open(url)
+                    }
                 } label: {
                     HStack {
                         Text("Rate app")
