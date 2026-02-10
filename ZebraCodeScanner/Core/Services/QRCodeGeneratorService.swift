@@ -512,6 +512,40 @@ final class QRCodeGeneratorService {
         return "sms:\(cleaned)?body=\(encodedMessage)"
     }
 
+    func encodeGeo(latitude: String, longitude: String, label: String = "") -> String {
+        let lat = latitude.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lon = longitude.trimmingCharacters(in: .whitespacesAndNewlines)
+        if label.isEmpty {
+            return "geo:\(lat),\(lon)"
+        }
+        let encodedLabel = label.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? label
+        return "geo:\(lat),\(lon)?q=\(encodedLabel)"
+    }
+
+    func encodeCrypto(address: String, currency: CryptoCurrencyType) -> String {
+        let trimmed = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        return "\(currency.uriScheme):\(trimmed)"
+    }
+
+    func encodeEvent(title: String, startDate: Date, endDate: Date, location: String = "", description: String = "") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd'T'HHmmss"
+        formatter.timeZone = TimeZone.current
+
+        var event = "BEGIN:VEVENT\n"
+        event += "SUMMARY:\(title)\n"
+        event += "DTSTART:\(formatter.string(from: startDate))\n"
+        event += "DTEND:\(formatter.string(from: endDate))\n"
+        if !location.isEmpty {
+            event += "LOCATION:\(location)\n"
+        }
+        if !description.isEmpty {
+            event += "DESCRIPTION:\(description)\n"
+        }
+        event += "END:VEVENT"
+        return event
+    }
+
     // MARK: - Barcode Generation
 
     func generateBarcode(from content: String, type: BarcodeType, width: CGFloat = 300, height: CGFloat = 100) -> UIImage? {
