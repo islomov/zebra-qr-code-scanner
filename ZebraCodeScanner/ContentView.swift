@@ -41,12 +41,13 @@ struct ContentView: View {
                 }
                 .tag(2)
         }
-        .onChange(of: selectedTab) { [selectedTab] newTab in
-            print("[ContentView] Tab switched: \(selectedTab) → \(newTab)")
+        .onChange(of: selectedTab) { newTab in
             if newTab == 1 {
-                // Start scanning immediately - camera is kept alive
                 scanViewModel.startScanning()
-            } else if selectedTab == 1 {
+            } else {
+                // Always stop when leaving scan tab — the old code only
+                // stopped when the *previous* tab was 1, so the camera
+                // kept running silently if the user never visited tab 1.
                 scanViewModel.stopScanning()
             }
         }
