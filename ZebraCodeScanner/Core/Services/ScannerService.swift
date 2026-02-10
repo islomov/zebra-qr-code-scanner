@@ -55,6 +55,8 @@ enum ScanMode: String, CaseIterable {
 struct CameraScannerRepresentable: UIViewControllerRepresentable {
     let onScanned: (String, String) -> Void
     let onError: (Error) -> Void
+    let onZoomChanged: (CGFloat) -> Void
+    let onFocusTap: (CGPoint) -> Void
 
     @Binding var isScanning: Bool
     @Binding var isTorchOn: Bool
@@ -63,6 +65,8 @@ struct CameraScannerRepresentable: UIViewControllerRepresentable {
         let controller = CameraScannerViewController()
         controller.onScanned = onScanned
         controller.onError = onError
+        controller.onZoomChanged = onZoomChanged
+        controller.onFocusTap = onFocusTap
         return controller
     }
 
@@ -105,19 +109,95 @@ class CameraScannerViewController: UIViewController {
 
     var onScanned: ((String, String) -> Void)?
     var onError: ((Error) -> Void)?
+    var onZoomChanged: ((CGFloat) -> Void)?
+    var onFocusTap: ((CGPoint) -> Void)?
 
     // Debounce: avoid firing for the same code repeatedly
     private var lastScannedValue: String?
     private var lastScanTime: Date?
 
+    // Zoom
+    private var initialZoomFactor: CGFloat = 1.0
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+
+        // Pinch-to-zoom gesture
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        view.addGestureRecognizer(pinchGesture)
+
+        // Tap-to-focus gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        view.addGestureRecognizer(tapGesture)
 
         // Configure the capture session on a background queue — no main thread blocking.
         sessionQueue.async { [weak self] in
             self?.configureSession()
         }
+    }
+
+    @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        handlePinchZoom(scale: gesture.scale, state: gesture.state)
+    }
+
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        let tapPoint = gesture.location(in: view)
+        focusAt(pointInView: tapPoint)
+    }
+
+    // MARK: - Pinch to Zoom
+
+    func handlePinchZoom(scale: CGFloat, state: UIGestureRecognizer.State) {
+        guard let device = AVCaptureDevice.default(for: .video) else { return }
+
+        switch state {
+        case .began:
+            initialZoomFactor = device.videoZoomFactor
+        case .changed:
+            let maxZoom = min(device.activeFormat.videoMaxZoomFactor, 10.0)
+            let newZoom = min(max(initialZoomFactor * scale, 1.0), maxZoom)
+            do {
+                try device.lockForConfiguration()
+                device.videoZoomFactor = newZoom
+                device.unlockForConfiguration()
+                onZoomChanged?(newZoom)
+            } catch {
+                print("[CameraScanner] Failed to set zoom: \(error)")
+            }
+        default:
+            break
+        }
+    }
+
+    // MARK: - Tap to Focus
+
+    func focusAt(pointInView: CGPoint) {
+        guard let previewLayer = previewLayer else { return }
+
+        let devicePoint = previewLayer.captureDevicePointConverted(fromLayerPoint: pointInView)
+
+        guard let device = AVCaptureDevice.default(for: .video) else { return }
+
+        do {
+            try device.lockForConfiguration()
+
+            if device.isFocusPointOfInterestSupported {
+                device.focusPointOfInterest = devicePoint
+                device.focusMode = .autoFocus
+            }
+
+            if device.isExposurePointOfInterestSupported {
+                device.exposurePointOfInterest = devicePoint
+                device.exposureMode = .autoExpose
+            }
+
+            device.unlockForConfiguration()
+        } catch {
+            print("[CameraScanner] Failed to set focus: \(error)")
+        }
+
+        onFocusTap?(pointInView)
     }
 
     private func configureSession() {
