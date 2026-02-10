@@ -232,16 +232,62 @@ struct SocialMediaPreviewView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
 
-                // Dot shape picker
-                StylePickerRow(
-                    title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
-                    subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Customize the QR code dot pattern"),
-                    selectedStyle: $viewModel.qrModuleStyle
-                ) {
-                    viewModel.regenerateStyledQRCode()
+                // Shape pickers
+                VStack(spacing: 12) {
+                    StylePickerRow(
+                        title: String(localized: "preview.finder_shape.title", defaultValue: "Finder Shape"),
+                        subtitle: String(localized: "preview.finder_shape.subtitle", defaultValue: "Shape of the 3 corner squares"),
+                        selectedStyle: $viewModel.qrFinderStyle
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
+
+                    StylePickerRow(
+                        title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
+                        subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Shape of the inner data pattern"),
+                        selectedStyle: $viewModel.qrModuleStyle
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
+
+                // Center icon picker
+                CenterIconPickerRow(
+                    title: String(localized: "preview.center_icon.title", defaultValue: "Center Icon"),
+                    subtitle: String(localized: "preview.center_icon.subtitle", defaultValue: "Add an icon to the center of QR code"),
+                    selectedIcon: $viewModel.qrCenterIcon
+                ) { icon in
+                    viewModel.selectCenterIcon(icon)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
+                // Icon color pickers (only when a center icon is selected)
+                if viewModel.qrCenterIcon != nil {
+                    VStack(spacing: 12) {
+                        ColorPickerRow(
+                            title: String(localized: "preview.icon_background_color.title", defaultValue: "Icon Background"),
+                            subtitle: String(localized: "preview.icon_background_color.subtitle", defaultValue: "Choose icon background color"),
+                            selectedColor: $viewModel.iconBackgroundColor,
+                            borderColor: .white
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+
+                        ColorPickerRow(
+                            title: String(localized: "preview.icon_color.title", defaultValue: "Icon Color"),
+                            subtitle: String(localized: "preview.icon_color.subtitle", defaultValue: "Choose icon color"),
+                            selectedColor: $viewModel.iconTintColor,
+                            borderColor: .black
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                }
 
                 // Action buttons
                 actionButtons
@@ -257,6 +303,7 @@ struct SocialMediaPreviewView: View {
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
+                    viewModel.qrCenterIcon = nil
                     viewModel.qrCenterLogo = image
                     viewModel.regenerateStyledQRCode()
                 }
@@ -403,6 +450,7 @@ struct SocialMediaPreviewView: View {
                 }
 
                 Button {
+                    viewModel.qrCenterIcon = nil
                     viewModel.qrCenterLogo = nil
                     viewModel.regenerateStyledQRCode()
                 } label: {

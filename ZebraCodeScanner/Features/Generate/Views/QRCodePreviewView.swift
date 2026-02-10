@@ -149,6 +149,88 @@ struct StylePickerRow: View {
     }
 }
 
+struct CenterIconPickerRow: View {
+    let title: String
+    var subtitle: String = ""
+    @Binding var selectedIcon: QRCenterIcon?
+    let onSelect: (QRCenterIcon?) -> Void
+
+    private let columns = 5
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.custom("Inter-Medium", size: 16))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.custom("Inter-Regular", size: 12))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.secondaryText)
+                }
+            }
+
+            let allItems: [QRCenterIcon?] = [nil] + QRCenterIcon.allCases.map { $0 as QRCenterIcon? }
+            let indices = Array(stride(from: 0, to: allItems.count, by: columns))
+
+            VStack(spacing: 6) {
+                ForEach(indices, id: \.self) { index in
+                    HStack(spacing: 6) {
+                        ForEach(0..<columns, id: \.self) { col in
+                            let itemIndex = index + col
+                            if itemIndex < allItems.count {
+                                let item = allItems[itemIndex]
+                                iconChip(for: item)
+                            } else {
+                                Color.clear.frame(maxWidth: .infinity, minHeight: 36)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(DesignColors.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private func iconChip(for icon: QRCenterIcon?) -> some View {
+        let isSelected = selectedIcon == icon
+        Button {
+            selectedIcon = icon
+            onSelect(icon)
+        } label: {
+            ZStack {
+                if let icon = icon {
+                    Image(icon.assetName)
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(DesignColors.primaryText)
+                } else {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DesignColors.secondaryText)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background(DesignColors.lightText)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isSelected ? DesignColors.primaryText : Color.clear, lineWidth: 2)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct QRCodePreviewView: View {
     let type: QRCodeContentType
     @ObservedObject var viewModel: GenerateViewModel
@@ -198,16 +280,62 @@ struct QRCodePreviewView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
 
-                // Dot shape picker
-                StylePickerRow(
-                    title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
-                    subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Customize the QR code dot pattern"),
-                    selectedStyle: $viewModel.qrModuleStyle
-                ) {
-                    viewModel.regenerateStyledQRCode()
+                // Shape pickers
+                VStack(spacing: 12) {
+                    StylePickerRow(
+                        title: String(localized: "preview.finder_shape.title", defaultValue: "Finder Shape"),
+                        subtitle: String(localized: "preview.finder_shape.subtitle", defaultValue: "Shape of the 3 corner squares"),
+                        selectedStyle: $viewModel.qrFinderStyle
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
+
+                    StylePickerRow(
+                        title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
+                        subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Shape of the inner data pattern"),
+                        selectedStyle: $viewModel.qrModuleStyle
+                    ) {
+                        viewModel.regenerateStyledQRCode()
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
+
+                // Center icon picker
+                CenterIconPickerRow(
+                    title: String(localized: "preview.center_icon.title", defaultValue: "Center Icon"),
+                    subtitle: String(localized: "preview.center_icon.subtitle", defaultValue: "Add an icon to the center of QR code"),
+                    selectedIcon: $viewModel.qrCenterIcon
+                ) { icon in
+                    viewModel.selectCenterIcon(icon)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
+                // Icon color pickers (only when a center icon is selected)
+                if viewModel.qrCenterIcon != nil {
+                    VStack(spacing: 12) {
+                        ColorPickerRow(
+                            title: String(localized: "preview.icon_background_color.title", defaultValue: "Icon Background"),
+                            subtitle: String(localized: "preview.icon_background_color.subtitle", defaultValue: "Choose icon background color"),
+                            selectedColor: $viewModel.iconBackgroundColor,
+                            borderColor: .white
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+
+                        ColorPickerRow(
+                            title: String(localized: "preview.icon_color.title", defaultValue: "Icon Color"),
+                            subtitle: String(localized: "preview.icon_color.subtitle", defaultValue: "Choose icon color"),
+                            selectedColor: $viewModel.iconTintColor,
+                            borderColor: .black
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                }
 
                 // Action buttons
                 actionButtons
@@ -223,6 +351,7 @@ struct QRCodePreviewView: View {
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
+                    viewModel.qrCenterIcon = nil
                     viewModel.qrCenterLogo = image
                     viewModel.regenerateStyledQRCode()
                 }
@@ -368,6 +497,7 @@ struct QRCodePreviewView: View {
                 }
 
                 Button {
+                    viewModel.qrCenterIcon = nil
                     viewModel.qrCenterLogo = nil
                     viewModel.regenerateStyledQRCode()
                 } label: {
