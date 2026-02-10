@@ -111,6 +111,9 @@ struct QRCodeFormView: View {
         case .wifi: return "icon-wifi"
         case .vcard: return "icon-contact"
         case .sms: return "icon-sms"
+        case .geo: return "icon-location"
+        case .crypto: return "icon-crypto"
+        case .event: return "icon-event"
         }
     }
 
@@ -125,6 +128,9 @@ struct QRCodeFormView: View {
         case .wifi: return "wifiSSID"
         case .vcard: return "vcardName"
         case .sms: return "smsPhone"
+        case .geo: return "geoLatitude"
+        case .crypto: return "cryptoAddress"
+        case .event: return "eventTitle"
         }
     }
 
@@ -147,6 +153,12 @@ struct QRCodeFormView: View {
             vcardFields
         case .sms:
             smsFields
+        case .geo:
+            geoFields
+        case .crypto:
+            cryptoFields
+        case .event:
+            eventFields
         }
     }
 
@@ -392,6 +404,155 @@ struct QRCodeFormView: View {
             )
         }
         .padding(.horizontal, 16)
+    }
+
+    // MARK: - Geo Form
+
+    private var geoFields: some View {
+        VStack(spacing: 8) {
+            customTextField(
+                text: $viewModel.geoLatitude,
+                placeholder: String(localized: "qr_form.placeholder.latitude", defaultValue: "Latitude (e.g. 40.7128)"),
+                fieldKey: "geoLatitude",
+                isRequired: true,
+                keyboardType: .decimalPad
+            )
+
+            customTextField(
+                text: $viewModel.geoLongitude,
+                placeholder: String(localized: "qr_form.placeholder.longitude", defaultValue: "Longitude (e.g. -74.0060)"),
+                fieldKey: "geoLongitude",
+                isRequired: true,
+                keyboardType: .decimalPad
+            )
+
+            customTextField(
+                text: $viewModel.geoLabel,
+                placeholder: String(localized: "qr_form.placeholder.location_label", defaultValue: "Label (Optional)"),
+                fieldKey: "geoLabel",
+                isRequired: false
+            )
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Crypto Form
+
+    private var cryptoFields: some View {
+        VStack(spacing: 12) {
+            cryptoCurrencyToggle
+
+            customTextField(
+                text: $viewModel.cryptoAddress,
+                placeholder: String(localized: "qr_form.placeholder.crypto_address", defaultValue: "Wallet address"),
+                fieldKey: "cryptoAddress",
+                isRequired: true,
+                autocapitalization: false
+            )
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Crypto Currency Toggle
+
+    private var cryptoCurrencyToggle: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 0) {
+                ForEach(CryptoCurrencyType.allCases) { currency in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.cryptoCurrency = currency
+                        }
+                    } label: {
+                        Text(currency.title)
+                            .font(.custom("Inter-Regular", size: 13))
+                            .tracking(-0.408)
+                            .foregroundStyle(DesignColors.primaryText)
+                            .padding(.horizontal, 12)
+                            .frame(height: 36)
+                            .background(
+                                viewModel.cryptoCurrency == currency
+                                ? DesignColors.cardBackground
+                                : Color.clear
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .shadow(
+                                color: viewModel.cryptoCurrency == currency
+                                ? Color.black.opacity(0.08) : Color.clear,
+                                radius: 4, y: 2
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(4)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .background(DesignColors.lightText)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Event Form
+
+    private var eventFields: some View {
+        VStack(spacing: 8) {
+            customTextField(
+                text: $viewModel.eventTitle,
+                placeholder: String(localized: "qr_form.placeholder.event_title", defaultValue: "Event title"),
+                fieldKey: "eventTitle",
+                isRequired: true
+            )
+
+            eventDatePicker(
+                label: String(localized: "qr_form.label.start_date", defaultValue: "Start"),
+                date: $viewModel.eventStartDate
+            )
+
+            eventDatePicker(
+                label: String(localized: "qr_form.label.end_date", defaultValue: "End"),
+                date: $viewModel.eventEndDate
+            )
+
+            customTextField(
+                text: $viewModel.eventLocation,
+                placeholder: String(localized: "qr_form.placeholder.event_location", defaultValue: "Location (Optional)"),
+                fieldKey: "eventLocation",
+                isRequired: false
+            )
+
+            customTextEditor(
+                text: $viewModel.eventDescription,
+                placeholder: String(localized: "qr_form.placeholder.event_description", defaultValue: "Description (Optional)"),
+                fieldKey: "eventDescription",
+                isRequired: false
+            )
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Event Date Picker
+
+    private func eventDatePicker(label: String, date: Binding<Date>) -> some View {
+        HStack {
+            Text(label)
+                .font(.custom("Inter-Regular", size: 14))
+                .tracking(-0.408)
+                .foregroundStyle(DesignColors.secondaryText)
+
+            Spacer()
+
+            DatePicker("", selection: date)
+                .labelsHidden()
+                .tint(DesignColors.primaryText)
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 58)
+        .background(DesignColors.cardBackground)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(DesignColors.stroke, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Generate Button

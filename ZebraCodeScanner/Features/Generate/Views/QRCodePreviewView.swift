@@ -471,6 +471,9 @@ struct QRCodePreviewView: View {
         case .wifi: return "icon-wifi"
         case .vcard: return "icon-contact"
         case .sms: return "icon-sms"
+        case .geo: return "icon-location"
+        case .crypto: return "icon-crypto"
+        case .event: return "icon-event"
         }
     }
 

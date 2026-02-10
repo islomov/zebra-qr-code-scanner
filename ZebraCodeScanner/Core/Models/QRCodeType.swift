@@ -15,6 +15,9 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
     case wifi = "wifi"
     case vcard = "vcard"
     case sms = "sms"
+    case geo = "geo"
+    case crypto = "crypto"
+    case event = "event"
 
     var id: String { rawValue }
 
@@ -27,6 +30,9 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
         case .wifi: return String(localized: "qr_content_type.wifi.title", defaultValue: "WiFi")
         case .vcard: return String(localized: "qr_content_type.vcard.title", defaultValue: "Contact")
         case .sms: return String(localized: "qr_content_type.sms.title", defaultValue: "SMS")
+        case .geo: return String(localized: "qr_content_type.geo.title", defaultValue: "Location")
+        case .crypto: return String(localized: "qr_content_type.crypto.title", defaultValue: "Crypto")
+        case .event: return String(localized: "qr_content_type.event.title", defaultValue: "Event")
         }
     }
 
@@ -39,6 +45,9 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
         case .wifi: return "wifi"
         case .vcard: return "person.crop.rectangle.fill"
         case .sms: return "message.fill"
+        case .geo: return "location.fill"
+        case .crypto: return "bitcoinsign.circle.fill"
+        case .event: return "calendar"
         }
     }
 
@@ -51,6 +60,49 @@ enum QRCodeContentType: String, CaseIterable, Identifiable {
         case .wifi: return String(localized: "qr_content_type.wifi.description", defaultValue: "WiFi credentials")
         case .vcard: return String(localized: "qr_content_type.vcard.description", defaultValue: "Contact card")
         case .sms: return String(localized: "qr_content_type.sms.description", defaultValue: "SMS message")
+        case .geo: return String(localized: "qr_content_type.geo.description", defaultValue: "Geographic location")
+        case .crypto: return String(localized: "qr_content_type.crypto.description", defaultValue: "Cryptocurrency address")
+        case .event: return String(localized: "qr_content_type.event.description", defaultValue: "Calendar event")
+        }
+    }
+}
+
+enum CryptoCurrencyType: String, CaseIterable, Identifiable {
+    case bitcoin = "bitcoin"
+    case ethereum = "ethereum"
+    case litecoin = "litecoin"
+    case bitcoinCash = "bitcoinCash"
+    case solana = "solana"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .bitcoin: return String(localized: "crypto.bitcoin.title", defaultValue: "Bitcoin")
+        case .ethereum: return String(localized: "crypto.ethereum.title", defaultValue: "Ethereum")
+        case .litecoin: return String(localized: "crypto.litecoin.title", defaultValue: "Litecoin")
+        case .bitcoinCash: return String(localized: "crypto.bitcoin_cash.title", defaultValue: "Bitcoin Cash")
+        case .solana: return String(localized: "crypto.solana.title", defaultValue: "Solana")
+        }
+    }
+
+    var uriScheme: String {
+        switch self {
+        case .bitcoin: return "bitcoin"
+        case .ethereum: return "ethereum"
+        case .litecoin: return "litecoin"
+        case .bitcoinCash: return "bitcoincash"
+        case .solana: return "solana"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .bitcoin: return "bitcoinsign.circle.fill"
+        case .ethereum: return "eurosign.circle.fill"
+        case .litecoin: return "lsign.circle.fill"
+        case .bitcoinCash: return "bitcoinsign.circle"
+        case .solana: return "sun.max.circle.fill"
         }
     }
 }
@@ -242,6 +294,9 @@ enum QRCenterIcon: String, CaseIterable, Identifiable {
     case wifi = "wifi"
     case contact = "contact"
     case sms = "sms"
+    case geo = "geo"
+    case crypto = "crypto"
+    case event = "event"
     case facebook = "facebook"
     case instagram = "instagram"
     case x = "x"
@@ -262,6 +317,9 @@ enum QRCenterIcon: String, CaseIterable, Identifiable {
         case .wifi: return "icon-wifi"
         case .contact: return "icon-contact"
         case .sms: return "icon-sms"
+        case .geo: return "icon-location"
+        case .crypto: return "icon-crypto"
+        case .event: return "icon-event"
         case .facebook: return "icon-facebook"
         case .instagram: return "icon-instagram"
         case .x: return "icon-twitter-x"
@@ -282,6 +340,9 @@ enum QRCenterIcon: String, CaseIterable, Identifiable {
         case .wifi: return String(localized: "center_icon.wifi.title", defaultValue: "WiFi")
         case .contact: return String(localized: "center_icon.contact.title", defaultValue: "Contact")
         case .sms: return String(localized: "center_icon.sms.title", defaultValue: "SMS")
+        case .geo: return String(localized: "center_icon.geo.title", defaultValue: "Location")
+        case .crypto: return String(localized: "center_icon.crypto.title", defaultValue: "Crypto")
+        case .event: return String(localized: "center_icon.event.title", defaultValue: "Event")
         case .facebook: return String(localized: "center_icon.facebook.title", defaultValue: "Facebook")
         case .instagram: return String(localized: "center_icon.instagram.title", defaultValue: "Instagram")
         case .x: return String(localized: "center_icon.x.title", defaultValue: "X")

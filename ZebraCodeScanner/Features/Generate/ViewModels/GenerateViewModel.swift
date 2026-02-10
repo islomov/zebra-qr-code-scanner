@@ -42,6 +42,22 @@ final class GenerateViewModel: ObservableObject {
     @Published var smsPhone: String = ""
     @Published var smsMessage: String = ""
 
+    // Geo
+    @Published var geoLatitude: String = ""
+    @Published var geoLongitude: String = ""
+    @Published var geoLabel: String = ""
+
+    // Crypto
+    @Published var cryptoAddress: String = ""
+    @Published var cryptoCurrency: CryptoCurrencyType = .bitcoin
+
+    // Event
+    @Published var eventTitle: String = ""
+    @Published var eventStartDate: Date = Date()
+    @Published var eventEndDate: Date = Date().addingTimeInterval(3600)
+    @Published var eventLocation: String = ""
+    @Published var eventDescription: String = ""
+
     // Social Media
     @Published var socialMediaUsername: String = ""
 
@@ -108,6 +124,12 @@ final class GenerateViewModel: ObservableObject {
             return qrService.encodeVCard(name: vcardName, phone: vcardPhone, email: vcardEmail, company: vcardCompany)
         case .sms:
             return qrService.encodeSMS(phone: smsPhone, message: smsMessage)
+        case .geo:
+            return qrService.encodeGeo(latitude: geoLatitude, longitude: geoLongitude, label: geoLabel)
+        case .crypto:
+            return qrService.encodeCrypto(address: cryptoAddress, currency: cryptoCurrency)
+        case .event:
+            return qrService.encodeEvent(title: eventTitle, startDate: eventStartDate, endDate: eventEndDate, location: eventLocation, description: eventDescription)
         }
     }
 
@@ -173,6 +195,14 @@ final class GenerateViewModel: ObservableObject {
             return !vcardName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .sms:
             return !smsPhone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .geo:
+            let lat = Double(geoLatitude.trimmingCharacters(in: .whitespacesAndNewlines))
+            let lon = Double(geoLongitude.trimmingCharacters(in: .whitespacesAndNewlines))
+            return lat != nil && lon != nil
+        case .crypto:
+            return !cryptoAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .event:
+            return !eventTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
     }
 
@@ -294,6 +324,16 @@ final class GenerateViewModel: ObservableObject {
         vcardCompany = ""
         smsPhone = ""
         smsMessage = ""
+        geoLatitude = ""
+        geoLongitude = ""
+        geoLabel = ""
+        cryptoAddress = ""
+        cryptoCurrency = .bitcoin
+        eventTitle = ""
+        eventStartDate = Date()
+        eventEndDate = Date().addingTimeInterval(3600)
+        eventLocation = ""
+        eventDescription = ""
         socialMediaUsername = ""
         barcodeContent = ""
         generatedImage = nil
