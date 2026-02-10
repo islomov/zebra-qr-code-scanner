@@ -203,6 +203,8 @@ enum SocialMediaType: String, CaseIterable, Identifiable {
 
 enum BarcodeType: String, CaseIterable, Identifiable {
     case code128 = "code128"
+    case code39 = "code39"
+    case code93 = "code93"
     case ean13 = "ean13"
     case ean8 = "ean8"
     case upca = "upca"
@@ -214,6 +216,8 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .code128: return String(localized: "barcode_type.code128.title", defaultValue: "Code 128")
+        case .code39: return String(localized: "barcode_type.code39.title", defaultValue: "Code 39")
+        case .code93: return String(localized: "barcode_type.code93.title", defaultValue: "Code 93")
         case .ean13: return String(localized: "barcode_type.ean13.title", defaultValue: "EAN-13")
         case .ean8: return String(localized: "barcode_type.ean8.title", defaultValue: "EAN-8")
         case .upca: return String(localized: "barcode_type.upca.title", defaultValue: "UPC-A")
@@ -233,6 +237,8 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     var description: String {
         switch self {
         case .code128: return String(localized: "barcode_type.code128.description", defaultValue: "Alphanumeric barcode")
+        case .code39: return String(localized: "barcode_type.code39.description", defaultValue: "Alphanumeric barcode")
+        case .code93: return String(localized: "barcode_type.code93.description", defaultValue: "Compact alphanumeric")
         case .ean13: return String(localized: "barcode_type.ean13.description", defaultValue: "13-digit product code")
         case .ean8: return String(localized: "barcode_type.ean8.description", defaultValue: "8-digit product code")
         case .upca: return String(localized: "barcode_type.upca.description", defaultValue: "12-digit US product code")
@@ -243,7 +249,7 @@ enum BarcodeType: String, CaseIterable, Identifiable {
 
     var requiredLength: Int? {
         switch self {
-        case .code128: return nil // Variable length
+        case .code128, .code39, .code93: return nil // Variable length
         case .ean13: return 13
         case .ean8: return 8
         case .upca: return 12
@@ -254,7 +260,7 @@ enum BarcodeType: String, CaseIterable, Identifiable {
 
     var allowsLetters: Bool {
         switch self {
-        case .code128, .aztec, .pdf417: return true
+        case .code128, .code39, .code93, .aztec, .pdf417: return true
         case .ean13, .ean8, .upca: return false
         }
     }
@@ -262,6 +268,8 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     var placeholder: String {
         switch self {
         case .code128: return String(localized: "barcode_type.code128.placeholder", defaultValue: "Enter text or numbers")
+        case .code39: return String(localized: "barcode_type.code39.placeholder", defaultValue: "Enter text or numbers")
+        case .code93: return String(localized: "barcode_type.code93.placeholder", defaultValue: "Enter text or numbers")
         case .ean13: return String(localized: "barcode_type.ean13.placeholder", defaultValue: "Enter 13 digits")
         case .ean8: return String(localized: "barcode_type.ean8.placeholder", defaultValue: "Enter 8 digits")
         case .upca: return String(localized: "barcode_type.upca.placeholder", defaultValue: "Enter 12 digits")
@@ -273,7 +281,7 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     var is2D: Bool {
         switch self {
         case .aztec, .pdf417: return true
-        case .code128, .ean13, .ean8, .upca: return false
+        case .code128, .code39, .code93, .ean13, .ean8, .upca: return false
         }
     }
 
