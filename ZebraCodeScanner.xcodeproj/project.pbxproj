@@ -21,7 +21,7 @@
 		15AE59BC2F263F2C002C8A8F /* ZebraCodeScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZebraCodeScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15AE5A012F53B00000C8A8F0 /* privacy-policy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "privacy-policy.html"; sourceTree = "<group>"; };
 		15AE5A032F53B00000C8A8F1 /* terms-of-use.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "terms-of-use.html"; sourceTree = "<group>"; };
-		15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = "Localizable.xcstrings"; path = "ZebraCodeScanner/Localizable.xcstrings"; sourceTree = "<group>"; };
+		15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ZebraCodeScanner/Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */

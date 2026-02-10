@@ -61,12 +61,12 @@ final class QRCodeGeneratorService {
 
         guard let outputImage = filter.outputImage else { return nil }
 
-        // Apply foreground/background colors via CIFalseColor
+        // Apply foreground color with transparent background via CIFalseColor
         let coloredImage: CIImage
         if let colorFilter = CIFilter(name: "CIFalseColor",
                                        parameters: ["inputImage": outputImage,
                                                      "inputColor0": CIColor(color: foregroundColor),
-                                                     "inputColor1": CIColor(color: backgroundColor)]),
+                                                     "inputColor1": CIColor(red: 0, green: 0, blue: 0, alpha: 0)]),
            let colored = colorFilter.outputImage {
             coloredImage = colored
         } else {
@@ -81,8 +81,13 @@ final class QRCodeGeneratorService {
 
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
         return renderer.image { ctx in
+            // Draw rounded background
+            let bgRect = CGRect(origin: .zero, size: CGSize(width: size, height: size))
+            backgroundColor.setFill()
+            UIBezierPath(roundedRect: bgRect, cornerRadius: size * 0.08).fill()
+
             let qrImage = UIImage(cgImage: cgImage)
-            qrImage.draw(in: CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+            qrImage.draw(in: bgRect)
 
             if let logo = centerLogo {
                 let logoSize = size * 0.15
@@ -114,15 +119,20 @@ final class QRCodeGeneratorService {
         guard let bounds = findQRCodeBounds(in: matrix) else { return nil }
 
         let qrSize = bounds.size
-        let moduleSize = size / CGFloat(qrSize)
+        let quietZone = 2
+        let totalSize = qrSize + quietZone * 2
+        let moduleSize = size / CGFloat(totalSize)
+        let offset = CGFloat(quietZone) * moduleSize
 
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
         return renderer.image { ctx in
             let cgCtx = ctx.cgContext
 
-            // Fill background
+            // Fill rounded background
+            let bgRect = CGRect(origin: .zero, size: CGSize(width: size, height: size))
             cgCtx.setFillColor(backgroundColor.cgColor)
-            cgCtx.fill(CGRect(origin: .zero, size: CGSize(width: size, height: size)))
+            cgCtx.addPath(UIBezierPath(roundedRect: bgRect, cornerRadius: size * 0.08).cgPath)
+            cgCtx.fillPath()
 
             // Draw data modules (skip finder pattern regions)
             cgCtx.setFillColor(foregroundColor.cgColor)
@@ -135,8 +145,8 @@ final class QRCodeGeneratorService {
                     guard !isFinderPattern(row: row, col: col, qrSize: qrSize) else { continue }
 
                     let rect = CGRect(
-                        x: CGFloat(col) * moduleSize,
-                        y: CGFloat(row) * moduleSize,
+                        x: offset + CGFloat(col) * moduleSize,
+                        y: offset + CGFloat(row) * moduleSize,
                         width: moduleSize,
                         height: moduleSize
                     )
@@ -146,9 +156,9 @@ final class QRCodeGeneratorService {
 
             // Draw finder patterns as composite shapes
             let finderPositions = [
-                CGPoint(x: 0, y: 0),
-                CGPoint(x: CGFloat(qrSize - 7) * moduleSize, y: 0),
-                CGPoint(x: 0, y: CGFloat(qrSize - 7) * moduleSize)
+                CGPoint(x: offset, y: offset),
+                CGPoint(x: offset + CGFloat(qrSize - 7) * moduleSize, y: offset),
+                CGPoint(x: offset, y: offset + CGFloat(qrSize - 7) * moduleSize)
             ]
             for origin in finderPositions {
                 drawFinderPattern(
@@ -267,25 +277,134 @@ final class QRCodeGeneratorService {
         return false
     }
 
+    private func shapePath(for style: QRModuleStyle, in rect: CGRect) -> UIBezierPath {
+        switch style {
+        case .square:
+            return UIBezierPath(rect: rect)
+
+        case .roundedSquare:
+            return UIBezierPath(roundedRect: rect, cornerRadius: rect.width * 0.3)
+
+        case .circle:
+            return UIBezierPath(ovalIn: rect)
+
+        case .diamond:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+            path.close()
+            return path
+
+        case .hexagon:
+            let path = UIBezierPath()
+            let center = CGPoint(x: rect.midX, y: rect.midY)
+            let radius = min(rect.width, rect.height) / 2
+            for i in 0..<6 {
+                let angle = CGFloat(i) * .pi / 3 - .pi / 2
+                let point = CGPoint(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
+            }
+            path.close()
+            return path
+
+        case .star:
+            let path = UIBezierPath()
+            let center = CGPoint(x: rect.midX, y: rect.midY)
+            let outerRadius = min(rect.width, rect.height) / 2
+            let innerRadius = outerRadius * 0.4
+            for i in 0..<8 {
+                let angle = CGFloat(i) * .pi / 4 - .pi / 2
+                let r = i % 2 == 0 ? outerRadius : innerRadius
+                let point = CGPoint(x: center.x + r * cos(angle), y: center.y + r * sin(angle))
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
+            }
+            path.close()
+            return path
+
+        case .heart:
+            let path = UIBezierPath()
+            let w = rect.width
+            let h = rect.height
+            path.move(to: CGPoint(x: rect.midX, y: rect.maxY))
+            path.addCurve(
+                to: CGPoint(x: rect.minX, y: rect.minY + h * 0.3),
+                controlPoint1: CGPoint(x: rect.minX + w * 0.1, y: rect.maxY - h * 0.15),
+                controlPoint2: CGPoint(x: rect.minX, y: rect.midY)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.midX, y: rect.minY + h * 0.25),
+                controlPoint1: CGPoint(x: rect.minX, y: rect.minY),
+                controlPoint2: CGPoint(x: rect.midX, y: rect.minY)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.maxX, y: rect.minY + h * 0.3),
+                controlPoint1: CGPoint(x: rect.midX, y: rect.minY),
+                controlPoint2: CGPoint(x: rect.maxX, y: rect.minY)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.midX, y: rect.maxY),
+                controlPoint1: CGPoint(x: rect.maxX, y: rect.midY),
+                controlPoint2: CGPoint(x: rect.maxX - w * 0.1, y: rect.maxY - h * 0.15)
+            )
+            path.close()
+            return path
+
+        case .leaf:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addQuadCurve(
+                to: CGPoint(x: rect.midX, y: rect.maxY),
+                controlPoint: CGPoint(x: rect.maxX + rect.width * 0.15, y: rect.midY)
+            )
+            path.addQuadCurve(
+                to: CGPoint(x: rect.midX, y: rect.minY),
+                controlPoint: CGPoint(x: rect.minX - rect.width * 0.15, y: rect.midY)
+            )
+            path.close()
+            return path
+
+        case .clover:
+            let path = UIBezierPath()
+            let center = CGPoint(x: rect.midX, y: rect.midY)
+            let petalRadius = min(rect.width, rect.height) * 0.3
+            let offset = petalRadius * 0.55
+            let positions = [
+                CGPoint(x: center.x, y: center.y - offset),
+                CGPoint(x: center.x + offset, y: center.y),
+                CGPoint(x: center.x, y: center.y + offset),
+                CGPoint(x: center.x - offset, y: center.y)
+            ]
+            for pos in positions {
+                let petalRect = CGRect(x: pos.x - petalRadius, y: pos.y - petalRadius, width: petalRadius * 2, height: petalRadius * 2)
+                path.append(UIBezierPath(ovalIn: petalRect))
+            }
+            return path
+
+        case .raindrop:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addCurve(
+                to: CGPoint(x: rect.midX, y: rect.maxY),
+                controlPoint1: CGPoint(x: rect.maxX + rect.width * 0.1, y: rect.midY),
+                controlPoint2: CGPoint(x: rect.maxX, y: rect.maxY - rect.height * 0.1)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.midX, y: rect.minY),
+                controlPoint1: CGPoint(x: rect.minX, y: rect.maxY - rect.height * 0.1),
+                controlPoint2: CGPoint(x: rect.minX - rect.width * 0.1, y: rect.midY)
+            )
+            path.close()
+            return path
+        }
+    }
+
     private func drawModule(in context: CGContext, rect: CGRect, style: QRModuleStyle) {
         let inset: CGFloat = rect.width * 0.05
         let insetRect = rect.insetBy(dx: inset, dy: inset)
-
-        switch style {
-        case .square:
-            context.fill(insetRect)
-
-        case .roundedSquare:
-            let radius = insetRect.width * 0.3
-            let path = UIBezierPath(roundedRect: insetRect, cornerRadius: radius)
-            context.addPath(path.cgPath)
-            context.fillPath()
-
-        case .circle:
-            let path = UIBezierPath(ovalIn: insetRect)
-            context.addPath(path.cgPath)
-            context.fillPath()
-        }
+        context.addPath(shapePath(for: style, in: insetRect).cgPath)
+        context.fillPath()
     }
 
     private func drawFinderPattern(in context: CGContext, origin: CGPoint, moduleSize: CGFloat, style: QRModuleStyle, foregroundColor: UIColor, backgroundColor: UIColor) {
@@ -307,45 +426,17 @@ final class QRCodeGeneratorService {
             height: innerSize
         )
 
-        switch style {
-        case .square:
-            context.setFillColor(foregroundColor.cgColor)
-            context.fill(outerRect)
-            context.setFillColor(backgroundColor.cgColor)
-            context.fill(middleRect)
-            context.setFillColor(foregroundColor.cgColor)
-            context.fill(innerRect)
+        context.setFillColor(foregroundColor.cgColor)
+        context.addPath(shapePath(for: style, in: outerRect).cgPath)
+        context.fillPath()
 
-        case .roundedSquare:
-            let outerRadius = moduleSize * 1.0
-            let middleRadius = moduleSize * 0.8
-            let innerRadius = moduleSize * 0.6
+        context.setFillColor(backgroundColor.cgColor)
+        context.addPath(shapePath(for: style, in: middleRect).cgPath)
+        context.fillPath()
 
-            context.setFillColor(foregroundColor.cgColor)
-            context.addPath(UIBezierPath(roundedRect: outerRect, cornerRadius: outerRadius).cgPath)
-            context.fillPath()
-
-            context.setFillColor(backgroundColor.cgColor)
-            context.addPath(UIBezierPath(roundedRect: middleRect, cornerRadius: middleRadius).cgPath)
-            context.fillPath()
-
-            context.setFillColor(foregroundColor.cgColor)
-            context.addPath(UIBezierPath(roundedRect: innerRect, cornerRadius: innerRadius).cgPath)
-            context.fillPath()
-
-        case .circle:
-            context.setFillColor(foregroundColor.cgColor)
-            context.addPath(UIBezierPath(ovalIn: outerRect).cgPath)
-            context.fillPath()
-
-            context.setFillColor(backgroundColor.cgColor)
-            context.addPath(UIBezierPath(ovalIn: middleRect).cgPath)
-            context.fillPath()
-
-            context.setFillColor(foregroundColor.cgColor)
-            context.addPath(UIBezierPath(ovalIn: innerRect).cgPath)
-            context.fillPath()
-        }
+        context.setFillColor(foregroundColor.cgColor)
+        context.addPath(shapePath(for: style, in: innerRect).cgPath)
+        context.fillPath()
     }
 
     // MARK: - Content Encoders

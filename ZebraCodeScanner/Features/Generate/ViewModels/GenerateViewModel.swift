@@ -223,6 +223,18 @@ final class GenerateViewModel: ObservableObject {
         regenerateStyledQRCode()
     }
 
+    func resetCustomization() {
+        qrBackgroundColor = .white
+        qrForegroundColor = .black
+        qrCenterLogo = nil
+        qrModuleStyle = .square
+        qrFinderStyle = .square
+        qrCenterIcon = nil
+        iconBackgroundColor = .white
+        iconTintColor = .black
+        regenerateStyledQRCode()
+    }
+
     func updateSavedImage() {
         guard let entity = savedEntity, let image = generatedImage else { return }
         entity.imageData = image.pngData()

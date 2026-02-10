@@ -195,105 +195,109 @@ struct SocialMediaPreviewView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                // Custom Navigation Header
-                navigationHeader
-
-                // Section header
-                sectionHeader
-
-                // QR image + Add Logo
-                qrImageSection
-                    .padding(.top, 16)
-
-                // Color pickers
-                VStack(spacing: 12) {
-                    ColorPickerRow(
-                        title: String(localized: "preview.background_color.title", defaultValue: "Background color"),
-                        subtitle: String(localized: "preview.background_color.subtitle", defaultValue: "Choose a preferred background color"),
-                        selectedColor: $viewModel.qrBackgroundColor,
-                        borderColor: .white,
-                        disabledColor: viewModel.qrForegroundColor
-                    ) {
-                        viewModel.regenerateStyledQRCode()
-                    }
-
-                    ColorPickerRow(
-                        title: String(localized: "preview.qr_code_color.title", defaultValue: "QR Code Color"),
-                        subtitle: String(localized: "preview.qr_code_color.subtitle", defaultValue: "Choose a preferred QR code color"),
-                        selectedColor: $viewModel.qrForegroundColor,
-                        borderColor: .black,
-                        disabledColor: viewModel.qrBackgroundColor
-                    ) {
-                        viewModel.regenerateStyledQRCode()
-                    }
-                }
-                .padding(.horizontal, 16)
+        VStack(spacing: 0) {
+            // Fixed top: Navigation + QR preview
+            navigationHeader
+            sectionHeader
+                .frame(maxWidth: .infinity, alignment: .leading)
+            qrImageSection
                 .padding(.top, 16)
+                .padding(.bottom, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Shape pickers
-                VStack(spacing: 12) {
-                    StylePickerRow(
-                        title: String(localized: "preview.finder_shape.title", defaultValue: "Finder Shape"),
-                        subtitle: String(localized: "preview.finder_shape.subtitle", defaultValue: "Shape of the 3 corner squares"),
-                        selectedStyle: $viewModel.qrFinderStyle
-                    ) {
-                        viewModel.regenerateStyledQRCode()
-                    }
-
-                    StylePickerRow(
-                        title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
-                        subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Shape of the inner data pattern"),
-                        selectedStyle: $viewModel.qrModuleStyle
-                    ) {
-                        viewModel.regenerateStyledQRCode()
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-
-                // Center icon picker
-                CenterIconPickerRow(
-                    title: String(localized: "preview.center_icon.title", defaultValue: "Center Icon"),
-                    subtitle: String(localized: "preview.center_icon.subtitle", defaultValue: "Add an icon to the center of QR code"),
-                    selectedIcon: $viewModel.qrCenterIcon
-                ) { icon in
-                    viewModel.selectCenterIcon(icon)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-
-                // Icon color pickers (only when a center icon is selected)
-                if viewModel.qrCenterIcon != nil {
+            // Scrollable customization options
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Color pickers
                     VStack(spacing: 12) {
                         ColorPickerRow(
-                            title: String(localized: "preview.icon_background_color.title", defaultValue: "Icon Background"),
-                            subtitle: String(localized: "preview.icon_background_color.subtitle", defaultValue: "Choose icon background color"),
-                            selectedColor: $viewModel.iconBackgroundColor,
-                            borderColor: .white
+                            title: String(localized: "preview.background_color.title", defaultValue: "Background color"),
+                            subtitle: String(localized: "preview.background_color.subtitle", defaultValue: "Choose a preferred background color"),
+                            selectedColor: $viewModel.qrBackgroundColor,
+                            borderColor: .white,
+                            disabledColor: viewModel.qrForegroundColor
                         ) {
                             viewModel.regenerateStyledQRCode()
                         }
 
                         ColorPickerRow(
-                            title: String(localized: "preview.icon_color.title", defaultValue: "Icon Color"),
-                            subtitle: String(localized: "preview.icon_color.subtitle", defaultValue: "Choose icon color"),
-                            selectedColor: $viewModel.iconTintColor,
-                            borderColor: .black
+                            title: String(localized: "preview.qr_code_color.title", defaultValue: "QR Code Color"),
+                            subtitle: String(localized: "preview.qr_code_color.subtitle", defaultValue: "Choose a preferred QR code color"),
+                            selectedColor: $viewModel.qrForegroundColor,
+                            borderColor: .black,
+                            disabledColor: viewModel.qrBackgroundColor
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
+
+                    // Shape pickers
+                    VStack(spacing: 12) {
+                        StylePickerRow(
+                            title: String(localized: "preview.finder_shape.title", defaultValue: "Finder Shape"),
+                            subtitle: String(localized: "preview.finder_shape.subtitle", defaultValue: "Shape of the 3 corner squares"),
+                            selectedStyle: $viewModel.qrFinderStyle
+                        ) {
+                            viewModel.regenerateStyledQRCode()
+                        }
+
+                        StylePickerRow(
+                            title: String(localized: "preview.dot_shape.title", defaultValue: "Dot Shape"),
+                            subtitle: String(localized: "preview.dot_shape.subtitle", defaultValue: "Shape of the inner data pattern"),
+                            selectedStyle: $viewModel.qrModuleStyle
                         ) {
                             viewModel.regenerateStyledQRCode()
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
-                }
 
-                // Action buttons
-                actionButtons
-                    .padding(.top, 24)
-                    .padding(.bottom, 24)
+                    // Center icon picker
+                    CenterIconPickerRow(
+                        title: String(localized: "preview.center_icon.title", defaultValue: "Center Icon"),
+                        subtitle: String(localized: "preview.center_icon.subtitle", defaultValue: "Add an icon to the center of QR code"),
+                        selectedIcon: $viewModel.qrCenterIcon
+                    ) { icon in
+                        viewModel.selectCenterIcon(icon)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+
+                    // Icon color pickers (only when a center icon is selected)
+                    if viewModel.qrCenterIcon != nil {
+                        VStack(spacing: 12) {
+                            ColorPickerRow(
+                                title: String(localized: "preview.icon_background_color.title", defaultValue: "Icon Background"),
+                                subtitle: String(localized: "preview.icon_background_color.subtitle", defaultValue: "Choose icon background color"),
+                                selectedColor: $viewModel.iconBackgroundColor,
+                                borderColor: .white
+                            ) {
+                                viewModel.regenerateStyledQRCode()
+                            }
+
+                            ColorPickerRow(
+                                title: String(localized: "preview.icon_color.title", defaultValue: "Icon Color"),
+                                subtitle: String(localized: "preview.icon_color.subtitle", defaultValue: "Choose icon color"),
+                                selectedColor: $viewModel.iconTintColor,
+                                borderColor: .black
+                            ) {
+                                viewModel.regenerateStyledQRCode()
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                    }
+
+                    Spacer().frame(height: 16)
+                }
             }
+
+            // Fixed bottom: Action buttons
+            actionButtons
+                .padding(.top, 12)
+                .padding(.bottom, 16)
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
@@ -435,29 +439,29 @@ struct SocialMediaPreviewView: View {
 
     private var addLogoSection: some View {
         VStack(spacing: 8) {
-            if let logo = viewModel.qrCenterLogo {
-                Image(uiImage: logo)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 44, height: 44)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            if viewModel.qrCenterLogo != nil {
+                ZStack(alignment: .topTrailing) {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        if let logo = viewModel.qrCenterLogo {
+                            Image(uiImage: logo)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 44, height: 44)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
 
-                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    Text(String(localized: "preview.logo.change", defaultValue: "Change"))
-                        .font(.custom("Inter-Medium", size: 14))
-                        .tracking(-0.408)
-                        .foregroundStyle(Color(red: 0x01/255, green: 0x87/255, blue: 0xFF/255))
-                }
-
-                Button {
-                    viewModel.qrCenterIcon = nil
-                    viewModel.qrCenterLogo = nil
-                    viewModel.regenerateStyledQRCode()
-                } label: {
-                    Text(String(localized: "preview.logo.remove", defaultValue: "Remove"))
-                        .font(.custom("Inter-Medium", size: 14))
-                        .tracking(-0.408)
-                        .foregroundStyle(Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
+                    Button {
+                        viewModel.qrCenterIcon = nil
+                        viewModel.qrCenterLogo = nil
+                        viewModel.regenerateStyledQRCode()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, Color(red: 0xE8/255, green: 0x10/255, blue: 0x10/255))
+                    }
+                    .offset(x: 6, y: -6)
                 }
             } else {
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
@@ -501,6 +505,23 @@ struct SocialMediaPreviewView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                 }
+
+                // Reset
+                Button { viewModel.resetCustomization() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 16, weight: .medium))
+                        Text(String(localized: "common.reset", defaultValue: "Reset"))
+                            .font(.custom("Inter-Medium", size: 16))
+                            .tracking(-0.408)
+                    }
+                    .foregroundStyle(DesignColors.primaryText)
+                    .padding(16)
+                    .frame(height: 51)
+                    .background(DesignColors.lightText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
 
                 // Save to Photos
                 Button { saveToPhotos() } label: {

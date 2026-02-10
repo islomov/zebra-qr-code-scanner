@@ -298,6 +298,13 @@ enum QRModuleStyle: String, CaseIterable, Identifiable {
     case square = "square"
     case roundedSquare = "roundedSquare"
     case circle = "circle"
+    case diamond = "diamond"
+    case hexagon = "hexagon"
+    case star = "star"
+    case heart = "heart"
+    case leaf = "leaf"
+    case clover = "clover"
+    case raindrop = "raindrop"
 
     var id: String { rawValue }
 
@@ -306,6 +313,13 @@ enum QRModuleStyle: String, CaseIterable, Identifiable {
         case .square: return String(localized: "qr_module_style.square.title", defaultValue: "Square")
         case .roundedSquare: return String(localized: "qr_module_style.rounded_square.title", defaultValue: "Rounded")
         case .circle: return String(localized: "qr_module_style.circle.title", defaultValue: "Circle")
+        case .diamond: return String(localized: "qr_module_style.diamond.title", defaultValue: "Diamond")
+        case .hexagon: return String(localized: "qr_module_style.hexagon.title", defaultValue: "Hexagon")
+        case .star: return String(localized: "qr_module_style.star.title", defaultValue: "Star")
+        case .heart: return String(localized: "qr_module_style.heart.title", defaultValue: "Heart")
+        case .leaf: return String(localized: "qr_module_style.leaf.title", defaultValue: "Leaf")
+        case .clover: return String(localized: "qr_module_style.clover.title", defaultValue: "Clover")
+        case .raindrop: return String(localized: "qr_module_style.raindrop.title", defaultValue: "Drop")
         }
     }
 
@@ -314,6 +328,22 @@ enum QRModuleStyle: String, CaseIterable, Identifiable {
         case .square: return "square.fill"
         case .roundedSquare: return "app.fill"
         case .circle: return "circle.fill"
+        case .diamond: return "diamond.fill"
+        case .hexagon: return "hexagon.fill"
+        case .star: return "star.fill"
+        case .heart: return "heart.fill"
+        case .leaf: return "leaf.fill"
+        case .clover: return "suit.club.fill"
+        case .raindrop: return "drop.fill"
+        }
+    }
+
+    var scannabilityNote: String? {
+        switch self {
+        case .star, .heart, .leaf, .clover:
+            return String(localized: "qr_module_style.scannability_warning", defaultValue: "This shape may reduce QR code scannability")
+        default:
+            return nil
         }
     }
 }
