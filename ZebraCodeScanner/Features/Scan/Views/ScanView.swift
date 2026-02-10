@@ -93,17 +93,51 @@ struct ScanView: View {
                 onError: { error in
                     viewModel.handleScanError(error)
                 },
+                onZoomChanged: { zoom in
+                    viewModel.currentZoom = zoom
+                },
+                onFocusTap: { point in
+                    viewModel.focusPoint = point
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                        viewModel.focusPoint = nil
+                    }
+                },
                 isScanning: $viewModel.isScanning,
                 isTorchOn: $viewModel.isTorchOn
             )
             .ignoresSafeArea()
 
             if viewModel.isScanning {
-                // Frame overlay
+                // Frame overlay (pass-through touches)
                 if viewModel.scanMode == .qrCode {
                     QRFrameOverlay()
+                        .allowsHitTesting(false)
                 } else {
                     BarcodeFrameOverlay()
+                        .allowsHitTesting(false)
+                }
+
+                // Focus indicator
+                if let focusPoint = viewModel.focusPoint {
+                    FocusIndicatorView(point: focusPoint)
+                        .allowsHitTesting(false)
+                }
+
+                // Zoom level indicator
+                if viewModel.currentZoom > 1.05 {
+                    VStack {
+                        Spacer()
+                        Text(String(format: "%.1fx", viewModel.currentZoom))
+                            .font(.custom("Inter-Medium", size: 14))
+                            .tracking(-0.408)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Capsule())
+                            .padding(.bottom, viewModel.scanMode == .barcode ? 170 : 80)
+                    }
+                    .allowsHitTesting(false)
                 }
 
                 // Header
@@ -414,6 +448,34 @@ extension View {
             }
             .compositingGroup()
         )
+    }
+}
+
+// MARK: - Focus Indicator
+
+struct FocusIndicatorView: View {
+    let point: CGPoint
+    @State private var scale: CGFloat = 1.3
+    @State private var opacity: Double = 1.0
+
+    var body: some View {
+        GeometryReader { _ in
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(Color.yellow, lineWidth: 2)
+                .frame(width: 70, height: 70)
+                .scaleEffect(scale)
+                .opacity(opacity)
+                .position(x: point.x, y: point.y)
+                .onAppear {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        scale = 1.0
+                    }
+                    withAnimation(.easeOut(duration: 0.3).delay(0.8)) {
+                        opacity = 0
+                    }
+                }
+        }
+        .ignoresSafeArea()
     }
 }
 
