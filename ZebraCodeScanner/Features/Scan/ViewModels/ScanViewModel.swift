@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Combine
-import VisionKit
 import PhotosUI
 import Vision
 import AudioToolbox
@@ -33,19 +32,17 @@ final class ScanViewModel: ObservableObject {
     @Published var manualBarcodeText: String = ""
     @Published var manualBarcodeType: String = "ean13"
 
-    private let scannerService = ScannerService.shared
-    private let dataManager = CoreDataManager.shared
-    private let productLookupService = ProductLookupService.shared
+    private lazy var scannerService = ScannerService.shared
+    private lazy var dataManager = CoreDataManager.shared
+    private lazy var productLookupService = ProductLookupService.shared
     private var hasAuthorizedCamera = false
 
     init() {
-        // Warm up the camera on app launch if permission was already granted.
-        // The DataScannerRepresentable is always in the view hierarchy, so setting
-        // isScanning = true triggers startScanning() on the DataScannerViewController
-        // in the background while the user sees another tab.
+        // Only record permission state — don't start the camera here.
+        // Camera init is heavyweight and blocks the main thread for ~1-2s.
+        // The actual scanning starts when the user navigates to the Scan tab.
         if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
             hasAuthorizedCamera = true
-            isScanning = true
         }
     }
 
@@ -54,11 +51,7 @@ final class ScanViewModel: ObservableObject {
     }
 
     var isSupported: Bool {
-        DataScannerViewController.isSupported
-    }
-
-    var isAvailable: Bool {
-        DataScannerViewController.isAvailable
+        AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
 
     func checkAndRequestPermission() async {
@@ -112,8 +105,9 @@ final class ScanViewModel: ObservableObject {
 
     func handleScannedCode(content: String, type: String) {
         print("[ScanVM] handleScannedCode: content=\(content), type=\(type)")
-        guard !content.isEmpty else { return }
+        guard !content.isEmpty, !showResult else { return }
 
+        isScanning = false
         scannedContent = content
         scannedType = type
         productInfo = nil
@@ -157,18 +151,7 @@ final class ScanViewModel: ObservableObject {
     }
 
     func handleScanError(_ error: Error) {
-        if let scanError = error as? DataScannerViewController.ScanningUnavailable {
-            switch scanError {
-            case .unsupported:
-                errorMessage = String(localized: "scan.error.unsupported", defaultValue: "This device does not support barcode scanning.")
-            case .cameraRestricted:
-                errorMessage = String(localized: "scan.error.camera_restricted", defaultValue: "Camera access is required to scan codes. Please enable it in Settings.")
-            @unknown default:
-                errorMessage = String(localized: "scan.error.unavailable", defaultValue: "Scanning is currently unavailable. Please try again later.")
-            }
-        } else {
-            errorMessage = error.localizedDescription
-        }
+        errorMessage = error.localizedDescription
     }
 
     func processSelectedPhoto() {

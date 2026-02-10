@@ -7,9 +7,7 @@
 
 import SwiftUI
 import Combine
-import VisionKit
 import AVFoundation
-import Vision
 
 @MainActor
 final class ScannerService: ObservableObject {
@@ -25,7 +23,7 @@ final class ScannerService: ObservableObject {
     }
 
     func checkAvailability() {
-        isAvailable = DataScannerViewController.isSupported && DataScannerViewController.isAvailable
+        isAvailable = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
 
     func checkPermission() {
@@ -50,92 +48,163 @@ enum ScanMode: String, CaseIterable {
         case .barcode: return String(localized: "scan_mode.barcode", defaultValue: "Barcode")
         }
     }
-
-    var recognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> {
-        switch self {
-        case .qrCode:
-            return [
-                .barcode(symbologies: [
-                    .qr,
-                    .dataMatrix,
-                    .aztec
-                ])
-            ]
-        case .barcode:
-            return [
-                .barcode(symbologies: [
-                    .code128,
-                    .ean13,
-                    .ean8,
-                    .upce,
-                    .code39,
-                    .code93,
-                    .itf14,
-                    .pdf417
-                ])
-            ]
-        }
-    }
 }
 
-// MARK: - DataScanner UIViewControllerRepresentable
-struct DataScannerRepresentable: UIViewControllerRepresentable {
+// MARK: - Camera Scanner UIViewControllerRepresentable
+
+struct CameraScannerRepresentable: UIViewControllerRepresentable {
     let onScanned: (String, String) -> Void
     let onError: (Error) -> Void
 
     @Binding var isScanning: Bool
     @Binding var isTorchOn: Bool
 
-    /// All symbologies recognized at once — no need to recreate the scanner when switching modes.
-    private static let allRecognizedDataTypes: Set<DataScannerViewController.RecognizedDataType> = [
-        .barcode(symbologies: [
-            .qr, .dataMatrix, .aztec,
-            .code128, .ean13, .ean8, .upce,
-            .code39, .code93, .itf14, .pdf417
-        ])
-    ]
-
-    func makeUIViewController(context: Context) -> DataScannerViewController {
-        print("[Scanner] makeUIViewController - creating scanner")
-        let scanner = DataScannerViewController(
-            recognizedDataTypes: Self.allRecognizedDataTypes,
-            qualityLevel: .balanced,
-            recognizesMultipleItems: false,
-            isHighFrameRateTrackingEnabled: true,
-            isPinchToZoomEnabled: true,
-            isGuidanceEnabled: false,
-            isHighlightingEnabled: false
-        )
-        scanner.delegate = context.coordinator
-        return scanner
+    func makeUIViewController(context: Context) -> CameraScannerViewController {
+        let controller = CameraScannerViewController()
+        controller.onScanned = onScanned
+        controller.onError = onError
+        return controller
     }
 
-    func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
+    func updateUIViewController(_ controller: CameraScannerViewController, context: Context) {
         if isScanning {
-            if !uiViewController.isScanning {
-                print("[Scanner] Starting scanning")
-                try? uiViewController.startScanning()
-            }
+            controller.startScanning()
         } else {
-            if uiViewController.isScanning {
-                print("[Scanner] Stopping scanning")
-                uiViewController.stopScanning()
-            }
+            controller.stopScanning()
         }
 
         let coordinator = context.coordinator
         if coordinator.previousTorchState != isTorchOn {
             coordinator.previousTorchState = isTorchOn
-            setTorch(on: isTorchOn)
+            controller.setTorch(on: isTorchOn)
         }
     }
 
-    static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
-        print("[Scanner] dismantleUIViewController - stopping scanner")
-        uiViewController.stopScanning()
+    static func dismantleUIViewController(_ controller: CameraScannerViewController, coordinator: Coordinator) {
+        controller.stopScanning()
     }
 
-    private func setTorch(on: Bool) {
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    class Coordinator {
+        var previousTorchState: Bool = false
+    }
+}
+
+// MARK: - Camera Scanner View Controller
+
+class CameraScannerViewController: UIViewController {
+
+    private let captureSession = AVCaptureSession()
+    private let sessionQueue = DispatchQueue(label: "com.zebra.scanner.session")
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var isConfigured = false
+    private var pendingStart = false
+
+    var onScanned: ((String, String) -> Void)?
+    var onError: ((Error) -> Void)?
+
+    // Debounce: avoid firing for the same code repeatedly
+    private var lastScannedValue: String?
+    private var lastScanTime: Date?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+
+        // Configure the capture session on a background queue — no main thread blocking.
+        sessionQueue.async { [weak self] in
+            self?.configureSession()
+        }
+    }
+
+    private func configureSession() {
+        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+            return
+        }
+
+        do {
+            let videoInput = try AVCaptureDeviceInput(device: videoDevice)
+
+            captureSession.beginConfiguration()
+
+            if captureSession.canAddInput(videoInput) {
+                captureSession.addInput(videoInput)
+            }
+
+            let metadataOutput = AVCaptureMetadataOutput()
+            if captureSession.canAddOutput(metadataOutput) {
+                captureSession.addOutput(metadataOutput)
+                metadataOutput.setMetadataObjectsDelegate(self, queue: .main)
+                metadataOutput.metadataObjectTypes = [
+                    .qr, .dataMatrix, .aztec,
+                    .ean13, .ean8, .upce,
+                    .code128, .code39, .code93,
+                    .interleaved2of5, .pdf417
+                ]
+            }
+
+            captureSession.commitConfiguration()
+            isConfigured = true
+
+            // Setup preview layer on main queue
+            DispatchQueue.main.async { [weak self] in
+                self?.setupPreviewLayer()
+            }
+
+            // If startScanning() was called before configuration finished, start now.
+            if pendingStart {
+                pendingStart = false
+                captureSession.startRunning()
+            }
+        } catch {
+            DispatchQueue.main.async { [weak self] in
+                self?.onError?(error)
+            }
+        }
+    }
+
+    private func setupPreviewLayer() {
+        let layer = AVCaptureVideoPreviewLayer(session: captureSession)
+        layer.videoGravity = .resizeAspectFill
+        layer.frame = view.bounds
+        view.layer.insertSublayer(layer, at: 0)
+        previewLayer = layer
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer?.frame = view.bounds
+    }
+
+    func startScanning() {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            if self.isConfigured {
+                if !self.captureSession.isRunning {
+                    self.captureSession.startRunning()
+                }
+            } else {
+                self.pendingStart = true
+            }
+        }
+    }
+
+    func stopScanning() {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            self.pendingStart = false
+            if self.captureSession.isRunning {
+                self.captureSession.stopRunning()
+            }
+        }
+        lastScannedValue = nil
+        lastScanTime = nil
+    }
+
+    func setTorch(on: Bool) {
         guard let device = AVCaptureDevice.default(for: .video),
               device.hasTorch else { return }
         do {
@@ -143,84 +212,48 @@ struct DataScannerRepresentable: UIViewControllerRepresentable {
             device.torchMode = on ? .on : .off
             device.unlockForConfiguration()
         } catch {
-            print("Failed to set torch: \(error)")
+            print("[CameraScanner] Failed to set torch: \(error)")
         }
     }
+}
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onScanned: onScanned, onError: onError)
+// MARK: - AVCaptureMetadataOutputObjectsDelegate
+
+extension CameraScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
+    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+              let stringValue = metadataObject.stringValue,
+              !stringValue.isEmpty else { return }
+
+        // Debounce: ignore the same value within 3 seconds
+        let now = Date()
+        if stringValue == lastScannedValue,
+           let lastTime = lastScanTime,
+           now.timeIntervalSince(lastTime) < 3.0 {
+            return
+        }
+
+        lastScannedValue = stringValue
+        lastScanTime = now
+
+        let type = mapType(metadataObject.type)
+        onScanned?(stringValue, type)
     }
 
-    class Coordinator: NSObject, DataScannerViewControllerDelegate {
-        let onScanned: (String, String) -> Void
-        let onError: (Error) -> Void
-        var previousTorchState: Bool = false
-
-        init(onScanned: @escaping (String, String) -> Void, onError: @escaping (Error) -> Void) {
-            self.onScanned = onScanned
-            self.onError = onError
-        }
-
-        func dataScanner(_ dataScanner: DataScannerViewController, didTapOn item: RecognizedItem) {
-            print("[Scanner] didTapOn item")
-            processItem(item)
-        }
-
-        func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
-            print("[Scanner] didAdd \(addedItems.count) items, total: \(allItems.count)")
-            guard let item = addedItems.first else { return }
-            processItem(item)
-        }
-
-        private func processItem(_ item: RecognizedItem) {
-            switch item {
-            case .barcode(let barcode):
-                let content = barcode.payloadStringValue ?? ""
-                let type = mapSymbologyToType(barcode.observation.symbology)
-                onScanned(content, type)
-            case .text(let text):
-                onScanned(text.transcript, "text")
-            @unknown default:
-                break
-            }
-        }
-
-        private func mapSymbologyToType(_ symbology: VNBarcodeSymbology) -> String {
-            switch symbology {
-            case .qr:
-                return "qr"
-            case .code128:
-                return "code128"
-            case .ean13:
-                return "ean13"
-            case .ean8:
-                return "ean8"
-            case .upce:
-                return "upce"
-            case .code39:
-                return "code39"
-            case .code93:
-                return "code93"
-            case .itf14:
-                return "itf14"
-            case .dataMatrix:
-                return "datamatrix"
-            case .pdf417:
-                return "pdf417"
-            case .aztec:
-                return "aztec"
-            default:
-                return "barcode"
-            }
-        }
-
-        func dataScanner(_ dataScanner: DataScannerViewController, becameUnavailableWithError error: DataScannerViewController.ScanningUnavailable) {
-            print("[Scanner] becameUnavailableWithError: \(error)")
-            onError(error)
-        }
-
-        deinit {
-            print("[Scanner] Coordinator deinit")
+    private func mapType(_ type: AVMetadataObject.ObjectType) -> String {
+        switch type {
+        case .qr: return "qr"
+        case .ean13: return "ean13"
+        case .ean8: return "ean8"
+        case .code128: return "code128"
+        case .code39: return "code39"
+        case .code93: return "code93"
+        case .upce: return "upce"
+        case .pdf417: return "pdf417"
+        case .aztec: return "aztec"
+        case .dataMatrix: return "datamatrix"
+        case .interleaved2of5: return "itf14"
+        default: return "barcode"
         }
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import VisionKit
 import PhotosUI
 
 struct ScanView: View {
@@ -16,13 +15,11 @@ struct ScanView: View {
 
     var body: some View {
         ZStack {
-            // Scanner always in the view hierarchy — never destroyed on tab switch
             if viewModel.isSupported {
                 scannerView
             }
 
             if !isActiveTab {
-                // Opaque cover hides camera preview when tab is inactive
                 Color(.systemBackground)
                     .ignoresSafeArea()
             } else if !viewModel.isSupported {
@@ -89,7 +86,7 @@ struct ScanView: View {
 
     private var scannerView: some View {
         ZStack {
-            DataScannerRepresentable(
+            CameraScannerRepresentable(
                 onScanned: { content, type in
                     viewModel.handleScannedCode(content: content, type: type)
                 },
