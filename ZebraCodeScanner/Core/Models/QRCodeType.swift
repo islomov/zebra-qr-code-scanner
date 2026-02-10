@@ -234,6 +234,66 @@ enum BarcodeType: String, CaseIterable, Identifiable {
     }
 }
 
+enum QRCenterIcon: String, CaseIterable, Identifiable {
+    case text = "text"
+    case link = "link"
+    case phone = "phone"
+    case email = "email"
+    case wifi = "wifi"
+    case contact = "contact"
+    case sms = "sms"
+    case facebook = "facebook"
+    case instagram = "instagram"
+    case x = "x"
+    case reddit = "reddit"
+    case tiktok = "tiktok"
+    case snapchat = "snapchat"
+    case threads = "threads"
+    case youtube = "youtube"
+
+    var id: String { rawValue }
+
+    var assetName: String {
+        switch self {
+        case .text: return "icon-text"
+        case .link: return "icon-link"
+        case .phone: return "icon-phone"
+        case .email: return "icon-email"
+        case .wifi: return "icon-wifi"
+        case .contact: return "icon-contact"
+        case .sms: return "icon-sms"
+        case .facebook: return "icon-facebook"
+        case .instagram: return "icon-instagram"
+        case .x: return "icon-twitter-x"
+        case .reddit: return "icon-reddit"
+        case .tiktok: return "icon-tiktok"
+        case .snapchat: return "icon-snapchat"
+        case .threads: return "icon-threads"
+        case .youtube: return "icon-youtube"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .text: return String(localized: "center_icon.text.title", defaultValue: "Text")
+        case .link: return String(localized: "center_icon.link.title", defaultValue: "Link")
+        case .phone: return String(localized: "center_icon.phone.title", defaultValue: "Phone")
+        case .email: return String(localized: "center_icon.email.title", defaultValue: "Email")
+        case .wifi: return String(localized: "center_icon.wifi.title", defaultValue: "WiFi")
+        case .contact: return String(localized: "center_icon.contact.title", defaultValue: "Contact")
+        case .sms: return String(localized: "center_icon.sms.title", defaultValue: "SMS")
+        case .facebook: return String(localized: "center_icon.facebook.title", defaultValue: "Facebook")
+        case .instagram: return String(localized: "center_icon.instagram.title", defaultValue: "Instagram")
+        case .x: return String(localized: "center_icon.x.title", defaultValue: "X")
+        case .reddit: return String(localized: "center_icon.reddit.title", defaultValue: "Reddit")
+        case .tiktok: return String(localized: "center_icon.tiktok.title", defaultValue: "TikTok")
+        case .snapchat: return String(localized: "center_icon.snapchat.title", defaultValue: "Snapchat")
+        case .threads: return String(localized: "center_icon.threads.title", defaultValue: "Threads")
+        case .youtube: return String(localized: "center_icon.youtube.title", defaultValue: "YouTube")
+        }
+    }
+}
+
 enum QRModuleStyle: String, CaseIterable, Identifiable {
     case square = "square"
     case roundedSquare = "roundedSquare"

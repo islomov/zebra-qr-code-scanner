@@ -59,6 +59,10 @@ final class GenerateViewModel: ObservableObject {
     @Published var qrForegroundColor: Color = .black
     @Published var qrCenterLogo: UIImage? = nil
     @Published var qrModuleStyle: QRModuleStyle = .square
+    @Published var qrFinderStyle: QRModuleStyle = .square
+    @Published var qrCenterIcon: QRCenterIcon? = nil
+    @Published var iconBackgroundColor: Color = .white
+    @Published var iconTintColor: Color = .black
     @Published var isStyleDirty: Bool = false
     var savedEntity: GeneratedCodeEntity? = nil
 
@@ -76,6 +80,8 @@ final class GenerateViewModel: ObservableObject {
         qrForegroundColor = .black
         qrCenterLogo = nil
         qrModuleStyle = .square
+        qrFinderStyle = .square
+        qrCenterIcon = nil
         generatedImage = qrService.generateStyledQRCode(
             from: content,
             size: 300,
@@ -114,6 +120,8 @@ final class GenerateViewModel: ObservableObject {
         qrForegroundColor = .black
         qrCenterLogo = nil
         qrModuleStyle = .square
+        qrFinderStyle = .square
+        qrCenterIcon = nil
         generatedImage = qrService.generateStyledQRCode(
             from: profileURL,
             size: 300,
@@ -197,9 +205,22 @@ final class GenerateViewModel: ObservableObject {
             backgroundColor: UIColor(qrBackgroundColor),
             foregroundColor: UIColor(qrForegroundColor),
             centerLogo: qrCenterLogo,
-            moduleStyle: qrModuleStyle
+            moduleStyle: qrModuleStyle,
+            finderStyle: qrFinderStyle,
+            logoBackgroundColor: qrCenterIcon != nil ? UIColor(iconBackgroundColor) : .white,
+            logoTintColor: qrCenterIcon != nil ? UIColor(iconTintColor) : nil
         )
         isStyleDirty = true
+    }
+
+    func selectCenterIcon(_ icon: QRCenterIcon?) {
+        qrCenterIcon = icon
+        if let icon = icon {
+            qrCenterLogo = UIImage(named: icon.assetName)
+        } else {
+            qrCenterLogo = nil
+        }
+        regenerateStyledQRCode()
     }
 
     func updateSavedImage() {
@@ -269,6 +290,10 @@ final class GenerateViewModel: ObservableObject {
         qrForegroundColor = .black
         qrCenterLogo = nil
         qrModuleStyle = .square
+        qrFinderStyle = .square
+        qrCenterIcon = nil
+        iconBackgroundColor = .white
+        iconTintColor = .black
         isStyleDirty = false
         savedEntity = nil
     }

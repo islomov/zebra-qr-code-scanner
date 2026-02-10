@@ -34,13 +34,13 @@ final class QRCodeGeneratorService {
         return UIImage(cgImage: cgImage)
     }
 
-    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, foregroundColor: UIColor = .black, centerLogo: UIImage? = nil, moduleStyle: QRModuleStyle = .square) -> UIImage? {
+    func generateStyledQRCode(from content: String, size: CGFloat = 300, backgroundColor: UIColor = .white, foregroundColor: UIColor = .black, centerLogo: UIImage? = nil, moduleStyle: QRModuleStyle = .square, finderStyle: QRModuleStyle = .square, logoBackgroundColor: UIColor = .white, logoTintColor: UIColor? = nil) -> UIImage? {
         guard let data = content.data(using: .utf8) else { return nil }
 
         let correctionLevel = centerLogo != nil ? "H" : "M"
 
         // For non-square styles, use custom drawing path
-        if moduleStyle != .square {
+        if moduleStyle != .square || finderStyle != .square {
             return generateCustomStyledQRCode(
                 data: data,
                 size: size,
@@ -48,7 +48,10 @@ final class QRCodeGeneratorService {
                 foregroundColor: foregroundColor,
                 centerLogo: centerLogo,
                 moduleStyle: moduleStyle,
-                correctionLevel: correctionLevel
+                finderStyle: finderStyle,
+                correctionLevel: correctionLevel,
+                logoBackgroundColor: logoBackgroundColor,
+                logoTintColor: logoTintColor
             )
         }
 
@@ -82,25 +85,31 @@ final class QRCodeGeneratorService {
             qrImage.draw(in: CGRect(origin: .zero, size: CGSize(width: size, height: size)))
 
             if let logo = centerLogo {
-                let logoSize = size * 0.22
+                let logoSize = size * 0.15
                 let logoPadding: CGFloat = 6
                 let backgroundSize = logoSize + logoPadding * 2
                 let backgroundOrigin = CGPoint(x: (size - backgroundSize) / 2, y: (size - backgroundSize) / 2)
                 let backgroundRect = CGRect(origin: backgroundOrigin, size: CGSize(width: backgroundSize, height: backgroundSize))
-
-                UIColor.white.setFill()
-                UIBezierPath(roundedRect: backgroundRect, cornerRadius: 8).fill()
-
                 let logoOrigin = CGPoint(x: (size - logoSize) / 2, y: (size - logoSize) / 2)
                 let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
-                logo.draw(in: logoRect)
+
+                logoBackgroundColor.setFill()
+                UIBezierPath(roundedRect: backgroundRect, cornerRadius: backgroundSize * 0.25).fill()
+
+                let drawRect = aspectFitRect(for: logo.size, in: logoRect)
+                if let tintColor = logoTintColor {
+                    let tinted = logo.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+                    tinted.draw(in: drawRect)
+                } else {
+                    logo.draw(in: drawRect)
+                }
             }
         }
     }
 
     // MARK: - Custom Styled QR Code Drawing
 
-    private func generateCustomStyledQRCode(data: Data, size: CGFloat, backgroundColor: UIColor, foregroundColor: UIColor, centerLogo: UIImage?, moduleStyle: QRModuleStyle, correctionLevel: String) -> UIImage? {
+    private func generateCustomStyledQRCode(data: Data, size: CGFloat, backgroundColor: UIColor, foregroundColor: UIColor, centerLogo: UIImage?, moduleStyle: QRModuleStyle, finderStyle: QRModuleStyle = .square, correctionLevel: String, logoBackgroundColor: UIColor = .white, logoTintColor: UIColor? = nil) -> UIImage? {
         guard let matrix = extractModuleMatrix(data: data, correctionLevel: correctionLevel) else { return nil }
         guard let bounds = findQRCodeBounds(in: matrix) else { return nil }
 
@@ -146,7 +155,7 @@ final class QRCodeGeneratorService {
                     in: cgCtx,
                     origin: origin,
                     moduleSize: moduleSize,
-                    style: moduleStyle,
+                    style: finderStyle,
                     foregroundColor: foregroundColor,
                     backgroundColor: backgroundColor
                 )
@@ -154,21 +163,41 @@ final class QRCodeGeneratorService {
 
             // Overlay center logo
             if let logo = centerLogo {
-                let logoSize = size * 0.22
+                let logoSize = size * 0.15
                 let logoPadding: CGFloat = 6
                 let backgroundSize = logoSize + logoPadding * 2
                 let backgroundOrigin = CGPoint(x: (size - backgroundSize) / 2, y: (size - backgroundSize) / 2)
                 let backgroundRect = CGRect(origin: backgroundOrigin, size: CGSize(width: backgroundSize, height: backgroundSize))
-
-                cgCtx.setFillColor(UIColor.white.cgColor)
-                cgCtx.addPath(UIBezierPath(roundedRect: backgroundRect, cornerRadius: 8).cgPath)
-                cgCtx.fillPath()
-
                 let logoOrigin = CGPoint(x: (size - logoSize) / 2, y: (size - logoSize) / 2)
                 let logoRect = CGRect(origin: logoOrigin, size: CGSize(width: logoSize, height: logoSize))
-                logo.draw(in: logoRect)
+
+                cgCtx.setFillColor(logoBackgroundColor.cgColor)
+                cgCtx.addPath(UIBezierPath(roundedRect: backgroundRect, cornerRadius: backgroundSize * 0.25).cgPath)
+                cgCtx.fillPath()
+
+                let drawRect = aspectFitRect(for: logo.size, in: logoRect)
+                if let tintColor = logoTintColor {
+                    let tinted = logo.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+                    tinted.draw(in: drawRect)
+                } else {
+                    logo.draw(in: drawRect)
+                }
             }
         }
+    }
+
+    private func aspectFitRect(for imageSize: CGSize, in boundingRect: CGRect) -> CGRect {
+        let widthRatio = boundingRect.width / imageSize.width
+        let heightRatio = boundingRect.height / imageSize.height
+        let scale = min(widthRatio, heightRatio)
+        let scaledWidth = imageSize.width * scale
+        let scaledHeight = imageSize.height * scale
+        return CGRect(
+            x: boundingRect.midX - scaledWidth / 2,
+            y: boundingRect.midY - scaledHeight / 2,
+            width: scaledWidth,
+            height: scaledHeight
+        )
     }
 
     private func extractModuleMatrix(data: Data, correctionLevel: String) -> [[Bool]]? {
