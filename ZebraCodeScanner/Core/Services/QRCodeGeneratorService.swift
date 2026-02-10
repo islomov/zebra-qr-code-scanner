@@ -518,6 +518,10 @@ final class QRCodeGeneratorService {
         switch type {
         case .code128:
             return generateCode128(from: content, width: width, height: height)
+        case .code39:
+            return generateCode39(from: content, width: width, height: height)
+        case .code93:
+            return generateCode93(from: content, width: width, height: height)
         case .ean13:
             return generateEAN13(from: content, width: width, height: height)
         case .ean8:
@@ -547,6 +551,212 @@ final class QRCodeGeneratorService {
         guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
 
         return UIImage(cgImage: cgImage)
+    }
+
+    // MARK: - Code 39 Generation
+
+    private static let code39Characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%"
+    private static let code39Patterns: [Character: String] = [
+        "0": "nnnwwnwnn", "1": "wnnwnnnnw", "2": "nnwwnnnnw", "3": "wnwwnnnn",
+        "4": "nnnwwnnnw", "5": "wnnwwnnn", "6": "nnwwwnnn", "7": "nnnwnnwnw",
+        "8": "wnnwnnwn", "9": "nnwwnnwn", "A": "wnnnnwnnw", "B": "nnwnnwnnw",
+        "C": "wnwnnwnn", "D": "nnnnwwnnw", "E": "wnnnwwnn", "F": "nnwnwwnn",
+        "G": "nnnnnwwnw", "H": "wnnnnwwn", "I": "nnwnnwwn", "J": "nnnnwwwn",
+        "K": "wnnnnnnww", "L": "nnwnnnnww", "M": "wnwnnnnw", "N": "nnnnwnnww",
+        "O": "wnnnwnnw", "P": "nnwnwnnw", "Q": "nnnnnnwww", "R": "wnnnnnww",
+        "S": "nnwnnnww", "T": "nnnnwnww", "U": "wwnnnnnnw", "V": "nwwnnnnnw",
+        "W": "wwwnnnnnn", "X": "nwnnwnnnw", "Y": "wwnnwnnn", "Z": "nwwnwnnn",
+        "-": "nwnnnnwnw", ".": "wwnnnnwn", " ": "nwwnnnwn", "$": "nwnwnwnn",
+        "/": "nwnwnnnw", "+": "nwnnnwnw", "%": "nnnwnwnw"
+    ]
+    private static let code39StartStop = "nwnwnnnw" // '*' character pattern (narrow-wide-narrow-wide-narrow-narrow-narrow-wide, but as bars)
+
+    // Actually, let me use a proper representation. Code 39 encodes each character as
+    // 9 elements (5 bars and 4 spaces), where 'n' = narrow and 'w' = wide.
+    // The pattern alternates bar-space-bar-space... starting with a bar.
+    // Between characters there's a narrow inter-character gap (space).
+
+    private func generateCode39(from content: String, width: CGFloat, height: CGFloat) -> UIImage? {
+        let uppercased = content.uppercased()
+
+        // Validate all characters are in Code 39 charset
+        for char in uppercased {
+            guard Self.code39Patterns[char] != nil else { return nil }
+        }
+
+        // Build the bar pattern: start(*) + data + stop(*)
+        var barPattern: [Bool] = [] // true = bar, false = space
+
+        // Helper to append a character pattern
+        func appendPattern(_ pattern: String) {
+            for (i, element) in pattern.enumerated() {
+                let isBar = (i % 2 == 0) // alternating bar/space starting with bar
+                let isWide = (element == "w")
+                let modules = isWide ? 3 : 1
+                for _ in 0..<modules {
+                    barPattern.append(isBar)
+                }
+            }
+        }
+
+        // Start character (*)
+        appendPattern(Self.code39StartStop)
+        barPattern.append(false) // inter-character gap
+
+        // Data characters
+        for char in uppercased {
+            if let pattern = Self.code39Patterns[char] {
+                appendPattern(pattern)
+                barPattern.append(false) // inter-character gap
+            }
+        }
+
+        // Stop character (*)
+        appendPattern(Self.code39StartStop)
+
+        // Draw the barcode
+        let quietZoneModules = 10
+        let totalModules = barPattern.count + quietZoneModules * 2
+        let barWidth = width / CGFloat(totalModules)
+        let quietZone = barWidth * CGFloat(quietZoneModules)
+
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 0)
+        guard let ctx = UIGraphicsGetCurrentContext() else { return nil }
+
+        ctx.setFillColor(UIColor.white.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+
+        ctx.setFillColor(UIColor.black.cgColor)
+        var x = quietZone
+        for isBar in barPattern {
+            if isBar {
+                ctx.fill(CGRect(x: x, y: 10, width: barWidth, height: height - 20))
+            }
+            x += barWidth
+        }
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+
+    // MARK: - Code 93 Generation
+
+    private static let code93Charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%"
+    private static let code93Patterns: [String] = [
+        "100010100", // 0
+        "101001000", // 1
+        "101000100", // 2
+        "101000010", // 3
+        "100101000", // 4
+        "100100100", // 5
+        "100100010", // 6
+        "101010000", // 7
+        "100010010", // 8
+        "100001010", // 9
+        "110101000", // A
+        "110100100", // B
+        "110100010", // C
+        "110010100", // D
+        "110010010", // E
+        "110001010", // F
+        "101101000", // G
+        "101100100", // H
+        "101100010", // I
+        "100110100", // J
+        "100011010", // K
+        "101011000", // L
+        "101001100", // M
+        "101000110", // N
+        "100101100", // O
+        "100010110", // P
+        "110110100", // Q
+        "110110010", // R
+        "110101100", // S
+        "110100110", // T
+        "110010110", // U
+        "110011010", // V
+        "101101100", // W
+        "101100110", // X
+        "100110110", // Y
+        "100111010", // Z
+        "100101110", // -
+        "111010100", // .
+        "111010010", // (space)
+        "111001010", // $
+        "101101110", // /
+        "101110110", // +
+        "110101110", // %
+    ]
+
+    private func code93CharIndex(_ char: Character) -> Int? {
+        guard let index = Self.code93Charset.firstIndex(of: char) else { return nil }
+        return Self.code93Charset.distance(from: Self.code93Charset.startIndex, to: index)
+    }
+
+    private func generateCode93(from content: String, width: CGFloat, height: CGFloat) -> UIImage? {
+        let uppercased = content.uppercased()
+
+        // Get character indices
+        var indices: [Int] = []
+        for char in uppercased {
+            guard let idx = code93CharIndex(char) else { return nil }
+            indices.append(idx)
+        }
+
+        // Calculate check digits (C and K)
+        // Check C: weighted sum modulo 47, weights cycle 1-20
+        var sum = 0
+        let count = indices.count
+        for (i, idx) in indices.reversed().enumerated() {
+            let weight = (i % 20) + 1
+            sum += idx * weight
+        }
+        let checkC = sum % 47
+        indices.append(checkC)
+
+        // Check K: weighted sum modulo 47 (including check C), weights cycle 1-15
+        sum = 0
+        for (i, idx) in indices.reversed().enumerated() {
+            let weight = (i % 15) + 1
+            sum += idx * weight
+        }
+        let checkK = sum % 47
+        indices.append(checkK)
+
+        // Build bar pattern
+        var barPattern = "111111011" // Start sentinel
+
+        for idx in indices {
+            barPattern += Self.code93Patterns[idx]
+        }
+
+        barPattern += "1111110111" // Stop sentinel (includes termination bar)
+
+        // Draw the barcode
+        let quietZoneModules = 10
+        let totalModules = barPattern.count + quietZoneModules * 2
+        let barWidth = width / CGFloat(totalModules)
+        let quietZone = barWidth * CGFloat(quietZoneModules)
+
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 0)
+        guard let ctx = UIGraphicsGetCurrentContext() else { return nil }
+
+        ctx.setFillColor(UIColor.white.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+
+        ctx.setFillColor(UIColor.black.cgColor)
+        var x = quietZone
+        for char in barPattern {
+            if char == "1" {
+                ctx.fill(CGRect(x: x, y: 10, width: barWidth, height: height - 20))
+            }
+            x += barWidth
+        }
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
     }
 
     private func generateAztec(from content: String, size: CGFloat) -> UIImage? {

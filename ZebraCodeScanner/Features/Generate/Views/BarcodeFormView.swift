@@ -161,7 +161,7 @@ struct BarcodeFormView: View {
 
     private var placeholderText: String {
         switch type {
-        case .code128:
+        case .code128, .code39, .code93:
             return String(localized: "barcode_form.placeholder.text_or_numbers", defaultValue: "Enter text or numbers")
         case .ean13:
             return String(localized: "barcode_form.placeholder.enter_13_digits", defaultValue: "Enter 13 digits")
@@ -180,6 +180,10 @@ struct BarcodeFormView: View {
         switch type {
         case .code128:
             return String(localized: "barcode_form.footer.code128", defaultValue: "Code 128 supports letters, numbers, and special characters")
+        case .code39:
+            return String(localized: "barcode_form.footer.code39", defaultValue: "Code 39 supports uppercase letters, numbers, and - . $ / + % space")
+        case .code93:
+            return String(localized: "barcode_form.footer.code93", defaultValue: "Code 93 supports uppercase letters, numbers, and - . $ / + % space")
         case .ean13:
             return String(localized: "barcode_form.footer.ean13", defaultValue: "Enter 12 or 13 digits. Check digit will be calculated automatically")
         case .ean8:

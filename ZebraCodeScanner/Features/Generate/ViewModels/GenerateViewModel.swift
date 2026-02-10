@@ -181,7 +181,7 @@ final class GenerateViewModel: ObservableObject {
         guard !content.isEmpty else { return false }
 
         switch type {
-        case .code128, .aztec, .pdf417:
+        case .code128, .code39, .code93, .aztec, .pdf417:
             return true // These formats accept any content
         case .ean13:
             let digits = content.filter { $0.isNumber }
