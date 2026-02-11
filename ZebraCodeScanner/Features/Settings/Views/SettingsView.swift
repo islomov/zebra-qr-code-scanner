@@ -5,6 +5,7 @@
 //  Created by Sardor Islomov on 25/01/26.
 //
 
+import AppTrackingTransparency
 import SwiftUI
 
 struct SettingsView: View {
@@ -13,6 +14,7 @@ struct SettingsView: View {
     @AppStorage("soundOnScan") private var soundOnScan = true
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
+    @StateObject private var trackingService = TrackingService.shared
     @State private var showClearHistoryAlert = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfUse = false
@@ -37,6 +39,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     scanningSection
                     notificationsSection
+                    privacySection
                     storageSection
                     appearanceSection
                     dataSection
@@ -136,6 +139,35 @@ struct SettingsView: View {
             )
         }
         .padding(.horizontal, 16)
+    }
+
+    // MARK: - Privacy Section
+
+    private var privacySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionTitle(String(localized: "settings.privacy.section_title", defaultValue: "Privacy"))
+
+            settingsToggleRow(
+                title: String(localized: "settings.privacy.personalized_ads", defaultValue: "Personalized Ads"),
+                isOn: Binding(
+                    get: { trackingService.isAuthorized },
+                    set: { _ in
+                        let status = ATTrackingManager.trackingAuthorizationStatus
+                        if status == .notDetermined {
+                            trackingService.requestTrackingPermission()
+                        } else {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                    }
+                )
+            )
+        }
+        .padding(.horizontal, 16)
+        .onAppear {
+            trackingService.updateStatus()
+        }
     }
 
     // MARK: - Storage Section

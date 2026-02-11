@@ -11,6 +11,7 @@
 		1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DB2F30E76400B61DB5 /* FirebaseCore */; };
 		1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */; };
 		1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */; };
+		1581A5E22F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1581A5E12F30E76400B61DB5 /* FirebaseAnalytics */; };
 		15AE5A002F53B00000C8A8F0 /* privacy-policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A012F53B00000C8A8F0 /* privacy-policy.html */; };
 		15AE5A022F53B00000C8A8F1 /* terms-of-use.html in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A032F53B00000C8A8F1 /* terms-of-use.html */; };
 		15AE5A052F53B10000C8A8F3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */; };
@@ -24,9 +25,22 @@
 		15AE5A042F53B10000C8A8F2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ZebraCodeScanner/Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		15AE59BF2F263F2C002C8A8F /* Exceptions for "ZebraCodeScanner" folder in "ZebraCodeScanner" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 15AE59BB2F263F2C002C8A8F /* ZebraCodeScanner */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		15AE59BE2F263F2C002C8A8F /* ZebraCodeScanner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				15AE59BF2F263F2C002C8A8F /* Exceptions for "ZebraCodeScanner" folder in "ZebraCodeScanner" target */,
+			);
 			path = ZebraCodeScanner;
 			sourceTree = "<group>";
 		};
@@ -40,6 +54,7 @@
 				1581A5DE2F30E76400B61DB5 /* FirebaseCrashlytics in Frameworks */,
 				1581A5DC2F30E76400B61DB5 /* FirebaseCore in Frameworks */,
 				1581A5E02F30E76400B61DB5 /* FirebaseRemoteConfig in Frameworks */,
+				1581A5E22F30E76400B61DB5 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +104,7 @@
 				1581A5DB2F30E76400B61DB5 /* FirebaseCore */,
 				1581A5DD2F30E76400B61DB5 /* FirebaseCrashlytics */,
 				1581A5DF2F30E76400B61DB5 /* FirebaseRemoteConfig */,
+				1581A5E12F30E76400B61DB5 /* FirebaseAnalytics */,
 			);
 			productName = ZebraCodeScanner;
 			productReference = 15AE59BC2F263F2C002C8A8F /* ZebraCodeScanner.app */;
@@ -285,11 +301,13 @@
 				DEVELOPMENT_TEAM = 265AV6332H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZebraCodeScanner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Zebra: Code Scanner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan QR codes and barcodes.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save generated QR codes to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to import images for scanning.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -327,11 +345,13 @@
 				DEVELOPMENT_TEAM = 265AV6332H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZebraCodeScanner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Zebra: Code Scanner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan QR codes and barcodes.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save generated QR codes to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to import images for scanning.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -408,6 +428,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		1581A5E12F30E76400B61DB5 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1581A5D82F30E76400B61DB5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

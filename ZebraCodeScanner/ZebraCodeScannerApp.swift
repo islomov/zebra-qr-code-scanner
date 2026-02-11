@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreText
 import FirebaseCore
+import FirebaseAnalytics
 import FirebaseCrashlytics
 
 @main
