@@ -5,12 +5,13 @@
 //  Created by Sardor Islomov on 25/01/26.
 //
 
-import SwiftUI
-import Combine
-import PhotosUI
-import Vision
+import AppTrackingTransparency
 import AudioToolbox
 import AVFoundation
+import Combine
+import PhotosUI
+import SwiftUI
+import Vision
 
 @MainActor
 final class ScanViewModel: ObservableObject {
@@ -91,6 +92,11 @@ final class ScanViewModel: ObservableObject {
             return
         }
         Task {
+            // Show ATT prompt before camera permission (only shows once)
+            if ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+                await ATTrackingManager.requestTrackingAuthorization()
+                TrackingService.shared.updateStatus()
+            }
             await checkAndRequestPermission()
         }
     }
