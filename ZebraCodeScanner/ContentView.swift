@@ -41,6 +41,7 @@ struct ContentView: View {
                 }
                 .tag(2)
         }
+        .tint(Color.primary)
         .onChange(of: selectedTab) { newTab in
             if newTab == 1 {
                 scanViewModel.startScanning()
