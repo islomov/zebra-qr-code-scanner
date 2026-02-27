@@ -16,6 +16,7 @@ struct ZebraCodeScannerApp: App {
     @StateObject private var forceUpdateService = ForceUpdateService()
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
+    @State private var showSplash = true
 
     init() {
         FirebaseApp.configure()
@@ -34,14 +35,26 @@ struct ZebraCodeScannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .fullScreenCover(isPresented: $forceUpdateService.requiresUpdate) {
-                    ForceUpdateView()
-                        .interactiveDismissDisabled()
+            ZStack {
+                ContentView()
+                    .fullScreenCover(isPresented: $forceUpdateService.requiresUpdate) {
+                        ForceUpdateView()
+                            .interactiveDismissDisabled()
+                    }
+                    .onAppear {
+                        forceUpdateService.checkForUpdate()
+                    }
+                    .opacity(showSplash ? 0 : 1)
+
+                if showSplash {
+                    SplashScreenView {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showSplash = false
+                        }
+                    }
+                    .transition(.opacity)
                 }
-                .onAppear {
-                    forceUpdateService.checkForUpdate()
-                }
+            }
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active && notificationsEnabled {
