@@ -97,8 +97,7 @@ final class HistoryViewModel: ObservableObject {
     func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
+        formatter.dateFormat = "MMM d, HH:mm"
         return formatter.string(from: date)
     }
 
