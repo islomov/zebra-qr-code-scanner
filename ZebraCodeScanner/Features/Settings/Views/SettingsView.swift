@@ -16,6 +16,8 @@ struct SettingsView: View {
     @State private var showClearHistoryAlert = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfUse = false
+    @State private var showLanguagePicker = false
+    @State private var showRestartAlert = false
 
     private let dataManager = CoreDataManager.shared
 
@@ -37,6 +39,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     scanningSection
                     notificationsSection
+                    languageSection
                     storageSection
                     appearanceSection
                     dataSection
@@ -54,6 +57,22 @@ struct SettingsView: View {
             }
         } message: {
             Text(String(localized: "settings.data.clear_history_message", defaultValue: "This will permanently delete all generated and scanned code history."))
+        }
+        .sheet(isPresented: $showLanguagePicker) {
+            LanguagePickerView { languageCode in
+                showLanguagePicker = false
+                UserDefaults.standard.set([languageCode], forKey: "AppleLanguages")
+                UserDefaults.standard.synchronize()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showRestartAlert = true
+                }
+            }
+            .preferredColorScheme(colorScheme)
+        }
+        .alert(String(localized: "settings.language.restart_title", defaultValue: "Restart Required"), isPresented: $showRestartAlert) {
+            Button(String(localized: "common.ok", defaultValue: "OK")) { }
+        } message: {
+            Text(String(localized: "settings.language.restart_message", defaultValue: "Please restart the app for the language change to take effect."))
         }
         .sheet(isPresented: $showPrivacyPolicy) {
             LegalDocumentView(title: String(localized: "settings.about.privacy_policy", defaultValue: "Privacy Policy"), fileName: "privacy-policy")
@@ -136,6 +155,59 @@ struct SettingsView: View {
             )
         }
         .padding(.horizontal, 16)
+    }
+
+    // MARK: - Language Section
+
+    private var currentLanguageDisplayName: String {
+        let code = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? Locale.current.language.languageCode?.identifier ?? "en"
+        return LanguagePickerView.supportedLanguages.first(where: { $0.code == code })?.nativeName ?? "English"
+    }
+
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionTitle(String(localized: "settings.language.section_title", defaultValue: "Language"))
+
+            Button {
+                showLanguagePicker = true
+            } label: {
+                HStack {
+                    Text(String(localized: "settings.language.app_language", defaultValue: "App Language"))
+                        .font(.custom("Inter-Medium", size: 16))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.primaryText)
+
+                    Spacer()
+
+                    Text(currentLanguageDisplayName)
+                        .font(.custom("Inter-Regular", size: 14))
+                        .tracking(-0.408)
+                        .foregroundStyle(DesignColors.secondaryText)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DesignColors.secondaryText)
+                }
+                .padding(20)
+                .frame(height: 58)
+                .background(DesignColors.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(DesignColors.stroke, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch appearanceMode {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
     }
 
     // MARK: - Storage Section
@@ -438,6 +510,177 @@ struct SettingsView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Language Picker View
+
+struct LanguagePickerView: View {
+    let onSelect: (String) -> Void
+
+    struct LanguageItem: Identifiable {
+        let id = UUID()
+        let code: String
+        let nativeName: String
+        let englishName: String
+    }
+
+    static let supportedLanguages: [LanguageItem] = [
+        LanguageItem(code: "en", nativeName: "English", englishName: "English"),
+        LanguageItem(code: "ar", nativeName: "العربية", englishName: "Arabic"),
+        LanguageItem(code: "da", nativeName: "Dansk", englishName: "Danish"),
+        LanguageItem(code: "de", nativeName: "Deutsch", englishName: "German"),
+        LanguageItem(code: "es", nativeName: "Español", englishName: "Spanish"),
+        LanguageItem(code: "fi", nativeName: "Suomi", englishName: "Finnish"),
+        LanguageItem(code: "fr", nativeName: "Français", englishName: "French"),
+        LanguageItem(code: "hi", nativeName: "हिन्दी", englishName: "Hindi"),
+        LanguageItem(code: "id", nativeName: "Bahasa Indonesia", englishName: "Indonesian"),
+        LanguageItem(code: "it", nativeName: "Italiano", englishName: "Italian"),
+        LanguageItem(code: "ja", nativeName: "日本語", englishName: "Japanese"),
+        LanguageItem(code: "ko", nativeName: "한국어", englishName: "Korean"),
+        LanguageItem(code: "ms", nativeName: "Bahasa Melayu", englishName: "Malay"),
+        LanguageItem(code: "nb", nativeName: "Norsk Bokmål", englishName: "Norwegian"),
+        LanguageItem(code: "nl", nativeName: "Nederlands", englishName: "Dutch"),
+        LanguageItem(code: "pl", nativeName: "Polski", englishName: "Polish"),
+        LanguageItem(code: "pt-BR", nativeName: "Português (Brasil)", englishName: "Portuguese (Brazil)"),
+        LanguageItem(code: "ru", nativeName: "Русский", englishName: "Russian"),
+        LanguageItem(code: "sv", nativeName: "Svenska", englishName: "Swedish"),
+        LanguageItem(code: "th", nativeName: "ไทย", englishName: "Thai"),
+        LanguageItem(code: "tr", nativeName: "Türkçe", englishName: "Turkish"),
+        LanguageItem(code: "uk", nativeName: "Українська", englishName: "Ukrainian"),
+        LanguageItem(code: "uz", nativeName: "O'zbek", englishName: "Uzbek"),
+        LanguageItem(code: "vi", nativeName: "Tiếng Việt", englishName: "Vietnamese"),
+        LanguageItem(code: "zh-Hans", nativeName: "简体中文", englishName: "Chinese (Simplified)"),
+        LanguageItem(code: "zh-Hant", nativeName: "繁體中文", englishName: "Chinese (Traditional)"),
+    ]
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    private var currentLanguageCode: String {
+        UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? Locale.current.language.languageCode?.identifier ?? "en"
+    }
+
+    private var filteredLanguages: [LanguageItem] {
+        if searchText.isEmpty {
+            return Self.supportedLanguages
+        }
+        let query = searchText.lowercased()
+        return Self.supportedLanguages.filter {
+            $0.nativeName.lowercased().contains(query) ||
+            $0.englishName.lowercased().contains(query) ||
+            $0.code.lowercased().contains(query)
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            ZStack {
+                Text(String(localized: "settings.language.picker_title", defaultValue: "Select Language"))
+                    .font(.custom("Inter-SemiBold", size: 20))
+                    .tracking(-0.408)
+                    .foregroundStyle(DesignColors.primaryText)
+
+                HStack {
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(DesignColors.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(DesignColors.cardBackground)
+                            .clipShape(Circle())
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+
+            // Search bar
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 14))
+                    .foregroundStyle(DesignColors.secondaryText)
+
+                TextField(String(localized: "settings.language.search_placeholder", defaultValue: "Search languages"), text: $searchText)
+                    .font(.custom("Inter-Regular", size: 16))
+                    .tracking(-0.408)
+
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(DesignColors.secondaryText)
+                    }
+                }
+            }
+            .padding(12)
+            .background(DesignColors.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignColors.stroke, lineWidth: 1)
+            )
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+
+            // Language list
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(Array(filteredLanguages.enumerated()), id: \.element.id) { index, language in
+                        Button {
+                            onSelect(language.code)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(language.nativeName)
+                                        .font(.custom("Inter-Medium", size: 16))
+                                        .tracking(-0.408)
+                                        .foregroundStyle(DesignColors.primaryText)
+
+                                    Text(language.englishName)
+                                        .font(.custom("Inter-Regular", size: 13))
+                                        .tracking(-0.408)
+                                        .foregroundStyle(DesignColors.secondaryText)
+                                }
+
+                                Spacer()
+
+                                if language.code == currentLanguageCode {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(DesignColors.primaryText)
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 14)
+                            .background(DesignColors.cardBackground)
+                        }
+                        .buttonStyle(.plain)
+
+                        if index < filteredLanguages.count - 1 {
+                            Divider()
+                                .background(DesignColors.stroke)
+                                .padding(.leading, 20)
+                        }
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(DesignColors.stroke, lineWidth: 1)
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+            }
+        }
+        .background(DesignColors.background)
     }
 }
 
