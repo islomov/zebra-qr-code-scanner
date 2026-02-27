@@ -297,8 +297,7 @@ struct HistoryDetailView: View {
     private func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
         let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .medium
+        formatter.dateFormat = "MMM d, HH:mm"
         return formatter.string(from: date)
     }
 
@@ -509,8 +508,7 @@ struct ScannedDetailView: View {
     private func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
         let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .medium
+        formatter.dateFormat = "MMM d, HH:mm"
         return formatter.string(from: date)
     }
 }
