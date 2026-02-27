@@ -128,7 +128,7 @@ struct GenerateView: View {
                         }
                         .multilineTextAlignment(.center)
 
-                        Link(destination: URL(string: "mailto:sardor.islomov.96@gmail.com?subject=Code%20Scanner%20-%20Feature%20Request")!) {
+                        Link(destination: URL(string: "mailto:support@viralapps.studio?subject=Code%20Scanner%20-%20Feature%20Request")!) {
                             Text(String(localized: "generate.request.button", defaultValue: "Send a Request"))
                                 .font(.custom("Inter-Medium", size: 16))
                                 .tracking(-0.408)
