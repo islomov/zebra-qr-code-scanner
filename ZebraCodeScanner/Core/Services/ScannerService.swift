@@ -41,11 +41,13 @@ final class ScannerService: ObservableObject {
 enum ScanMode: String, CaseIterable {
     case qrCode = "qrCode"
     case barcode = "barcode"
+    case photoSearch = "photoSearch"
 
     var title: String {
         switch self {
         case .qrCode: return String(localized: "scan_mode.qr_code", defaultValue: "QR Code")
         case .barcode: return String(localized: "scan_mode.barcode", defaultValue: "Barcode")
+        case .photoSearch: return String(localized: "scan_mode.photo_search", defaultValue: "Photo Search")
         }
     }
 }
@@ -57,6 +59,8 @@ struct CameraScannerRepresentable: UIViewControllerRepresentable {
     let onError: (Error) -> Void
     let onZoomChanged: (CGFloat) -> Void
     let onFocusTap: (CGPoint) -> Void
+    var onPhotoCaptured: ((UIImage) -> Void)?
+    var controllerRef: (CameraScannerViewController) -> Void
 
     @Binding var isScanning: Bool
     @Binding var isTorchOn: Bool
@@ -67,6 +71,8 @@ struct CameraScannerRepresentable: UIViewControllerRepresentable {
         controller.onError = onError
         controller.onZoomChanged = onZoomChanged
         controller.onFocusTap = onFocusTap
+        controller.onPhotoCaptured = onPhotoCaptured
+        controllerRef(controller)
         return controller
     }
 
@@ -104,6 +110,7 @@ class CameraScannerViewController: UIViewController {
     private let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "com.zebra.scanner.session")
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private let photoOutput = AVCapturePhotoOutput()
     private var isConfigured = false
     private var pendingStart = false
 
@@ -111,6 +118,7 @@ class CameraScannerViewController: UIViewController {
     var onError: ((Error) -> Void)?
     var onZoomChanged: ((CGFloat) -> Void)?
     var onFocusTap: ((CGPoint) -> Void)?
+    var onPhotoCaptured: ((UIImage) -> Void)?
 
     // Debounce: avoid firing for the same code repeatedly
     private var lastScannedValue: String?
@@ -226,6 +234,10 @@ class CameraScannerViewController: UIViewController {
                 ]
             }
 
+            if captureSession.canAddOutput(photoOutput) {
+                captureSession.addOutput(photoOutput)
+            }
+
             captureSession.commitConfiguration()
             isConfigured = true
 
@@ -295,6 +307,14 @@ class CameraScannerViewController: UIViewController {
             print("[CameraScanner] Failed to set torch: \(error)")
         }
     }
+
+    func capturePhoto() {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            let settings = AVCapturePhotoSettings()
+            self.photoOutput.capturePhoto(with: settings, delegate: self)
+        }
+    }
 }
 
 // MARK: - AVCaptureMetadataOutputObjectsDelegate
@@ -334,6 +354,45 @@ extension CameraScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
         case .dataMatrix: return "datamatrix"
         case .interleaved2of5: return "itf14"
         default: return "barcode"
+        }
+    }
+}
+
+// MARK: - AVCapturePhotoCaptureDelegate
+
+extension CameraScannerViewController: AVCapturePhotoCaptureDelegate {
+    // This delegate is called on sessionQueue (background), not main thread
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let error = error {
+            print("[CameraScanner] Photo capture error: \(error)")
+            return
+        }
+
+        guard let data = photo.fileDataRepresentation(),
+              let original = UIImage(data: data) else { return }
+
+        let maxDimension: CGFloat = 1200
+        let size = original.size
+        let scale: CGFloat
+        if size.width > size.height {
+            scale = size.width > maxDimension ? maxDimension / size.width : 1.0
+        } else {
+            scale = size.height > maxDimension ? maxDimension / size.height : 1.0
+        }
+
+        let resized: UIImage
+        if scale < 1.0 {
+            let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+            let renderer = UIGraphicsImageRenderer(size: newSize)
+            resized = renderer.image { _ in
+                original.draw(in: CGRect(origin: .zero, size: newSize))
+            }
+        } else {
+            resized = original
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.onPhotoCaptured?(resized)
         }
     }
 }
