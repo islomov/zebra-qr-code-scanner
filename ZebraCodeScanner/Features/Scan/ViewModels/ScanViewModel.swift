@@ -178,7 +178,12 @@ final class ScanViewModel: ObservableObject {
                 return
             }
 
-            await scanImageForCodes(uiImage)
+            if scanMode == .photoSearch {
+                searchImage = uiImage
+                showGoogleLens = true
+            } else {
+                await scanImageForCodes(uiImage)
+            }
         }
     }
 
