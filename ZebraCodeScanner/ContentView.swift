@@ -13,10 +13,6 @@ struct ContentView: View {
     @StateObject private var scanViewModel = ScanViewModel()
     @AppStorage("appearanceMode") private var appearanceMode = "system"
 
-    init() {
-        UITabBar.appearance().isHidden = true
-    }
-
     private var colorScheme: ColorScheme? {
         switch appearanceMode {
         case "light": return .light
@@ -27,23 +23,23 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                GenerateView(showSettings: $showSettings)
-                    .tag(0)
-
-                ScanView(showSettings: $showSettings, viewModel: scanViewModel, isActiveTab: selectedTab == 1)
-                    .tag(1)
-
-                HistoryView(showSettings: $showSettings)
-                    .tag(2)
+            Group {
+                switch selectedTab {
+                case 1:
+                    ScanView(showSettings: $showSettings, viewModel: scanViewModel)
+                case 2:
+                    HistoryView(showSettings: $showSettings)
+                default:
+                    GenerateView(showSettings: $showSettings)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             FloatingTabBar(selectedTab: $selectedTab)
                 .padding(.bottom, 12)
         }
         .ignoresSafeArea(.keyboard)
         .onChange(of: selectedTab) { newTab in
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             if newTab == 1 {
                 scanViewModel.startScanning()
             } else {
@@ -102,7 +98,14 @@ private struct TabBarButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                action()
+            }
+        } label: {
             Image(icon)
                 .renderingMode(.template)
                 .resizable()
@@ -116,6 +119,7 @@ private struct TabBarButton: View {
                 )
         }
         .buttonStyle(.plain)
+        .animation(nil, value: isSelected)
     }
 }
 
