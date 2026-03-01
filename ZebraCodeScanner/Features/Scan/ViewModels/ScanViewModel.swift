@@ -24,6 +24,10 @@ final class ScanViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     @Published var selectedPhoto: PhotosPickerItem?
+    @Published var showGoogleLens: Bool = false
+    @Published var searchImage: UIImage?
+
+    weak var cameraController: CameraScannerViewController?
 
     @Published var productInfo: ProductInfo?
     @Published var isLoadingProduct: Bool = false
@@ -174,6 +178,16 @@ final class ScanViewModel: ObservableObject {
 
             await scanImageForCodes(uiImage)
         }
+    }
+
+    func takePhotoForSearch() {
+        searchImage = nil
+        showGoogleLens = true
+        cameraController?.capturePhoto()
+    }
+
+    func handleCapturedPhoto(_ image: UIImage) {
+        searchImage = image
     }
 
     private func scanImageForCodes(_ image: UIImage) async {

@@ -29,6 +29,11 @@ struct ScanView: View {
         .onChange(of: viewModel.selectedPhoto) { _ in
             viewModel.processSelectedPhoto()
         }
+        .sheet(isPresented: $viewModel.showGoogleLens) {
+            viewModel.searchImage = nil
+        } content: {
+            GoogleLensView(image: viewModel.searchImage)
+        }
         .sheet(isPresented: $viewModel.showResult) {
             if viewModel.isBarcode {
                 ProductResultView(
@@ -102,62 +107,115 @@ struct ScanView: View {
                         viewModel.focusPoint = nil
                     }
                 },
+                onPhotoCaptured: { image in
+                    viewModel.handleCapturedPhoto(image)
+                },
+                controllerRef: { controller in
+                    viewModel.cameraController = controller
+                },
                 isScanning: $viewModel.isScanning,
                 isTorchOn: $viewModel.isTorchOn
             )
             .ignoresSafeArea()
 
             if viewModel.isScanning {
-                // Frame overlay (pass-through touches)
-                if viewModel.scanMode == .qrCode {
-                    QRFrameOverlay()
+                if viewModel.scanMode == .photoSearch {
+                    // Photo search mode - camera stays visible, show capture button
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
                         .allowsHitTesting(false)
-                } else {
-                    BarcodeFrameOverlay()
-                        .allowsHitTesting(false)
-                }
 
-                // Focus indicator
-                if let focusPoint = viewModel.focusPoint {
-                    FocusIndicatorView(point: focusPoint)
-                        .allowsHitTesting(false)
-                }
+                    // Header
+                    VStack {
+                        scanHeader
+                        Spacer()
+                    }
 
-                // Zoom level indicator
-                if viewModel.currentZoom > 1.05 {
+                    // Bottom controls with capture button
                     VStack {
                         Spacer()
-                        Text(String(format: "%.1fx", viewModel.currentZoom))
+
+                        Text(String(localized: "scan.photo_search.hint", defaultValue: "Take a photo to search"))
                             .font(.custom("Inter-Medium", size: 14))
                             .tracking(-0.408)
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                             .background(Color.black.opacity(0.5))
                             .clipShape(Capsule())
-                            .padding(.bottom, viewModel.scanMode == .barcode ? 170 : 80)
-                    }
-                    .allowsHitTesting(false)
-                }
-
-                // Header
-                VStack {
-                    scanHeader
-                    Spacer()
-                }
-
-                // Bottom controls
-                VStack {
-                    Spacer()
-
-                    if viewModel.scanMode == .barcode {
-                        actionButtons
                             .padding(.bottom, 16)
+
+                        // Capture button
+                        Button {
+                            viewModel.takePhotoForSearch()
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .stroke(.white, lineWidth: 4)
+                                    .frame(width: 72, height: 72)
+                                Circle()
+                                    .fill(.white)
+                                    .frame(width: 60, height: 60)
+                            }
+                        }
+                        .padding(.bottom, 20)
+
+                        ScanModePicker(selectedMode: $viewModel.scanMode)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 100)
+                    }
+                } else {
+                    // Frame overlay (pass-through touches)
+                    if viewModel.scanMode == .qrCode {
+                        QRFrameOverlay()
+                            .allowsHitTesting(false)
+                    } else {
+                        BarcodeFrameOverlay()
+                            .allowsHitTesting(false)
                     }
 
-                    ScanModePicker(selectedMode: $viewModel.scanMode)
-                        .padding(.horizontal, 44)
-                        .padding(.bottom, 100)
+                    // Focus indicator
+                    if let focusPoint = viewModel.focusPoint {
+                        FocusIndicatorView(point: focusPoint)
+                            .allowsHitTesting(false)
+                    }
+
+                    // Zoom level indicator
+                    if viewModel.currentZoom > 1.05 {
+                        VStack {
+                            Spacer()
+                            Text(String(format: "%.1fx", viewModel.currentZoom))
+                                .font(.custom("Inter-Medium", size: 14))
+                                .tracking(-0.408)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Capsule())
+                                .padding(.bottom, viewModel.scanMode == .barcode ? 170 : 80)
+                        }
+                        .allowsHitTesting(false)
+                    }
+
+                    // Header
+                    VStack {
+                        scanHeader
+                        Spacer()
+                    }
+
+                    // Bottom controls
+                    VStack {
+                        Spacer()
+
+                        if viewModel.scanMode == .barcode {
+                            actionButtons
+                                .padding(.bottom, 16)
+                        }
+
+                        ScanModePicker(selectedMode: $viewModel.scanMode)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 100)
+                    }
                 }
             } else {
                 DesignColors.background
@@ -511,7 +569,7 @@ struct ScanModePicker: View {
             }
         }
         .padding(4)
-        .frame(width: 302)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(DesignColors.lightText)
