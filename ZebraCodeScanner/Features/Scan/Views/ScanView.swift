@@ -11,19 +11,20 @@ import PhotosUI
 struct ScanView: View {
     @Binding var showSettings: Bool
     @ObservedObject var viewModel: ScanViewModel
-    var isActiveTab: Bool
+    @State private var isCameraReady = false
 
     var body: some View {
         ZStack {
-            if viewModel.isSupported {
+            if viewModel.isSupported && isCameraReady {
                 scannerView
-            }
-
-            if !isActiveTab {
-                Color(.systemBackground)
-                    .ignoresSafeArea()
             } else if !viewModel.isSupported {
                 unsupportedView
+            }
+        }
+        .onAppear {
+            // Defer camera creation to the next frame so the view appears instantly
+            DispatchQueue.main.async {
+                isCameraReady = true
             }
         }
         .onChange(of: viewModel.selectedPhoto) { _ in
@@ -708,6 +709,6 @@ struct ManualBarcodeEntryView: View {
 
 struct ScanView_Previews: PreviewProvider {
     static var previews: some View {
-        ScanView(showSettings: .constant(false), viewModel: ScanViewModel(), isActiveTab: true)
+        ScanView(showSettings: .constant(false), viewModel: ScanViewModel())
     }
 }

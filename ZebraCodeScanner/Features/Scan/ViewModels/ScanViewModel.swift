@@ -44,7 +44,13 @@ final class ScanViewModel: ObservableObject {
     private lazy var productLookupService = ProductLookupService.shared
     private var hasAuthorizedCamera = false
 
+    /// Cached at init so we never call AVCaptureDevice.default on the main thread
+    /// during a SwiftUI body evaluation.
+    let isSupported: Bool
+
     init() {
+        isSupported = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
+
         // Only record permission state — don't start the camera here.
         // Camera init is heavyweight and blocks the main thread for ~1-2s.
         // The actual scanning starts when the user navigates to the Scan tab.
@@ -55,10 +61,6 @@ final class ScanViewModel: ObservableObject {
 
     var isBarcode: Bool {
         scannedType != "qr" && scannedType != "datamatrix" && scannedType != "aztec" && scannedType != "text" && !scannedType.isEmpty
-    }
-
-    var isSupported: Bool {
-        AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
 
     func checkAndRequestPermission() async {
