@@ -157,7 +157,7 @@ struct ScanView: View {
 
                     ScanModePicker(selectedMode: $viewModel.scanMode)
                         .padding(.horizontal, 44)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 100)
                 }
             } else {
                 DesignColors.background

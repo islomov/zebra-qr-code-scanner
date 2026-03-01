@@ -149,6 +149,7 @@ struct GenerateView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 24)
                 }
+                .padding(.bottom, 80)
             }
             .background(DesignColors.background)
             .navigationBarHidden(true)

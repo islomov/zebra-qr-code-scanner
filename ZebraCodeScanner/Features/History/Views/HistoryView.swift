@@ -191,7 +191,7 @@ struct HistoryView: View {
                     scannedSection
                 }
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 80)
         }
     }
 
