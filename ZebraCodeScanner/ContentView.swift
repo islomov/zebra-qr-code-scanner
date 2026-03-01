@@ -13,6 +13,10 @@ struct ContentView: View {
     @StateObject private var scanViewModel = ScanViewModel()
     @AppStorage("appearanceMode") private var appearanceMode = "system"
 
+    init() {
+        UITabBar.appearance().isHidden = true
+    }
+
     private var colorScheme: ColorScheme? {
         switch appearanceMode {
         case "light": return .light
@@ -22,33 +26,25 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            GenerateView(showSettings: $showSettings)
-                .tabItem {
-                    Label(String(localized: "tabs.generate", defaultValue: "Generate"), image: "icon-qr")
-                }
-                .tag(0)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedTab) {
+                GenerateView(showSettings: $showSettings)
+                    .tag(0)
 
-            ScanView(showSettings: $showSettings, viewModel: scanViewModel, isActiveTab: selectedTab == 1)
-                .tabItem {
-                    Label(String(localized: "tabs.scan", defaultValue: "Scan"), image: "icon-scan")
-                }
-                .tag(1)
+                ScanView(showSettings: $showSettings, viewModel: scanViewModel, isActiveTab: selectedTab == 1)
+                    .tag(1)
 
-            HistoryView(showSettings: $showSettings)
-                .tabItem {
-                    Label(String(localized: "tabs.history", defaultValue: "History"), image: "icon-history")
-                }
-                .tag(2)
+                HistoryView(showSettings: $showSettings)
+                    .tag(2)
+            }
+            FloatingTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 12)
         }
-        .tint(Color.primary)
+        .ignoresSafeArea(.keyboard)
         .onChange(of: selectedTab) { newTab in
             if newTab == 1 {
                 scanViewModel.startScanning()
             } else {
-                // Always stop when leaving scan tab — the old code only
-                // stopped when the *previous* tab was 1, so the camera
-                // kept running silently if the user never visited tab 1.
                 scanViewModel.stopScanning()
             }
         }
@@ -57,6 +53,64 @@ struct ContentView: View {
                 .preferredColorScheme(colorScheme)
         }
         .preferredColorScheme(colorScheme)
+    }
+}
+
+private struct FloatingTabBar: View {
+    @Binding var selectedTab: Int
+
+    private let tabs: [(icon: String, tag: Int)] = [
+        ("icon-qr", 0),
+        ("icon-scan", 1),
+        ("icon-history", 2)
+    ]
+
+    var body: some View {
+        HStack(spacing: 20) {
+            ForEach(tabs, id: \.tag) { tab in
+                TabBarButton(
+                    icon: tab.icon,
+                    isSelected: selectedTab == tab.tag
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = tab.tag
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .fill(Color(UIColor { tc in
+                    tc.userInterfaceStyle == .dark ? .white : UIColor(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255, alpha: 1)
+                }))
+                .shadow(color: .black.opacity(0.08), radius: 16, x: 0, y: 4)
+                .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+        )
+    }
+}
+
+private struct TabBarButton: View {
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(icon)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .foregroundColor(isSelected ? DesignColors.primaryButtonText : DesignColors.inactive)
+                .padding(10)
+                .background(
+                    Circle()
+                        .fill(isSelected ? DesignColors.primaryButtonText.opacity(0.12) : .clear)
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 

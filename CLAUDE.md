@@ -394,6 +394,14 @@ All functionality can be achieved with native Apple frameworks:
 
 ---
 
+## Localization Rules
+
+- When adding or removing localization strings, only modify the **English** language entries in `Localizable.xcstrings`
+- Do **not** add, remove, or modify strings for any other languages
+- Multi-language localization updates will be handled in a separate ticket
+
+---
+
 ## Important Considerations
 
 1. **Camera Permission:** Request camera access for scanning feature
