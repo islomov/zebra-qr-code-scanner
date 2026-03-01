@@ -6,11 +6,35 @@
 //
 
 import SwiftUI
+import Combine
+
+class TabBarVisibility: ObservableObject {
+    @Published var isVisible = true
+    private var hideCount = 0
+
+    func hide() {
+        hideCount += 1
+        updateVisibility()
+    }
+
+    func show() {
+        hideCount = max(0, hideCount - 1)
+        updateVisibility()
+    }
+
+    private func updateVisibility() {
+        let shouldBeVisible = hideCount == 0
+        if isVisible != shouldBeVisible {
+            isVisible = shouldBeVisible
+        }
+    }
+}
 
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showSettings = false
     @StateObject private var scanViewModel = ScanViewModel()
+    @StateObject private var tabBarVisibility = TabBarVisibility()
     @AppStorage("appearanceMode") private var appearanceMode = "system"
 
     private var colorScheme: ColorScheme? {
@@ -37,7 +61,12 @@ struct ContentView: View {
 
             FloatingTabBar(selectedTab: $selectedTab)
                 .padding(.bottom, 12)
+                .offset(y: tabBarVisibility.isVisible ? 0 : 100)
+                .opacity(tabBarVisibility.isVisible ? 1 : 0)
+                .allowsHitTesting(tabBarVisibility.isVisible)
+                .animation(.easeInOut(duration: 0.25), value: tabBarVisibility.isVisible)
         }
+        .environmentObject(tabBarVisibility)
         .ignoresSafeArea(.keyboard)
         .onChange(of: selectedTab) { newTab in
             if newTab == 1 {
@@ -120,6 +149,24 @@ private struct TabBarButton: View {
         }
         .buttonStyle(.plain)
         .animation(nil, value: isSelected)
+    }
+}
+
+// MARK: - Hide Tab Bar Modifier
+
+struct HideTabBarModifier: ViewModifier {
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibility
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { tabBarVisibility.hide() }
+            .onDisappear { tabBarVisibility.show() }
+    }
+}
+
+extension View {
+    func hideFloatingTabBar() -> some View {
+        modifier(HideTabBarModifier())
     }
 }
 

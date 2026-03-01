@@ -36,6 +36,7 @@ struct SocialMediaFormView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(DesignColors.background)
         .navigationBarHidden(true)
+        .hideFloatingTabBar()
         .navigationDestination(isPresented: $showPreview) {
             SocialMediaPreviewView(type: type, viewModel: viewModel)
         }
@@ -301,7 +302,7 @@ struct SocialMediaPreviewView: View {
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .hideFloatingTabBar()
         .onAppear { saveToHistory() }
         .onChange(of: selectedPhotoItem) { newItem in
             Task {

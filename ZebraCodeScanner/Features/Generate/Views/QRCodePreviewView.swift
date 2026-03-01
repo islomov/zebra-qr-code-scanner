@@ -360,7 +360,7 @@ struct QRCodePreviewView: View {
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .hideFloatingTabBar()
         .onAppear { saveToHistory() }
         .onChange(of: selectedPhotoItem) { newItem in
             Task {

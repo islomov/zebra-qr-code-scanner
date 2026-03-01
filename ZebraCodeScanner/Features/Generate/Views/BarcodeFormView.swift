@@ -35,6 +35,7 @@ struct BarcodeFormView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(DesignColors.background)
         .navigationBarHidden(true)
+        .hideFloatingTabBar()
         .navigationDestination(isPresented: $showPreview) {
             BarcodePreviewView(type: type, viewModel: viewModel)
         }
