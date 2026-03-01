@@ -37,15 +37,22 @@ struct ContentView: View {
                 HistoryView(showSettings: $showSettings)
                     .tag(2)
             }
+
             FloatingTabBar(selectedTab: $selectedTab)
                 .padding(.bottom, 12)
         }
         .ignoresSafeArea(.keyboard)
         .onChange(of: selectedTab) { newTab in
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             if newTab == 1 {
                 scanViewModel.startScanning()
             } else {
                 scanViewModel.stopScanning()
+            }
+        }
+        .onChange(of: showSettings) { isShowing in
+            if isShowing {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
             }
         }
         .sheet(isPresented: $showSettings) {
@@ -72,9 +79,7 @@ private struct FloatingTabBar: View {
                     icon: tab.icon,
                     isSelected: selectedTab == tab.tag
                 ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedTab = tab.tag
-                    }
+                    selectedTab = tab.tag
                 }
             }
         }
