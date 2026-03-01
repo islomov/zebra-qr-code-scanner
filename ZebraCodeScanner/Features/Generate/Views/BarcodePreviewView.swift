@@ -47,7 +47,7 @@ struct BarcodePreviewView: View {
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .hideFloatingTabBar()
         .onAppear {
             saveToHistory()
         }

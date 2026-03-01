@@ -37,6 +37,7 @@ struct QRCodeFormView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(DesignColors.background)
         .navigationBarHidden(true)
+        .hideFloatingTabBar()
         .navigationDestination(isPresented: $showPreview) {
             QRCodePreviewView(type: type, viewModel: viewModel)
         }

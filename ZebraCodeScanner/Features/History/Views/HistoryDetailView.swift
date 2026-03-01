@@ -43,7 +43,7 @@ struct HistoryDetailView: View {
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .hideFloatingTabBar()
         .alert(String(localized: "common.alert.saved", defaultValue: "Saved!"), isPresented: $showSaveSuccess) {
             Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
         } message: {
@@ -341,7 +341,7 @@ struct ScannedDetailView: View {
         }
         .background(DesignColors.background)
         .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .hideFloatingTabBar()
     }
 
     // MARK: - Header
