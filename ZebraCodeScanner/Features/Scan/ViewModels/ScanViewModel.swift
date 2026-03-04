@@ -145,6 +145,8 @@ final class ScanViewModel: ObservableObject {
         if isBarcode {
             lookupProduct(barcode: content)
         }
+
+        AppRatingService.shared.recordSuccessfulScan()
     }
 
     private func lookupProduct(barcode: String) {
