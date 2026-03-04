@@ -16,6 +16,7 @@ struct ProductResultView: View {
     let onDismiss: () -> Void
 
     @State private var showCopiedAlert = false
+    @State private var showSearchOptions = false
 
     var body: some View {
         NavigationStack {
@@ -41,6 +42,9 @@ struct ProductResultView: View {
                             .foregroundStyle(DesignColors.primaryText)
                     }
                 }
+            }
+            .sheet(isPresented: $showSearchOptions) {
+                SearchOnlineSheet(query: searchQuery)
             }
             .alert(String(localized: "common.alert.copied", defaultValue: "Copied!"), isPresented: $showCopiedAlert) {
                 Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
@@ -230,6 +234,21 @@ struct ProductResultView: View {
                 }
 
                 Button {
+                    showSearchOptions = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 16))
+                        Text(String(localized: "search_online.button", defaultValue: "Search Online"))
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .padding(16)
+                    .background(DesignColors.actionButtonBackground)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+
+                Button {
                     UIPasteboard.general.string = content
                     showCopiedAlert = true
                 } label: {
@@ -301,6 +320,10 @@ struct ProductResultView: View {
         default:
             return String(localized: "common.barcode", defaultValue: "Barcode")
         }
+    }
+
+    private var searchQuery: String {
+        productInfo?.name ?? content
     }
 
 }

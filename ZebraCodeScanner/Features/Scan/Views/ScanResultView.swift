@@ -14,6 +14,7 @@ struct ScanResultView: View {
     let onDismiss: () -> Void
 
     @State private var showCopiedAlert = false
+    @State private var showSearchOptions = false
 
     var body: some View {
         NavigationStack {
@@ -84,6 +85,9 @@ struct ScanResultView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showSearchOptions) {
+                SearchOnlineSheet(query: content)
+            }
             .alert(String(localized: "common.alert.copied", defaultValue: "Copied!"), isPresented: $showCopiedAlert) {
                 Button(String(localized: "common.ok", defaultValue: "OK"), role: .cancel) {}
             } message: {
@@ -141,6 +145,21 @@ struct ScanResultView: View {
                         .foregroundStyle(DesignColors.primaryText)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
+                }
+
+                Button {
+                    showSearchOptions = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 16))
+                        Text(String(localized: "search_online.button", defaultValue: "Search Online"))
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .padding(16)
+                    .background(DesignColors.actionButtonBackground)
+                    .foregroundStyle(DesignColors.primaryText)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
 
                 Button {
