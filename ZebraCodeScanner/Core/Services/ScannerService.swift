@@ -37,21 +37,6 @@ final class ScannerService: ObservableObject {
     }
 }
 
-// MARK: - Scan Mode Enum (shared with ScanViewModel)
-enum ScanMode: String, CaseIterable {
-    case qrCode = "qrCode"
-    case barcode = "barcode"
-    case photoSearch = "photoSearch"
-
-    var title: String {
-        switch self {
-        case .qrCode: return String(localized: "scan_mode.qr_code", defaultValue: "QR Code")
-        case .barcode: return String(localized: "scan_mode.barcode", defaultValue: "Barcode")
-        case .photoSearch: return String(localized: "scan_mode.photo_search", defaultValue: "Photo Search")
-        }
-    }
-}
-
 // MARK: - Camera Scanner UIViewControllerRepresentable
 
 struct CameraScannerRepresentable: UIViewControllerRepresentable {

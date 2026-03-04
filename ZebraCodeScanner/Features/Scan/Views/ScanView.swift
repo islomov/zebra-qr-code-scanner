@@ -12,6 +12,8 @@ struct ScanView: View {
     @Binding var showSettings: Bool
     @ObservedObject var viewModel: ScanViewModel
     @State private var isCameraReady = false
+    @State private var isPhotoSearchActive = false
+    @State private var photoSearchSelectedPhoto: PhotosPickerItem?
 
     var body: some View {
         ZStack {
@@ -29,6 +31,16 @@ struct ScanView: View {
         }
         .onChange(of: viewModel.selectedPhoto) { _ in
             viewModel.processSelectedPhoto()
+        }
+        .onChange(of: photoSearchSelectedPhoto) { _ in
+            guard let item = photoSearchSelectedPhoto else { return }
+            photoSearchSelectedPhoto = nil
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let uiImage = UIImage(data: data) else { return }
+                viewModel.searchImage = uiImage
+                viewModel.showGoogleLens = true
+            }
         }
         .sheet(isPresented: $viewModel.showGoogleLens) {
             viewModel.searchImage = nil
@@ -120,19 +132,23 @@ struct ScanView: View {
             .ignoresSafeArea()
 
             if viewModel.isScanning {
-                if viewModel.scanMode == .photoSearch {
-                    // Photo search mode - camera stays visible, show capture button
+                if isPhotoSearchActive {
+                    // Photo search mode overlay
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .allowsHitTesting(false)
 
-                    // Header
+                    // Header title
                     VStack {
-                        scanHeader
+                        Text(String(localized: "scan.photo_search.title", defaultValue: "Photo Search"))
+                            .font(.custom("Inter-SemiBold", size: 20))
+                            .tracking(-0.408)
+                            .foregroundStyle(.white)
+                            .padding(.top, 16)
                         Spacer()
                     }
 
-                    // Bottom controls with capture button
+                    // Bottom controls
                     VStack {
                         Spacer()
 
@@ -144,36 +160,73 @@ struct ScanView: View {
                             .padding(.vertical, 8)
                             .background(Color.black.opacity(0.5))
                             .clipShape(Capsule())
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 24)
 
-                        // Capture button
-                        Button {
-                            viewModel.takePhotoForSearch()
-                        } label: {
-                            ZStack {
-                                Circle()
-                                    .stroke(.white, lineWidth: 4)
-                                    .frame(width: 72, height: 72)
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 60, height: 60)
+                        HStack(spacing: 40) {
+                            // Flashlight
+                            Button {
+                                viewModel.toggleTorch()
+                            } label: {
+                                Image(systemName: viewModel.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+
+                            // Shutter button
+                            Button {
+                                viewModel.takePhotoForSearch()
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .stroke(.white, lineWidth: 4)
+                                        .frame(width: 72, height: 72)
+                                    Circle()
+                                        .fill(.white)
+                                        .frame(width: 60, height: 60)
+                                }
+                            }
+
+                            // Gallery picker
+                            PhotosPicker(selection: $photoSearchSelectedPhoto, matching: .images) {
+                                Image(systemName: "photo.on.rectangle")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
                             }
                         }
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 16)
 
-                        ScanModePicker(selectedMode: $viewModel.scanMode)
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 100)
+                        // Back button
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                isPhotoSearchActive = false
+                                viewModel.isTorchOn = false
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text(String(localized: "scan.photo_search.back", defaultValue: "Back to Scanner"))
+                                    .font(.custom("Inter-Medium", size: 14))
+                                    .tracking(-0.408)
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .frame(height: 40)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Capsule())
+                        }
+                        .padding(.bottom, 100)
                     }
                 } else {
-                    // Frame overlay (pass-through touches)
-                    if viewModel.scanMode == .qrCode {
-                        QRFrameOverlay()
-                            .allowsHitTesting(false)
-                    } else {
-                        BarcodeFrameOverlay()
-                            .allowsHitTesting(false)
-                    }
+                    // Normal scan mode
+                    QRFrameOverlay()
+                        .allowsHitTesting(false)
 
                     // Focus indicator
                     if let focusPoint = viewModel.focusPoint {
@@ -193,7 +246,7 @@ struct ScanView: View {
                                 .padding(.vertical, 6)
                                 .background(Color.black.opacity(0.5))
                                 .clipShape(Capsule())
-                                .padding(.bottom, viewModel.scanMode == .barcode ? 170 : 80)
+                                .padding(.bottom, 160)
                         }
                         .allowsHitTesting(false)
                     }
@@ -204,17 +257,21 @@ struct ScanView: View {
                         Spacer()
                     }
 
-                    // Bottom controls
+                    // Bottom: hint label + action buttons
                     VStack {
                         Spacer()
 
-                        if viewModel.scanMode == .barcode {
-                            actionButtons
-                                .padding(.bottom, 16)
-                        }
+                        Text(String(localized: "scan.hint", defaultValue: "Point at a QR code or barcode"))
+                            .font(.custom("Inter-Medium", size: 14))
+                            .tracking(-0.408)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Capsule())
+                            .padding(.bottom, 16)
 
-                        ScanModePicker(selectedMode: $viewModel.scanMode)
-                            .padding(.horizontal, 20)
+                        actionButtons
                             .padding(.bottom, 100)
                     }
                 }
@@ -284,18 +341,31 @@ struct ScanView: View {
 
                 Spacer()
 
-                Button {
-                    showSettings = true
-                } label: {
-                    Image("icon-setting")
-                        .renderingMode(.template)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                        .foregroundStyle(DesignColors.primaryText)
-                        .frame(width: 44, height: 44)
-                        .background(DesignColors.cardBackground)
-                        .clipShape(Circle())
+                HStack(spacing: 8) {
+                    Button {
+                        // TODO: Implement info/help screen
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(DesignColors.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(DesignColors.cardBackground)
+                            .clipShape(Circle())
+                    }
+
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image("icon-setting")
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 24, height: 24)
+                            .foregroundStyle(DesignColors.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(DesignColors.cardBackground)
+                            .clipShape(Circle())
+                    }
                 }
             }
         }
@@ -304,7 +374,7 @@ struct ScanView: View {
         .padding(.bottom, 16)
     }
 
-    // MARK: - Action Buttons (Flashlight & Keyboard)
+    // MARK: - Action Buttons (Flashlight, Photo Search & Keyboard)
 
     private var actionButtons: some View {
         HStack(spacing: 16) {
@@ -317,6 +387,25 @@ struct ScanView: View {
                     .frame(width: 44, height: 44)
                     .background(DesignColors.lightText)
                     .clipShape(Circle())
+            }
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    isPhotoSearchActive = true
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 14, weight: .medium))
+                    Text(String(localized: "scan.photo_search.button", defaultValue: "Photo Search"))
+                        .font(.custom("Inter-Medium", size: 14))
+                        .tracking(-0.408)
+                }
+                .foregroundStyle(DesignColors.primaryText)
+                .padding(.horizontal, 16)
+                .frame(height: 44)
+                .background(DesignColors.lightText)
+                .clipShape(Capsule())
             }
 
             Button {
@@ -417,44 +506,6 @@ struct QRFrameOverlay: View {
     }
 }
 
-// MARK: - Barcode Frame Overlay
-
-struct BarcodeFrameOverlay: View {
-    @State private var isAnimating = false
-    private let frameWidth: CGFloat = 342
-    private let frameHeight: CGFloat = 150
-    private let cornerLength: CGFloat = 32
-    private let lineWidth: CGFloat = 3
-
-    var body: some View {
-        ZStack {
-            Color(red: 0x1E/255, green: 0x1E/255, blue: 0x1E/255)
-                .opacity(0.72)
-                .reverseMask {
-                    RoundedRectangle(cornerRadius: 4)
-                        .frame(width: frameWidth, height: frameHeight)
-                }
-
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.white.opacity(0.2))
-                .frame(width: frameWidth, height: frameHeight)
-
-            ZStack {
-                CornerShape(corner: .topLeft, length: cornerLength, lineWidth: lineWidth)
-                CornerShape(corner: .topRight, length: cornerLength, lineWidth: lineWidth)
-                CornerShape(corner: .bottomLeft, length: cornerLength, lineWidth: lineWidth)
-                CornerShape(corner: .bottomRight, length: cornerLength, lineWidth: lineWidth)
-            }
-            .frame(width: frameWidth + 8, height: frameHeight + 8)
-            .foregroundStyle(.white)
-            .opacity(isAnimating ? 1.0 : 0.7)
-            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
-            .onAppear { isAnimating = true }
-        }
-        .ignoresSafeArea()
-    }
-}
-
 // MARK: - Corner Shape
 
 struct CornerShape: View {
@@ -535,50 +586,6 @@ struct FocusIndicatorView: View {
                 }
         }
         .ignoresSafeArea()
-    }
-}
-
-// MARK: - Scan Mode Picker
-
-struct ScanModePicker: View {
-    @Binding var selectedMode: ScanMode
-    @Namespace private var animation
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(ScanMode.allCases, id: \.self) { mode in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        selectedMode = mode
-                    }
-                } label: {
-                    Text(mode.title)
-                        .font(.custom("Inter-Regular", size: 14))
-                        .tracking(-0.408)
-                        .foregroundStyle(DesignColors.primaryText)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 36)
-                        .background {
-                            if selectedMode == mode {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(DesignColors.primaryButtonText)
-                                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 0)
-                                    .matchedGeometryEffect(id: "tab", in: animation)
-                            }
-                        }
-                }
-            }
-        }
-        .padding(4)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(DesignColors.lightText)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(DesignColors.stroke, lineWidth: 1)
-                )
-        )
     }
 }
 

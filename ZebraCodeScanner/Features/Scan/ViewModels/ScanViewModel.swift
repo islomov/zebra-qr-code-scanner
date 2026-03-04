@@ -32,7 +32,6 @@ final class ScanViewModel: ObservableObject {
     @Published var productInfo: ProductInfo?
     @Published var isLoadingProduct: Bool = false
 
-    @Published var scanMode: ScanMode = .qrCode
     @Published var currentZoom: CGFloat = 1.0
     @Published var focusPoint: CGPoint?
     @Published var showManualEntry: Bool = false
@@ -180,12 +179,7 @@ final class ScanViewModel: ObservableObject {
                 return
             }
 
-            if scanMode == .photoSearch {
-                searchImage = uiImage
-                showGoogleLens = true
-            } else {
-                await scanImageForCodes(uiImage)
-            }
+            await scanImageForCodes(uiImage)
         }
     }
 
