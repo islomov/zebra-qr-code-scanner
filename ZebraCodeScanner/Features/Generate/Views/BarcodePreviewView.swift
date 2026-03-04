@@ -252,6 +252,7 @@ struct BarcodePreviewView: View {
         guard !hasSavedToHistory else { return }
         hasSavedToHistory = true
         viewModel.saveBarcodeToHistory(type: type)
+        AppRatingService.shared.recordSuccessfulGeneration()
     }
 
     private func saveToPhotos() {

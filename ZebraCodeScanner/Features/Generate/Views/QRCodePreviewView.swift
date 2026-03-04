@@ -645,6 +645,7 @@ struct QRCodePreviewView: View {
         guard !hasSavedToHistory else { return }
         hasSavedToHistory = true
         viewModel.saveToHistory(type: type)
+        AppRatingService.shared.recordSuccessfulGeneration()
     }
 
     private func saveToPhotos() {
