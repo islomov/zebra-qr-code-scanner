@@ -313,6 +313,7 @@ struct HistoryDetailView: View {
 struct ScannedDetailView: View {
     let entity: ScannedCodeEntity
     @Environment(\.dismiss) private var dismiss
+    @State private var showSearchOptions = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -342,6 +343,9 @@ struct ScannedDetailView: View {
         .background(DesignColors.background)
         .navigationBarHidden(true)
         .hideFloatingTabBar()
+        .sheet(isPresented: $showSearchOptions) {
+            SearchOnlineSheet(query: searchQuery)
+        }
     }
 
     // MARK: - Header
@@ -478,6 +482,13 @@ struct ScannedDetailView: View {
                         actionButton(icon: "safari", title: String(localized: "history_detail.open_link", defaultValue: "Open Link"))
                     }
                 }
+
+                // Search Online
+                Button {
+                    showSearchOptions = true
+                } label: {
+                    actionButton(icon: "magnifyingglass", title: String(localized: "search_online.button", defaultValue: "Search Online"))
+                }
             }
             .padding(.horizontal, 16)
         }
@@ -510,6 +521,13 @@ struct ScannedDetailView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d, HH:mm"
         return formatter.string(from: date)
+    }
+
+    private var searchQuery: String {
+        if let productName = entity.productName, !productName.isEmpty {
+            return productName
+        }
+        return entity.content ?? ""
     }
 }
 
