@@ -596,13 +596,6 @@ struct ManualBarcodeEntryView: View {
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isInputFocused: Bool
 
-    private let barcodeTypes = [
-        ("ean13", "EAN-13"),
-        ("ean8", "EAN-8"),
-        ("upce", "UPC-E"),
-        ("code128", "Code 128"),
-    ]
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
@@ -631,42 +624,6 @@ struct ManualBarcodeEntryView: View {
             .padding(.top, 16)
             .padding(.bottom, 8)
 
-            // Barcode type segmented control
-            HStack(spacing: 0) {
-                ForEach(barcodeTypes, id: \.0) { value, label in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            viewModel.manualBarcodeType = value
-                        }
-                    } label: {
-                        Text(label)
-                            .font(.custom("Inter-Regular", size: 14))
-                            .tracking(-0.408)
-                            .foregroundStyle(DesignColors.primaryText)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 36)
-                            .background(
-                                viewModel.manualBarcodeType == value
-                                    ? RoundedRectangle(cornerRadius: 10)
-                                        .fill(DesignColors.primaryButtonText)
-                                        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 0)
-                                    : nil
-                            )
-                    }
-                }
-            }
-            .padding(4)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(DesignColors.lightText)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(DesignColors.stroke, lineWidth: 1)
-                    )
-            )
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-
             // Input field
             TextField(String(localized: "scan.manual_entry.placeholder", defaultValue: "Enter barcode number"), text: $viewModel.manualBarcodeText)
                 .font(.custom("Inter-Regular", size: 16))
@@ -684,7 +641,7 @@ struct ManualBarcodeEntryView: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.horizontal, 16)
-                .padding(.top, 24)
+                .padding(.top, 16)
 
             // Search button
             Button {
