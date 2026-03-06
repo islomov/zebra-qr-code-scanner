@@ -251,13 +251,17 @@ struct ScanView: View {
                         .allowsHitTesting(false)
                     }
 
-                    // Header
+                    // Header title
                     VStack {
-                        scanHeader
+                        Text(String(localized: "scan.header.title", defaultValue: "Scan"))
+                            .font(.custom("Inter-SemiBold", size: 20))
+                            .tracking(-0.408)
+                            .foregroundStyle(.white)
+                            .padding(.top, 16)
                         Spacer()
                     }
 
-                    // Bottom: hint label + action buttons
+                    // Bottom controls
                     VStack {
                         Spacer()
 
@@ -269,7 +273,46 @@ struct ScanView: View {
                             .padding(.vertical, 8)
                             .background(Color.black.opacity(0.5))
                             .clipShape(Capsule())
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 24)
+
+                        // Gallery & Settings
+                        HStack(spacing: 16) {
+                            PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "photo.on.rectangle")
+                                        .font(.system(size: 14, weight: .medium))
+                                    Text(String(localized: "scan.gallery.button", defaultValue: "Gallery"))
+                                        .font(.custom("Inter-Medium", size: 14))
+                                        .tracking(-0.408)
+                                }
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 16)
+                                .frame(height: 40)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Capsule())
+                            }
+
+                            Button {
+                                showSettings = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image("icon-setting")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 16, height: 16)
+                                    Text(String(localized: "scan.settings.button", defaultValue: "Settings"))
+                                        .font(.custom("Inter-Medium", size: 14))
+                                        .tracking(-0.408)
+                                }
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 16)
+                                .frame(height: 40)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Capsule())
+                            }
+                        }
+                        .padding(.bottom, 16)
 
                         actionButtons
                             .padding(.bottom, 100)
@@ -318,60 +361,6 @@ struct ScanView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Scan Header
-
-    private var scanHeader: some View {
-        ZStack {
-            Text(String(localized: "scan.header.title", defaultValue: "Scan"))
-                .font(.custom("Inter-SemiBold", size: 20))
-                .tracking(-0.408)
-                .foregroundStyle(.white)
-
-            HStack {
-                PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
-                    Image(systemName: "photo.on.rectangle")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(DesignColors.primaryText)
-                        .frame(width: 44, height: 44)
-                        .background(DesignColors.cardBackground)
-                        .clipShape(Circle())
-                }
-
-                Spacer()
-
-                HStack(spacing: 8) {
-                    Button {
-                        // TODO: Implement info/help screen
-                    } label: {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(DesignColors.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(DesignColors.cardBackground)
-                            .clipShape(Circle())
-                    }
-
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image("icon-setting")
-                            .renderingMode(.template)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 24, height: 24)
-                            .foregroundStyle(DesignColors.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(DesignColors.cardBackground)
-                            .clipShape(Circle())
-                    }
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 16)
-        .padding(.bottom, 16)
     }
 
     // MARK: - Action Buttons (Flashlight, Photo Search & Keyboard)
