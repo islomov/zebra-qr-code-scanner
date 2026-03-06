@@ -156,12 +156,9 @@ private struct ImageSearchWebView: UIViewRepresentable {
         webView.customUserAgent = Self.userAgent
 
         if engine == .googleLens {
-            // Google Lens returns results directly from POST — load in WebView
             directPostUpload(image: image, engine: engine, webView: webView)
         } else {
-            // Other engines redirect after upload — use URLSession first,
-            // then load the results URL in the WebView
-            twoStepUpload(image: image, engine: engine, webView: webView)
+            yandexUpload(image: image, webView: webView)
         }
 
         return webView
@@ -169,7 +166,7 @@ private struct ImageSearchWebView: UIViewRepresentable {
 
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 
-    // MARK: - Google Lens (direct POST in WebView)
+    // MARK: - Direct POST Upload
 
     private func directPostUpload(image: UIImage, engine: ImageSearchEngine, webView: WKWebView) {
         DispatchQueue.global(qos: .userInitiated).async {
@@ -182,47 +179,45 @@ private struct ImageSearchWebView: UIViewRepresentable {
         }
     }
 
-    // MARK: - Yandex / Bing / TinEye (upload via URLSession, then load results URL)
+    // MARK: - Yandex Upload (URLSession → parse JSON → load results URL)
 
-    private func twoStepUpload(image: UIImage, engine: ImageSearchEngine, webView: WKWebView) {
+    private func yandexUpload(image: UIImage, webView: WKWebView) {
         DispatchQueue.global(qos: .userInitiated).async {
             guard let imageData = image.jpegData(compressionQuality: 0.6) else { return }
-            let request = Self.buildMultipartRequest(engine: engine, imageData: imageData)
+            let request = Self.buildMultipartRequest(engine: .yandex, imageData: imageData)
 
-            // Use a delegate that captures the redirect URL instead of following it
-            let delegate = RedirectCaptureDelegate()
-            let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                var resultsURL: URL?
 
-            let task = session.dataTask(with: request) { data, response, error in
-                let resultsURL: URL?
-
-                if let redirectURL = delegate.redirectURL {
-                    // Engine responded with a redirect — use that URL
-                    resultsURL = redirectURL
-                } else if let httpResponse = response as? HTTPURLResponse,
-                          let location = httpResponse.value(forHTTPHeaderField: "Location"),
-                          let url = URL(string: location) {
-                    resultsURL = url
-                } else if let data {
-                    // Try parsing as JSON first (Yandex returns JSON with format=json)
-                    if let jsonURL = Self.extractYandexJSONURL(from: data) {
-                        resultsURL = jsonURL
-                    } else if let html = String(data: data, encoding: .utf8) {
-                        // Parse HTML for meta-refresh redirect
-                        resultsURL = Self.extractMetaRefreshURL(from: html, baseURL: engine.uploadURL)
-                    } else {
-                        resultsURL = nil
+                if let data {
+                    // Yandex returns JSON with cbirId to construct the results URL
+                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let blocks = json["blocks"] as? [[String: Any]],
+                       let firstBlock = blocks.first,
+                       let params = firstBlock["params"] as? [String: Any],
+                       let cbirId = params["cbirId"] as? String {
+                        let encoded = cbirId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cbirId
+                        resultsURL = URL(string: "https://yandex.com/images/search?rpt=imageview&cbir_id=\(encoded)")
                     }
-                } else {
-                    resultsURL = nil
+                }
+
+                // Fallback: if the response was a redirect, use the final URL
+                if resultsURL == nil, let httpResponse = response as? HTTPURLResponse,
+                   let location = httpResponse.value(forHTTPHeaderField: "Location"),
+                   let url = URL(string: location) {
+                    resultsURL = url
                 }
 
                 DispatchQueue.main.async {
                     if let resultsURL {
-                        webView.load(URLRequest(url: resultsURL))
-                    } else if let data {
-                        // Fallback: load raw response content
-                        webView.load(data, mimeType: "text/html", characterEncodingName: "utf-8", baseURL: engine.uploadURL)
+                        var resultsRequest = URLRequest(url: resultsURL)
+                        resultsRequest.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+                        webView.load(resultsRequest)
+                    } else {
+                        // Last resort: load raw response in WebView
+                        if let data {
+                            webView.load(data, mimeType: "text/html", characterEncodingName: "utf-8", baseURL: ImageSearchEngine.yandex.uploadURL)
+                        }
                     }
                 }
             }
@@ -259,36 +254,6 @@ private struct ImageSearchWebView: UIViewRepresentable {
         return request
     }
 
-    // MARK: - Parse Yandex JSON response
-
-    private static func extractYandexJSONURL(from data: Data) -> URL? {
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let blocks = json["blocks"] as? [[String: Any]],
-              let firstBlock = blocks.first,
-              let params = firstBlock["params"] as? [String: Any],
-              let queryString = params["url"] as? String else {
-            return nil
-        }
-        // Yandex returns a query string (e.g. "cbir_id=...&rpt=imageview")
-        // Construct full URL: base + "?" + queryString
-        return URL(string: "https://yandex.com/images/search?\(queryString)")
-    }
-
-    // MARK: - Parse meta-refresh redirect from HTML
-
-    private static func extractMetaRefreshURL(from html: String, baseURL: URL) -> URL? {
-        // Look for <meta http-equiv="refresh" content="0;URL='...'" />
-        guard let range = html.range(of: "URL=", options: .caseInsensitive) else { return nil }
-        let afterURL = html[range.upperBound...]
-        let cleaned = afterURL.drop { $0 == "'" || $0 == "\"" }
-        let urlString = String(cleaned.prefix(while: { $0 != "'" && $0 != "\"" && $0 != ">" }))
-        if urlString.hasPrefix("http") {
-            return URL(string: urlString)
-        }
-        // Relative URL
-        return URL(string: urlString, relativeTo: baseURL)
-    }
-
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, WKNavigationDelegate {
@@ -312,20 +277,3 @@ private struct ImageSearchWebView: UIViewRepresentable {
     }
 }
 
-// MARK: - URLSession Delegate to Capture Redirect URL
-
-private final class RedirectCaptureDelegate: NSObject, URLSessionTaskDelegate {
-    var redirectURL: URL?
-
-    func urlSession(
-        _ session: URLSession,
-        task: URLSessionTask,
-        willPerformHTTPRedirection response: HTTPURLResponse,
-        newRequest request: URLRequest,
-        completionHandler: @escaping (URLRequest?) -> Void
-    ) {
-        // Capture the redirect URL and stop following
-        redirectURL = request.url
-        completionHandler(nil)
-    }
-}
