@@ -25,10 +25,7 @@ enum ImageSearchEngine: String, CaseIterable, Identifiable {
         case .googleLens:
             return URL(string: "https://lens.google.com/v3/upload")!
         case .yandex:
-            // rpt, format, and request must be query params (not form fields)
-            let request = "{\"blocks\":[{\"block\":\"b-page_type_search-by-image__link\"}]}"
-            let encoded = request.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            return URL(string: "https://yandex.com/images/search?rpt=imageview&format=json&request=\(encoded)")!
+            return URL(string: "https://yandex.com/images/search?rpt=imageview&format=json&request=%7B%22blocks%22%3A%5B%7B%22block%22%3A%22b-page_type_search-by-image__link%22%7D%5D%7D")!
         }
     }
 
