@@ -36,7 +36,6 @@ final class ScanViewModel: ObservableObject {
     @Published var focusPoint: CGPoint?
     @Published var showManualEntry: Bool = false
     @Published var manualBarcodeText: String = ""
-    @Published var manualBarcodeType: String = "ean13"
 
     private lazy var scannerService = ScannerService.shared
     private lazy var dataManager = CoreDataManager.shared
@@ -161,8 +160,17 @@ final class ScanViewModel: ObservableObject {
         let trimmed = manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         showManualEntry = false
-        handleScannedCode(content: trimmed, type: manualBarcodeType)
+        handleScannedCode(content: trimmed, type: detectBarcodeType(trimmed))
         manualBarcodeText = ""
+    }
+
+    private func detectBarcodeType(_ code: String) -> String {
+        switch code.count {
+        case 8: return "ean8"
+        case 12: return "upca"
+        case 13: return "ean13"
+        default: return "barcode"
+        }
     }
 
     func handleScanError(_ error: Error) {
