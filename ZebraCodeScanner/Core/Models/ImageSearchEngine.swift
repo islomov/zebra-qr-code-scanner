@@ -21,11 +21,12 @@ enum ImageSearchEngine: String, CaseIterable, Identifiable {
     }
 
     var uploadURL: URL {
+        let lang = Locale.current.language.languageCode?.identifier ?? "en"
         switch self {
         case .googleLens:
-            return URL(string: "https://lens.google.com/v3/upload")!
+            return URL(string: "https://lens.google.com/v3/upload?hl=\(lang)")!
         case .yandex:
-            return URL(string: "https://yandex.com/images/search?rpt=imageview&format=json&request=%7B%22blocks%22%3A%5B%7B%22block%22%3A%22b-page_type_search-by-image__link%22%7D%5D%7D")!
+            return URL(string: "https://yandex.com/images/search?rpt=imageview&lang=\(lang)&format=json&request=%7B%22blocks%22%3A%5B%7B%22block%22%3A%22b-page_type_search-by-image__link%22%7D%5D%7D")!
         }
     }
 

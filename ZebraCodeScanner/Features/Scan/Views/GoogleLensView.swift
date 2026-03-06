@@ -84,6 +84,7 @@ struct ImageSearchView: View {
             }
         }
         .background(DesignColors.background)
+        .interactiveDismissDisabled()
     }
 
     // MARK: - Engine Tab Bar
@@ -197,7 +198,8 @@ private struct ImageSearchWebView: UIViewRepresentable {
                        let params = firstBlock["params"] as? [String: Any],
                        let cbirId = params["cbirId"] as? String {
                         let encoded = cbirId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cbirId
-                        resultsURL = URL(string: "https://yandex.com/images/search?rpt=imageview&cbir_id=\(encoded)")
+                        let lang = Locale.current.language.languageCode?.identifier ?? "en"
+                        resultsURL = URL(string: "https://yandex.com/images/search?rpt=imageview&lang=\(lang)&cbir_id=\(encoded)")
                     }
                 }
 
