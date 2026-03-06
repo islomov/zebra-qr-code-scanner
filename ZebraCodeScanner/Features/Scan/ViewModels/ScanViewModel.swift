@@ -24,7 +24,7 @@ final class ScanViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     @Published var selectedPhoto: PhotosPickerItem?
-    @Published var showGoogleLens: Bool = false
+    @Published var showImageSearch: Bool = false
     @Published var searchImage: UIImage?
 
     weak var cameraController: CameraScannerViewController?
@@ -185,7 +185,7 @@ final class ScanViewModel: ObservableObject {
 
     func takePhotoForSearch() {
         searchImage = nil
-        showGoogleLens = true
+        showImageSearch = true
         cameraController?.capturePhoto()
     }
 

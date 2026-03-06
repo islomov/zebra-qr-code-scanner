@@ -39,13 +39,13 @@ struct ScanView: View {
                 guard let data = try? await item.loadTransferable(type: Data.self),
                       let uiImage = UIImage(data: data) else { return }
                 viewModel.searchImage = uiImage
-                viewModel.showGoogleLens = true
+                viewModel.showImageSearch = true
             }
         }
-        .sheet(isPresented: $viewModel.showGoogleLens) {
+        .sheet(isPresented: $viewModel.showImageSearch) {
             viewModel.searchImage = nil
         } content: {
-            GoogleLensView(image: viewModel.searchImage)
+            ImageSearchView(image: viewModel.searchImage)
         }
         .sheet(isPresented: $viewModel.showResult) {
             if viewModel.isBarcode {
