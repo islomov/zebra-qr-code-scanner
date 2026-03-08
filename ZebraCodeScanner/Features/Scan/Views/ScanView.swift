@@ -251,13 +251,30 @@ struct ScanView: View {
                         .allowsHitTesting(false)
                     }
 
-                    // Header title
+                    // Header title + settings
                     VStack {
-                        Text(String(localized: "scan.header.title", defaultValue: "Scan"))
-                            .font(.custom("Inter-SemiBold", size: 20))
-                            .tracking(-0.408)
-                            .foregroundStyle(.white)
-                            .padding(.top, 16)
+                        HStack {
+                            Spacer()
+                            Text(String(localized: "scan.header.title", defaultValue: "Scan"))
+                                .font(.custom("Inter-SemiBold", size: 20))
+                                .tracking(-0.408)
+                                .foregroundStyle(.white)
+                            Spacer()
+                        }
+                        .overlay(alignment: .trailing) {
+                            Button {
+                                showSettings = true
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+                            .padding(.trailing, 16)
+                        }
+                        .padding(.top, 16)
                         Spacer()
                     }
 
@@ -265,57 +282,71 @@ struct ScanView: View {
                     VStack {
                         Spacer()
 
-                        Text(String(localized: "scan.hint", defaultValue: "Point at a QR code or barcode"))
-                            .font(.custom("Inter-Medium", size: 14))
-                            .tracking(-0.408)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Capsule())
-                            .padding(.bottom, 24)
+                        HStack(spacing: 6) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 13, weight: .medium))
+                            Text(String(localized: "scan.hint", defaultValue: "Point at a QR code or barcode"))
+                                .font(.custom("Inter-Medium", size: 14))
+                                .tracking(-0.408)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.black.opacity(0.5))
+                        .clipShape(Capsule())
+                        .padding(.bottom, 24)
 
-                        // Gallery & Settings
-                        HStack(spacing: 16) {
-                            PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "photo.on.rectangle")
-                                        .font(.system(size: 14, weight: .medium))
-                                    Text(String(localized: "scan.gallery.button", defaultValue: "Gallery"))
-                                        .font(.custom("Inter-Medium", size: 14))
-                                        .tracking(-0.408)
-                                }
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 16)
-                                .frame(height: 40)
-                                .background(Color.white.opacity(0.2))
-                                .clipShape(Capsule())
+                        // All controls in a single row
+                        HStack(spacing: 20) {
+                            // Flashlight
+                            Button {
+                                viewModel.toggleTorch()
+                            } label: {
+                                Image(systemName: viewModel.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
                             }
 
+                            // Gallery
+                            PhotosPicker(selection: $viewModel.selectedPhoto, matching: .images) {
+                                Image(systemName: "photo.on.rectangle")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+
+                            // Photo Search
                             Button {
-                                showSettings = true
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Image("icon-setting")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 16, height: 16)
-                                    Text(String(localized: "scan.settings.button", defaultValue: "Settings"))
-                                        .font(.custom("Inter-Medium", size: 14))
-                                        .tracking(-0.408)
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    isPhotoSearchActive = true
                                 }
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 16)
-                                .frame(height: 40)
-                                .background(Color.white.opacity(0.2))
-                                .clipShape(Capsule())
+                            } label: {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+
+                            // Manual Entry
+                            Button {
+                                viewModel.showManualEntry = true
+                            } label: {
+                                Image(systemName: "keyboard")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
                             }
                         }
-                        .padding(.bottom, 16)
-
-                        actionButtons
-                            .padding(.bottom, 100)
+                        .padding(.bottom, 100)
                     }
                 }
             } else {
@@ -363,52 +394,6 @@ struct ScanView: View {
         }
     }
 
-    // MARK: - Action Buttons (Flashlight, Photo Search & Keyboard)
-
-    private var actionButtons: some View {
-        HStack(spacing: 16) {
-            Button {
-                viewModel.toggleTorch()
-            } label: {
-                Image(systemName: viewModel.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(DesignColors.primaryText)
-                    .frame(width: 44, height: 44)
-                    .background(DesignColors.lightText)
-                    .clipShape(Circle())
-            }
-
-            Button {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    isPhotoSearchActive = true
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 14, weight: .medium))
-                    Text(String(localized: "scan.photo_search.button", defaultValue: "Photo Search"))
-                        .font(.custom("Inter-Medium", size: 14))
-                        .tracking(-0.408)
-                }
-                .foregroundStyle(DesignColors.primaryText)
-                .padding(.horizontal, 16)
-                .frame(height: 44)
-                .background(DesignColors.lightText)
-                .clipShape(Capsule())
-            }
-
-            Button {
-                viewModel.showManualEntry = true
-            } label: {
-                Image(systemName: "keyboard")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(DesignColors.primaryText)
-                    .frame(width: 44, height: 44)
-                    .background(DesignColors.lightText)
-                    .clipShape(Circle())
-            }
-        }
-    }
 
     // MARK: - Unsupported View
 
