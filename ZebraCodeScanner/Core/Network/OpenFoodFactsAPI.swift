@@ -16,7 +16,8 @@ final class OpenFoodFactsAPI {
     private init() {}
 
     func fetchProduct(barcode: String) async -> ProductInfo? {
-        let urlString = "\(baseURL)/\(barcode).json"
+        let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
+        let urlString = "\(baseURL)/\(barcode).json?lc=\(languageCode)"
 
         do {
             let response = try await networkManager.fetch(OpenFoodFactsResponse.self, from: urlString)
