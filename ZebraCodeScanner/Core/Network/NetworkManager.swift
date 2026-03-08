@@ -43,4 +43,35 @@ final class NetworkManager {
             throw NetworkError.decodingFailed(error)
         }
     }
+
+    func fetch<T: Decodable>(_ type: T.Type, request: URLRequest) async throws -> T {
+        print("[Network] \(request.httpMethod ?? "GET") \(request.url?.absoluteString ?? "nil")")
+        if let body = request.httpBody, let bodyStr = String(data: body, encoding: .utf8) {
+            print("[Network] Body: \(bodyStr)")
+        }
+        print("[Network] Headers: \(request.allHTTPHeaderFields ?? [:])")
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("[Network] No HTTP response")
+            throw NetworkError.invalidResponse
+        }
+
+        print("[Network] Status: \(httpResponse.statusCode)")
+        if let responseStr = String(data: data, encoding: .utf8) {
+            print("[Network] Response: \(String(responseStr.prefix(500)))")
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.invalidResponse
+        }
+
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch {
+            print("[Network] Decoding error: \(error)")
+            throw NetworkError.decodingFailed(error)
+        }
+    }
 }
