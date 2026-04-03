@@ -144,6 +144,7 @@ final class ScanViewModel: ObservableObject {
             lookupProduct(barcode: content)
         }
 
+        AnalyticsService.logCodeScanned(codeType: type)
         AppRatingService.shared.recordSuccessfulScan()
     }
 
@@ -153,12 +154,14 @@ final class ScanViewModel: ObservableObject {
             let info = await productLookupService.lookupProduct(barcode: barcode)
             self.productInfo = info
             self.isLoadingProduct = false
+            AnalyticsService.logProductLookup(found: info != nil)
         }
     }
 
     func submitManualBarcode() {
         let trimmed = manualBarcodeText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        AnalyticsService.logManualBarcodeEntered()
         showManualEntry = false
         handleScannedCode(content: trimmed, type: detectBarcodeType(trimmed))
         manualBarcodeText = ""
@@ -187,6 +190,7 @@ final class ScanViewModel: ObservableObject {
                 return
             }
 
+            AnalyticsService.logPhotoScanned()
             await scanImageForCodes(uiImage)
         }
     }

@@ -90,6 +90,7 @@ final class GenerateViewModel: ObservableObject {
     // MARK: - Generation
 
     func generateQRCode(for type: QRCodeContentType) {
+        AnalyticsService.logQRCodeGenerated(contentType: type.rawValue)
         let content = encodeContent(for: type)
         generatedContent = content
         qrBackgroundColor = .white
@@ -136,6 +137,7 @@ final class GenerateViewModel: ObservableObject {
     // MARK: - Social Media Generation
 
     func generateSocialMediaQRCode(for type: SocialMediaType) {
+        AnalyticsService.logSocialMediaQRGenerated(platform: type.rawValue)
         let profileURL = type.baseURL + socialMediaUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         generatedContent = profileURL
         qrBackgroundColor = .white
@@ -173,6 +175,7 @@ final class GenerateViewModel: ObservableObject {
     // MARK: - Barcode Generation
 
     func generateBarcode(for type: BarcodeType) {
+        AnalyticsService.logBarcodeGenerated(barcodeType: type.rawValue)
         generatedContent = barcodeContent
         generatedImage = qrService.generateBarcode(from: barcodeContent, type: type)
     }
@@ -241,6 +244,7 @@ final class GenerateViewModel: ObservableObject {
             logoTintColor: qrCenterIcon != nil ? UIColor(iconTintColor) : nil
         )
         isStyleDirty = true
+        AnalyticsService.logQRCodeCustomized()
     }
 
     func selectCenterIcon(_ icon: QRCenterIcon?) {
