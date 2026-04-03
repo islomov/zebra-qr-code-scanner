@@ -52,6 +52,7 @@ struct SettingsView: View {
         .alert(String(localized: "settings.data.clear_history_title", defaultValue: "Clear History"), isPresented: $showClearHistoryAlert) {
             Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) { }
             Button(String(localized: "settings.data.clear_all", defaultValue: "Clear All"), role: .destructive) {
+                AnalyticsService.logHistoryCleared()
                 dataManager.deleteAllGeneratedCodes()
                 dataManager.deleteAllScannedCodes()
             }
@@ -255,6 +256,7 @@ struct SettingsView: View {
                     isSelected: appearanceMode == "system"
                 ) {
                     appearanceMode = "system"
+                    AnalyticsService.logSettingChanged(setting: "appearance", value: "system")
                 }
 
                 appearanceCard(
@@ -264,6 +266,7 @@ struct SettingsView: View {
                     isSelected: appearanceMode == "light"
                 ) {
                     appearanceMode = "light"
+                    AnalyticsService.logSettingChanged(setting: "appearance", value: "light")
                 }
 
                 appearanceCard(
@@ -273,6 +276,7 @@ struct SettingsView: View {
                     isSelected: appearanceMode == "dark"
                 ) {
                     appearanceMode = "dark"
+                    AnalyticsService.logSettingChanged(setting: "appearance", value: "dark")
                 }
             }
         }

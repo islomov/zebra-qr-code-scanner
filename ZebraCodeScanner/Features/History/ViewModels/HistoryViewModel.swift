@@ -89,6 +89,7 @@ final class HistoryViewModel: ObservableObject {
     }
 
     func deleteAll() {
+        AnalyticsService.logHistoryCleared()
         dataManager.deleteAllGeneratedCodes()
         dataManager.deleteAllScannedCodes()
         fetchHistory()
